@@ -1507,3 +1507,59 @@ button,a{-webkit-tap-highlight-color:transparent}
   .footer-slogan{font-size:13px}
   .footer-service-line{font-size:7px;letter-spacing:.11em}
 }
+
+
+/* === VECTOR BRAND FIX V2 === */
+.brand-official{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  min-width:max-content;
+  height:auto;
+}
+.brand-emblem{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  filter:drop-shadow(0 0 10px rgba(0,174,255,.12)) drop-shadow(0 6px 14px rgba(212,163,83,.12));
+}
+.brand-emblem svg{width:100%;height:100%;display:block;overflow:visible}
+.brand-wordmark{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  line-height:1;
+}
+.brand-wordmark strong{
+  font:800 20px/1 "Manrope",sans-serif;
+  letter-spacing:.16em;
+  background:linear-gradient(105deg,#fff0ad 0%,#d4a353 35%,#f4d27d 68%,#b97826 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-shadow:0 0 18px rgba(212,163,83,.08);
+}
+.brand-wordmark small{
+  margin-top:5px;
+  font:600 7px/1 "Manrope",sans-serif;
+  letter-spacing:.34em;
+  color:#e5ded3;
+}
+.footer-brand-official .brand-emblem{width:62px;height:62px}
+.footer-brand-official .brand-wordmark strong{font-size:27px}
+.footer-brand-official .brand-wordmark small{font-size:8px;letter-spacing:.38em}
+
+@media(max-width:1180px){
+  .brand-emblem{width:44px;height:44px}
+  .brand-wordmark strong{font-size:18px}
+}
+@media(max-width:680px){
+  .brand-official{gap:7px}
+  .brand-emblem{width:39px;height:39px}
+  .brand-wordmark strong{font-size:16px;letter-spacing:.12em}
+  .brand-wordmark small{font-size:6px;letter-spacing:.25em;margin-top:4px}
+  .footer-brand-official .brand-emblem{width:52px;height:52px}
+  .footer-brand-official .brand-wordmark strong{font-size:23px}
+}
