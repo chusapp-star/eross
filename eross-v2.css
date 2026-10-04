@@ -156,6 +156,29 @@ button,a{-webkit-tap-highlight-color:transparent}
   margin-top:48px;display:flex;align-items:center;gap:0;border-top:1px solid var(--line);padding-top:22px;
   max-width:620px
 }
+.hero-feed{
+  margin-top:20px;max-width:620px;min-height:38px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;
+  gap:13px;padding:9px 12px;border:1px solid rgba(212,163,83,.14);border-radius:12px;
+  background:linear-gradient(90deg,rgba(212,163,83,.045),rgba(255,255,255,.018),rgba(212,163,83,.035));
+  position:relative;overflow:hidden
+}
+.hero-feed:after{
+  content:"";position:absolute;inset:0 auto 0 -35%;width:28%;
+  background:linear-gradient(90deg,transparent,rgba(240,200,121,.1),transparent);
+  transform:skewX(-18deg);animation:feedSweep 4.6s linear infinite;pointer-events:none
+}
+.feed-label{
+  display:flex;align-items:center;gap:7px;font-size:7px;letter-spacing:.14em;text-transform:uppercase;
+  color:#b9a278;white-space:nowrap
+}
+.feed-label i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(85,216,141,.65);animation:pulse 1.8s infinite}
+.feed-copy{
+  min-width:0;color:#918b81;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:opacity .22s ease,transform .22s ease
+}
+.feed-copy.is-changing{opacity:0;transform:translateY(5px)}
+.feed-time{font-size:7px;color:#55514b;text-transform:uppercase;letter-spacing:.1em}
+@keyframes feedSweep{to{left:125%}}
 .trust-item{display:flex;align-items:center;gap:9px;padding:0 20px;border-right:1px solid var(--line)}
 .trust-item:first-child{padding-left:0}
 .trust-item:last-child{border-right:0}
@@ -172,6 +195,17 @@ button,a{-webkit-tap-highlight-color:transparent}
   border:1px solid rgba(255,255,255,.12);border-radius:20px;background:#101012;
   box-shadow:0 45px 100px rgba(0,0,0,.62),0 0 0 1px rgba(212,163,83,.04),0 0 90px rgba(212,163,83,.065);
   overflow:hidden;z-index:5;animation:deviceFloat 7s ease-in-out infinite
+}
+.device-shell:after{
+  content:"";position:absolute;left:0;right:0;height:72px;top:-90px;z-index:20;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(240,200,121,.055),transparent);
+  animation:dashboardScan 6.5s ease-in-out infinite
+}
+@keyframes dashboardScan{
+  0%,12%{transform:translateY(0);opacity:0}
+  20%{opacity:1}
+  68%{opacity:.8}
+  82%,100%{transform:translateY(610px);opacity:0}
 }
 @keyframes deviceFloat{
   0%,100%{transform:translate(-47%,-49%) rotateY(-7deg) rotateX(2deg) translateY(0)}
@@ -288,6 +322,23 @@ button,a{-webkit-tap-highlight-color:transparent}
 .data-beam{
   position:absolute;height:1px;z-index:2;opacity:.4;background:linear-gradient(90deg,transparent,var(--gold),transparent);
   transform-origin:left;filter:drop-shadow(0 0 4px rgba(212,163,83,.4))
+}
+.signal-field{position:absolute;inset:0;z-index:3;pointer-events:none}
+.signal-field i{
+  position:absolute;width:4px;height:4px;border-radius:50%;background:var(--gold-2);
+  box-shadow:0 0 12px rgba(240,200,121,.75);opacity:0;animation:signalDrift 5.4s linear infinite
+}
+.signal-field i:nth-child(1){left:8%;top:24%;animation-delay:-.4s}
+.signal-field i:nth-child(2){left:21%;top:68%;animation-delay:-1.6s}
+.signal-field i:nth-child(3){right:13%;top:19%;animation-delay:-2.8s}
+.signal-field i:nth-child(4){right:6%;bottom:25%;animation-delay:-3.8s}
+.signal-field i:nth-child(5){left:41%;top:7%;animation-delay:-4.6s}
+.signal-field i:nth-child(6){right:38%;bottom:5%;animation-delay:-2.1s}
+@keyframes signalDrift{
+  0%{opacity:0;transform:translate3d(-12px,10px,0) scale(.45)}
+  16%{opacity:.85}
+  58%{opacity:.35}
+  100%{opacity:0;transform:translate3d(54px,-46px,0) scale(1.35)}
 }
 .beam-a{width:47%;right:6%;top:43%;transform:rotate(-18deg);animation:beamPulse 2.7s infinite}
 .beam-b{width:44%;left:8%;bottom:32%;transform:rotate(13deg);animation:beamPulse 2.7s 1s infinite}
@@ -521,6 +572,9 @@ button,a{-webkit-tap-highlight-color:transparent}
   .hero-trust{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .trust-item{border-right:0;padding:0}
   .trust-item:last-child{grid-column:1 / -1}
+  .hero-feed{grid-template-columns:auto 1fr;margin-top:18px;padding:9px 10px;gap:9px}
+  .feed-time{display:none}
+  .feed-copy{font-size:8px}
   .hero-visual{height:510px;margin-top:30px;overflow:visible}
   .device-shell{min-width:0;width:104%;left:50%;top:52%;transform:translate(-50%,-50%) rotateY(-4deg);animation:deviceFloatMobile 7s ease-in-out infinite}
   @keyframes deviceFloatMobile{0%,100%{transform:translate(-50%,-50%) rotateY(-4deg) translateY(0)}50%{transform:translate(-50%,-50%) rotateY(-3deg) translateY(-8px)}}
