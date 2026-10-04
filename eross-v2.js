@@ -64,13 +64,17 @@
     let flowIndex = 0;
     const nodes = [...ecosystemFlow.querySelectorAll('.flow-node')];
 
+    const setFlowStep = (index) => {
+      flowIndex = index;
+      ecosystemFlow.style.setProperty('--flow-step', String(index));
+      nodes.forEach((node, i) => node.classList.toggle('active', i === index));
+    };
+
     const startFlow = () => {
       if (prefersReducedMotion || flowTimer || !nodes.length) return;
       flowTimer = window.setInterval(() => {
-        nodes.forEach(node => node.classList.remove('active'));
-        flowIndex = (flowIndex + 1) % nodes.length;
-        nodes[flowIndex].classList.add('active');
-      }, 1650);
+        setFlowStep((flowIndex + 1) % nodes.length);
+      }, 1850);
     };
 
     const stopFlow = () => {
@@ -79,10 +83,24 @@
       flowTimer = null;
     };
 
+    nodes.forEach((node, index) => {
+      node.addEventListener('mouseenter', () => {
+        setFlowStep(index);
+        stopFlow();
+      });
+      node.addEventListener('mouseleave', startFlow);
+      node.addEventListener('focusin', () => {
+        setFlowStep(index);
+        stopFlow();
+      });
+      node.addEventListener('focusout', startFlow);
+    });
+
     const ecosystemObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           ecosystemFlow.classList.add('is-visible');
+          setFlowStep(flowIndex);
           startFlow();
         } else {
           stopFlow();
@@ -171,16 +189,4 @@
       });
     });
   }
-
-  const activeNodes = document.querySelectorAll('.flow-node');
-  activeNodes.forEach((node, index) => {
-    node.addEventListener('mouseenter', () => {
-      activeNodes.forEach(n => n.classList.remove('active'));
-      node.classList.add('active');
-    });
-    node.addEventListener('focusin', () => {
-      activeNodes.forEach(n => n.classList.remove('active'));
-      node.classList.add('active');
-    });
-  });
 })();
