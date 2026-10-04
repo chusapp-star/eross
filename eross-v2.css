@@ -1563,3 +1563,81 @@ button,a{-webkit-tap-highlight-color:transparent}
   .footer-brand-official .brand-emblem{width:52px;height:52px}
   .footer-brand-official .brand-wordmark strong{font-size:23px}
 }
+
+
+/* === BRAND PRESENCE + HERO SLOGAN V3 === */
+.site-header{
+  min-height:92px;
+}
+.brand-official{
+  transform-origin:left center;
+}
+.brand-emblem{
+  width:58px;
+  height:58px;
+}
+.brand-wordmark strong{
+  font-size:24px;
+  letter-spacing:.18em;
+}
+.brand-wordmark small{
+  font-size:7.5px;
+  letter-spacing:.38em;
+  color:#eee7dc;
+}
+.site-header.scrolled .brand-emblem{
+  width:52px;
+  height:52px;
+}
+.site-header.scrolled .brand-wordmark strong{
+  font-size:22px;
+}
+.hero-brand-slogan{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  margin:22px 0 14px;
+  color:#f2ece4;
+}
+.hero-brand-slogan .slogan-line{
+  width:38px;
+  height:1px;
+  flex:0 0 auto;
+  background:linear-gradient(90deg,#d4a353,#00b7ff);
+  box-shadow:0 0 14px rgba(0,183,255,.14);
+}
+.hero-brand-slogan strong{
+  font:600 clamp(15px,1.45vw,19px)/1.35 "Manrope",sans-serif;
+  letter-spacing:-.01em;
+  background:linear-gradient(90deg,#f2ede6 0%,#f0c879 58%,#8edcff 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.hero-lead{
+  margin-top:12px;
+}
+
+@media(max-width:1180px){
+  .brand-emblem{width:53px;height:53px}
+  .brand-wordmark strong{font-size:21px}
+  .site-header.scrolled .brand-emblem{width:49px;height:49px}
+}
+@media(max-width:960px){
+  .site-header{min-height:72px}
+  .brand-emblem{width:47px;height:47px}
+  .brand-wordmark strong{font-size:19px}
+  .hero-brand-slogan{margin-top:18px}
+}
+@media(max-width:680px){
+  .brand-emblem{width:43px;height:43px}
+  .brand-wordmark strong{font-size:17px}
+  .brand-wordmark small{font-size:5.8px;letter-spacing:.28em}
+  .hero-brand-slogan{
+    gap:9px;
+    margin:16px 0 12px;
+    align-items:flex-start;
+  }
+  .hero-brand-slogan .slogan-line{width:26px;margin-top:10px}
+  .hero-brand-slogan strong{font-size:14px;line-height:1.45}
+}
