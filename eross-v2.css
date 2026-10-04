@@ -956,3 +956,253 @@ button,a{-webkit-tap-highlight-color:transparent}
   .orbit-caption{bottom:0;width:94%}
   .orbit-caption strong{font-size:6.5px}
 }
+
+
+/* === LEGIBILITY PASS V1: APPROVED STRUCTURE UNCHANGED === */
+
+/* Hero orbital: make every mini-dashboard readable without changing composition */
+.orbital-glow{
+  background:radial-gradient(circle,rgba(212,163,83,.16) 0%,rgba(212,163,83,.065) 34%,transparent 70%);
+}
+.orbital-ring{
+  border-color:rgba(212,163,83,.19);
+  box-shadow:0 0 54px rgba(212,163,83,.04),inset 0 0 44px rgba(212,163,83,.03);
+}
+.ecosystem-core{
+  border-color:rgba(240,200,121,.48);
+  background:
+    radial-gradient(circle at 38% 27%,rgba(240,200,121,.19),transparent 34%),
+    linear-gradient(145deg,#1b1813,#0c0c0d 68%);
+  box-shadow:0 0 0 10px rgba(212,163,83,.035),0 28px 70px rgba(0,0,0,.62),0 0 82px rgba(212,163,83,.16);
+}
+.ecosystem-core small{color:#a39887}
+.core-halo{border-color:rgba(212,163,83,.15)}
+
+.screen-face{
+  filter:brightness(1.08) contrast(1.04);
+  drop-shadow:0 18px 28px rgba(0,0,0,.5);
+}
+.screen-face:hover{filter:brightness(1.2) contrast(1.06)}
+.screen-top{
+  border-color:rgba(255,255,255,.22);
+  border-bottom-color:rgba(255,255,255,.11);
+  background:#18181b;
+  box-shadow:0 16px 38px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.035)
+}
+.screen-top span{background:#626167}
+.screen-top b{color:#c2bbb0}
+.screen-body{
+  border-color:rgba(255,255,255,.21);
+  background:linear-gradient(150deg,#18181b,#0e0e10);
+  box-shadow:inset 0 0 22px rgba(255,255,255,.018)
+}
+.monitor-neck{
+  background:linear-gradient(90deg,#1d1d20,#35353a,#1b1b1e);
+  border-color:rgba(255,255,255,.14)
+}
+.monitor-base{
+  background:#303034;
+  border-color:rgba(255,255,255,.14)
+}
+.screen-kpi small,.analytics-kpi small{color:#aaa196}
+.screen-kpi strong{color:#7ee0a5;text-shadow:0 0 10px rgba(85,216,141,.16)}
+.ad-bars i{
+  background:linear-gradient(to top,rgba(212,163,83,.32),#efbd67);
+  box-shadow:0 0 8px rgba(212,163,83,.08)
+}
+.screen-chip{
+  color:#d4ad68;
+  border-color:rgba(212,163,83,.3);
+  background:rgba(212,163,83,.045)
+}
+.wa-bubble{
+  background:#242428;
+  color:#c5bfb6
+}
+.wa-bubble.right{
+  background:rgba(85,216,141,.17);
+  color:#a5e1bb;
+  border:1px solid rgba(85,216,141,.08)
+}
+.crm-columns i{
+  background:#1b1b1e;
+  border-color:rgba(255,255,255,.11)
+}
+.crm-columns small{color:#938d84}
+.crm-columns b{
+  background:#313136;
+  border-left-color:rgba(240,200,121,.72)
+}
+.analytics-kpi strong{text-shadow:0 0 12px rgba(212,163,83,.18)}
+.screen-analytics path{
+  stroke:var(--gold-2);
+  stroke-width:2.3;
+  filter:drop-shadow(0 0 7px rgba(240,200,121,.35))
+}
+.content-thumb{
+  background:linear-gradient(145deg,#332b20,#171719);
+  border:1px solid rgba(212,163,83,.1)
+}
+.content-thumb:before{background:rgba(212,163,83,.22)}
+.content-thumb i{border-color:rgba(240,200,121,.58)}
+.content-lines b{background:#454348}
+.content-screen>span{color:#9cd3ad}
+.web-nav{background:#3b3a3f}
+.web-hero-mini{background:linear-gradient(120deg,rgba(212,163,83,.14),#18181b)}
+.web-hero-mini b{background:#d1a355}
+.web-hero-mini span{background:#4a484e}
+.web-cta-mini{background:var(--gold-2);box-shadow:0 0 10px rgba(212,163,83,.16)}
+
+.screen-whatsapp .screen-top b{color:#9de0b7}
+.screen-crm .screen-top b{color:#efc778}
+.screen-analytics .screen-top b{color:#f1ca79}
+.screen-content .screen-top b{color:#c7bfdf}
+.screen-web .screen-top b{color:#b8c7e3}
+.orbit-caption span{color:#b99a65}
+.orbit-caption strong{color:#989187}
+
+/* Connected journey: increase hierarchy and active-state visibility */
+.flow-line{background:rgba(255,255,255,.14)}
+.flow-progress{
+  background:linear-gradient(90deg,rgba(212,163,83,.22),rgba(255,220,146,.84),rgba(212,163,83,.22));
+  box-shadow:0 0 18px rgba(212,163,83,.28)
+}
+.flow-signal{
+  background:#ffd98c;
+  box-shadow:0 0 0 6px rgba(212,163,83,.1),0 0 28px rgba(240,200,121,.78)
+}
+.flow-node{
+  border-color:rgba(255,255,255,.07);
+  background:rgba(14,14,16,.74)
+}
+.flow-node.active{
+  border-color:rgba(240,200,121,.42);
+  background:linear-gradient(155deg,rgba(31,25,17,.97),rgba(14,14,16,.92));
+  box-shadow:0 24px 58px rgba(0,0,0,.28),0 0 48px rgba(212,163,83,.09)
+}
+.node-no{color:#817a70}
+.node-state{
+  color:#817b72;
+  border-color:rgba(255,255,255,.11)
+}
+.flow-node.active .node-state{
+  color:#f0c879;
+  border-color:rgba(240,200,121,.34);
+  background:rgba(212,163,83,.075)
+}
+.node-icon{
+  color:#aaa39a;
+  border-color:rgba(255,255,255,.14);
+  background:#161618;
+  box-shadow:0 0 0 7px #0b0b0c,0 8px 20px rgba(0,0,0,.18)
+}
+.flow-node.active .node-icon,.flow-node:hover .node-icon{
+  color:#ffd98c;
+  border-color:rgba(240,200,121,.5);
+  background:rgba(212,163,83,.1);
+  box-shadow:0 0 0 7px #0b0b0c,0 0 40px rgba(212,163,83,.17)
+}
+.stage-mini{
+  border-color:rgba(255,255,255,.12);
+  background:#151517;
+  box-shadow:inset 0 0 18px rgba(255,255,255,.012)
+}
+.flow-node.active .stage-mini{
+  border-color:rgba(240,200,121,.26);
+  background:#191713;
+  box-shadow:inset 0 0 18px rgba(212,163,83,.035),0 8px 20px rgba(0,0,0,.16)
+}
+.flow-node p{color:#918b83}
+.flow-node.active p{color:#bbb3a8}
+.stage-social i{background:#222225;border-color:rgba(255,255,255,.14)}
+.stage-ads b{background:linear-gradient(to top,rgba(212,163,83,.22),rgba(240,200,121,.72))}
+.flow-node.active .stage-ads b:nth-child(4){
+  background:linear-gradient(to top,rgba(212,163,83,.32),#ffd98c);
+  filter:drop-shadow(0 0 8px rgba(212,163,83,.3))
+}
+.stage-wa i{background:#2b2a2e}
+.stage-wa i:nth-child(2){background:rgba(85,216,141,.2)}
+.stage-crm>i{background:#1c1c1f;border-color:rgba(255,255,255,.09)}
+.stage-crm b{background:#333237;border-left-color:rgba(240,200,121,.72)}
+.stage-sale span{
+  color:#aaa39a;
+  border-color:rgba(255,255,255,.12);
+  background:#171719
+}
+.flow-node.active .stage-sale span:last-child{
+  color:#b7e4c7;border-color:rgba(85,216,141,.26);background:rgba(85,216,141,.075)
+}
+.stage-analytics i{background:#3a393d}
+.flow-node.active .stage-analytics i{
+  background:linear-gradient(to top,rgba(212,163,83,.24),rgba(240,200,121,.8))
+}
+
+/* Services: retain layout, improve readability */
+.service-card{
+  border-color:rgba(255,255,255,.12);
+  background:linear-gradient(155deg,#141416,#0d0d0f);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)
+}
+.service-card.featured{
+  border-color:rgba(240,200,121,.38);
+  background:linear-gradient(155deg,#1d1811,#101011);
+  box-shadow:0 0 42px rgba(212,163,83,.04),inset 0 1px 0 rgba(255,255,255,.022)
+}
+.service-no{color:#77716a}
+.service-icon{
+  border-color:rgba(240,200,121,.38);
+  background:rgba(212,163,83,.095);
+  color:#ffd98c;
+  box-shadow:0 0 18px rgba(212,163,83,.045)
+}
+.service-card h3{color:#f2ece4}
+.service-card p{color:#a39d94}
+.service-card ul{border-top-color:rgba(255,255,255,.1)}
+.service-card li{color:#b9b2a8}
+.featured-tag{
+  color:#edc16f;
+  border-color:rgba(240,200,121,.36);
+  background:rgba(212,163,83,.045)
+}
+
+/* PYME section: make orbital stages visible while preserving premium darkness */
+.pymes-panel{
+  border-color:rgba(255,255,255,.13);
+  background:linear-gradient(135deg,#141416,#0d0d0f)
+}
+.pymes-copy p{color:#a69f96}
+.pyme-points strong{color:#e2dbd1}
+.pyme-points small{color:#969087}
+.pyme-points>div>span{
+  color:#f0c879;
+  background:rgba(212,163,83,.1);
+  border-color:rgba(240,200,121,.34)
+}
+.pyme-visual{
+  border-left-color:rgba(255,255,255,.11);
+  background:radial-gradient(circle at 50% 50%,rgba(212,163,83,.12),transparent 55%)
+}
+.pyme-orb{
+  border-color:rgba(240,200,121,.3);
+  box-shadow:inset 0 0 105px rgba(212,163,83,.065),0 0 90px rgba(212,163,83,.055)
+}
+.pyme-orb:before,.pyme-orb:after{border-color:rgba(212,163,83,.15)}
+.pyme-card{
+  border-color:rgba(255,255,255,.18);
+  background:rgba(22,22,25,.94);
+  box-shadow:0 25px 54px rgba(0,0,0,.38),0 0 28px rgba(212,163,83,.035)
+}
+.pyme-card small{color:#a3937b}
+.pyme-card strong{color:#f0e8dc}
+.pyme-card span{color:#aaa39a}
+
+@media(max-width:680px){
+  .screen-face{filter:brightness(1.14) contrast(1.05)}
+  .screen-top{border-color:rgba(255,255,255,.25)}
+  .screen-body{border-color:rgba(255,255,255,.23)}
+  .flow-node p{color:#a09990}
+  .flow-node.active p{color:#c3bbb0}
+  .service-card p{color:#aca69d}
+  .service-card li{color:#c0b8ad}
+  .pyme-card span{color:#b4ada3}
+}
