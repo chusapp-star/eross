@@ -1206,3 +1206,136 @@ button,a{-webkit-tap-highlight-color:transparent}
   .service-card li{color:#c0b8ad}
   .pyme-card span{color:#b4ada3}
 }
+
+
+/* === ICONOGRAPHY + PYME ORBS PASS V1 === */
+.node-icon-svg svg,
+.service-icon svg{
+  width:29px;height:29px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  overflow:visible
+}
+.node-icon-svg{
+  position:relative;
+  overflow:visible
+}
+.node-icon-svg:after{
+  content:"";position:absolute;inset:8px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,200,121,.13),transparent 68%);
+  opacity:0;transform:scale(.75);transition:.45s var(--ease);pointer-events:none
+}
+.flow-node.active .node-icon-svg:after,.flow-node:hover .node-icon-svg:after{
+  opacity:1;transform:scale(1.35)
+}
+.flow-node.active .node-icon-svg svg{
+  filter:drop-shadow(0 0 7px rgba(240,200,121,.28))
+}
+.flow-node:nth-child(2) .node-icon-svg{color:#d9b26a}
+.flow-node:nth-child(3) .node-icon-svg{color:#82aaff}
+.flow-node:nth-child(4) .node-icon-svg{color:#6fd79a}
+.flow-node:nth-child(5) .node-icon-svg{color:#d8b17a}
+.flow-node:nth-child(6) .node-icon-svg{color:#f1c56f}
+.flow-node:nth-child(7) .node-icon-svg{color:#a9bad8}
+
+.service-icon{
+  position:relative;
+  overflow:hidden
+}
+.service-icon:after{
+  content:"";position:absolute;inset:-35%;
+  background:radial-gradient(circle,rgba(240,200,121,.14),transparent 58%);
+  opacity:.7;pointer-events:none
+}
+.service-icon svg{position:relative;z-index:2}
+.service-icon-strategy{color:#efc777}
+.service-icon-growth{color:#f5c66e}
+.service-icon-connect{color:#7ed6a0}
+.service-icon-analytics{color:#9fb5dc}
+.service-card:hover .service-icon svg{
+  transform:scale(1.08) translateY(-1px);
+  filter:drop-shadow(0 0 8px currentColor)
+}
+.service-icon svg{transition:.35s var(--ease)}
+
+/* Three distinct growth stages — subtle color families, still premium */
+.pyme-visual{
+  isolation:isolate;
+}
+.pyme-orb{
+  position:absolute;
+  left:50%;top:50%;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  background:transparent;
+  transition:.5s var(--ease)
+}
+.pyme-orb:before,.pyme-orb:after{content:none}
+
+.pyme-orb-presence{
+  width:305px;height:305px;
+  border:1px solid rgba(240,190,94,.36);
+  box-shadow:
+    0 0 55px rgba(220,157,55,.08),
+    inset 0 0 70px rgba(220,157,55,.045)
+}
+.pyme-orb-presence:after{
+  content:"";position:absolute;inset:17%;border-radius:50%;
+  background:radial-gradient(circle,rgba(239,182,77,.11),transparent 70%);
+  filter:blur(12px)
+}
+.pyme-orb-captacion{
+  width:430px;height:430px;
+  border:1px solid rgba(93,197,155,.22);
+  box-shadow:
+    0 0 72px rgba(66,170,130,.06),
+    inset 0 0 82px rgba(66,170,130,.035)
+}
+.pyme-orb-captacion:after{
+  content:"";position:absolute;inset:14%;border-radius:50%;
+  border:1px dashed rgba(93,197,155,.14);
+  animation:pymeRingSpin 34s linear infinite
+}
+.pyme-orb-sistema{
+  width:555px;height:555px;
+  border:1px solid rgba(117,139,205,.18);
+  box-shadow:
+    0 0 90px rgba(87,111,184,.055),
+    inset 0 0 100px rgba(87,111,184,.03)
+}
+.pyme-orb-sistema:after{
+  content:"";position:absolute;inset:-1px;border-radius:50%;
+  background:
+    radial-gradient(circle at 68% 30%,rgba(103,126,198,.08),transparent 22%),
+    radial-gradient(circle at 32% 75%,rgba(92,190,151,.055),transparent 24%);
+  filter:blur(2px)
+}
+@keyframes pymeRingSpin{to{transform:rotate(360deg)}}
+
+.pc-one{
+  border-color:rgba(240,190,94,.26);
+  box-shadow:0 25px 54px rgba(0,0,0,.38),0 0 30px rgba(220,157,55,.055)
+}
+.pc-one small{color:#cda866}
+.pc-two{
+  border-color:rgba(93,197,155,.22);
+  box-shadow:0 25px 54px rgba(0,0,0,.38),0 0 32px rgba(66,170,130,.05)
+}
+.pc-two small{color:#82bca5}
+.pc-three{
+  border-color:rgba(117,139,205,.22);
+  box-shadow:0 25px 54px rgba(0,0,0,.38),0 0 34px rgba(87,111,184,.05)
+}
+.pc-three small{color:#98a8d1}
+
+@media(max-width:680px){
+  .node-icon-svg svg{width:25px;height:25px}
+  .service-icon svg{width:25px;height:25px}
+  .pyme-orb-presence{width:230px;height:230px}
+  .pyme-orb-captacion{width:330px;height:330px}
+  .pyme-orb-sistema{width:430px;height:430px}
+}
