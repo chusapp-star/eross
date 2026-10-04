@@ -1339,3 +1339,28 @@ button,a{-webkit-tap-highlight-color:transparent}
   .pyme-orb-captacion{width:330px;height:330px}
   .pyme-orb-sistema{width:430px;height:430px}
 }
+
+
+/* === ECOSYSTEM LABEL VISIBILITY V1 === */
+.ecosystem-shell .node-state{
+  color:#d8b36a;
+  border-color:rgba(216,179,106,.38);
+  background:rgba(216,179,106,.08);
+  font-weight:600;
+  text-shadow:0 0 10px rgba(216,179,106,.08);
+}
+.ecosystem-shell .node-no{
+  color:rgba(255,255,255,.48);
+  font-weight:600;
+}
+.ecosystem-shell .flow-node.active .node-state,
+.ecosystem-shell .flow-node:hover .node-state{
+  color:#f0c97a;
+  border-color:rgba(240,201,122,.58);
+  background:rgba(240,201,122,.12);
+  box-shadow:0 0 16px rgba(212,163,83,.06);
+}
+.ecosystem-shell .flow-node.active .node-no,
+.ecosystem-shell .flow-node:hover .node-no{
+  color:rgba(255,255,255,.68);
+}
