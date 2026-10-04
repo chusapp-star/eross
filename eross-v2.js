@@ -6,7 +6,7 @@
   const cursorGlow = document.querySelector('.cursor-glow');
   const heroVisual = document.querySelector('.hero-visual');
   const parallaxCards = document.querySelectorAll('.parallax-card');
-  const ecosystemFlow = document.querySelector('.ecosystem-flow');
+  const ecosystemFlow = document.querySelector('.ecosystem-shell');
   const feedCopy = document.querySelector('.feed-copy');
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
