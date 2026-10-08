@@ -28,6 +28,14 @@ function FlexibleAvailability(){
         if(!response.ok)throw new Error("Error al cargar disponibilidad");
         const saved=await response.json();
         if(controller.signal.aborted)return;
+        const settingResponse=await fetch("/api/agenda/booking-settings",{cache:"no-store",signal:controller.signal});
+        if(settingResponse.ok){
+          const settings=await settingResponse.json();
+          if(!controller.signal.aborted){
+            setSlotStep(String(settings.slotStep??30));
+            setNotice(String(settings.notice??120));
+          }
+        }
         if(saved.timezone)setTimezone(saved.timezone);
         if(Array.isArray(saved.days)){
           setDays(INITIAL_DAYS.map(day=>{
@@ -60,7 +68,14 @@ function FlexibleAvailability(){
       });
       const result=await response.json();
       if(!response.ok||!result.ok)throw new Error(result.error||"No se pudo guardar");
-      flash("Disponibilidad guardada en Neon");
+      const settingsResponse=await fetch("/api/agenda/booking-settings",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({slotStep:Number(slotStep),notice:Number(notice)})
+      });
+      const settingsResult=await settingsResponse.json();
+      if(!settingsResponse.ok||!settingsResult.ok)
+        throw new Error("Horarios guardados, pero falló el intervalo/anticipación: "+(settingsResult.error||"Error"));
+      flash("Disponibilidad y reglas de reserva guardadas en Neon");
     }catch(error){
       flash(error.message||"Error al guardar disponibilidad");
     }finally{setSavingAvailability(false);}
