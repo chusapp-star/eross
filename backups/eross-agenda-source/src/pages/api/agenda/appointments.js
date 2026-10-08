@@ -43,6 +43,17 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
   const rule=(await sql`SELECT active,all_day,slots FROM agenda_availability_rules WHERE company_id=${companyId}::uuid AND weekday=${weekday} AND user_id IS NULL AND location_id IS NULL LIMIT 1`)[0];
   if(!rule||!rule.active) throw new Error("OUTSIDE_AVAILABILITY");
   const mins=Number(time.slice(0,2))*60+Number(time.slice(3,5));
+  // No confiar solo en el calendario del navegador: aplicar reglas también en el servidor.
+  const bookingSettings=await sql`SELECT slot_interval_min,min_notice_min
+    FROM agenda_booking_settings WHERE company_id=${companyId}::uuid`;
+  const interval=Number(bookingSettings[0]?.slot_interval_min??30);
+  const minNotice=Number(bookingSettings[0]?.min_notice_min??120);
+  const startRows=await sql`SELECT ((${date}::date+${time}::time) AT TIME ZONE c.timezone) start_at,
+    now() server_now FROM agenda_companies c WHERE id=${companyId}::uuid`;
+  if(!startRows.length)throw new Error("COMPANY_NOT_FOUND");
+  if(new Date(startRows[0].start_at).getTime()-new Date(startRows[0].server_now).getTime()<minNotice*60000)
+    throw new Error("MIN_NOTICE");
+  if(mins%interval!==0)throw new Error("INVALID_SLOT_INTERVAL");
   const dur=Number(body.duration||type.duration_min||30),before=Number(type.buffer_before_min||0),after=Number(type.buffer_after_min||0);
   let fits=!!rule.all_day;
   if(!fits){
