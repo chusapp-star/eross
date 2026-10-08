@@ -165,10 +165,12 @@ export default function AgendaConfigurationV2(){
     flash("Tipo de cita duplicado");
   };
 
+  // Conservar el historial de citas: retirar un tipo significa desactivarlo.
+  // Se guarda de manera definitiva al pulsar «Guardar cambios».
   const deleteType=(id)=>{
-    setTypes(v=>v.filter(x=>x.id!==id));
+    setTypes(v=>v.map(x=>x.id===id?{...x,active:false}:x));
     setMenuId(null);
-    flash("Tipo de cita eliminado");
+    flash("Tipo desactivado. Guardá los cambios para confirmar.");
   };
 
   const addBlock=()=>{
@@ -247,7 +249,7 @@ export default function AgendaConfigurationV2(){
                 {menuId===t.id && <div className="ec-menu" onClick={e=>e.stopPropagation()}>
                   <button onClick={()=>openEdit(t)}>✎ <span>Editar</span></button>
                   <button onClick={()=>duplicateType(t)}>⧉ <span>Duplicar</span></button>
-                  <button className="danger" onClick={()=>deleteType(t.id)}>⌫ <span>Eliminar</span></button>
+                  <button className="danger" onClick={()=>deleteType(t.id)}>⊘ <span>Desactivar</span></button>
                 </div>}
               </div>
             </article>)}
