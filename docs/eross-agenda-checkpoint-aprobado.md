@@ -1,46 +1,66 @@
 # EROSS Agenda — checkpoint aprobado
 
-Fecha de aprobación: 2026-10-07
+Fecha de aprobación visual: 2026-10-07
+Última actualización técnica: 2026-10-08
 
-## Versión aprobada
+## Versión visual aprobada
 - Proyecto Vercel: `eross-agenda`
-- Deployment aprobado: `dpl_FcAv2qCfU3GLwjrC7vdJqTUB3NKL`
-- URL de revisión aprobada:
-  https://eross-agenda-4f5tvve6o-jesus-prado-portuguez-s-projects.vercel.app/agenda-master-review
-
-## Estado visual aprobado
-- Sidebar en azul marino con acentos dorados.
-- Branding EROSS Agenda con bloque superior aprobado y sin duplicados.
+- Branding EROSS Agenda aprobado: sidebar azul marino, dorado, bloque de marca sin duplicados.
 - Menú lateral con iconos.
-- Dashboard limpio y consistente con EROSS.
-- Agenda con vistas Mes / Semana / Día / Lista.
-- Mayor contraste en horas, días y numeración.
-- Clientes con avatares/iniciales.
-- Reportes con iconos funcionales.
-- Mejor contraste en nombres, títulos y textos de tablas.
-- Estilo general: moderno, premium, corporativo y legible.
+- Vistas de Agenda: Mes / Semana / Día / Lista / Disponibilidad.
+- Configuración: tipos de cita, disponibilidad flexible, horarios extendidos, varias franjas por día, 24 h, bloqueos y zona horaria.
+- Formulario completo de cita: cliente/prospecto, teléfono, correo, fecha, hora, tipo, duración, responsable, sede, modalidad, estado, origen, canal de confirmación, recordatorio, etiquetas, comentarios/notas e ID externo CRM.
+
+## Versión técnica actual
+- Deployment: `dpl_WHesSBFEpqHEwsYhchC3rcWVnk5D`
+- URL:
+  https://eross-agenda-hr26qnegq-jesus-prado-portuguez-s-projects.vercel.app/agenda-master-review
+- Backend: Next.js API Routes.
+- Base de datos: Neon/PostgreSQL.
+- Base dedicada: `eross_agenda`.
+- Empresa demo multiempresa: `EROSS Demo`.
+- La app ya lee datos desde Neon mediante `/api/agenda/bootstrap`.
+- Vercel tiene `DATABASE_URL` y `AGENDA_COMPANY_ID` configurados para este proyecto.
+
+## Modelo de datos real
+Tablas principales:
+- `agenda_companies`
+- `agenda_users`
+- `agenda_locations`
+- `agenda_clients`
+- `agenda_appointment_types`
+- `agenda_availability_rules`
+- `agenda_blocks`
+- `agenda_appointments`
+- `agenda_appointment_events`
+- `agenda_integration_outbox`
+
+La estructura está preparada para múltiples empresas sin mezclar información.
+
+## Protección de agenda
+- La disponibilidad se calcula con horario, franjas, duración, márgenes, bloqueos y citas existentes.
+- Cada cita guarda `reserved_starts_at` y `reserved_ends_at` para incluir márgenes.
+- PostgreSQL protege choques de agenda por responsable mediante exclusión de rangos.
+- El backend valida disponibilidad antes de guardar.
+- Estados soportados: pending / confirmed / rescheduled / attended / no_show / cancelled.
+
+## Eventos para futuro CRM/Meta
+- Las citas generan eventos internos.
+- Existe una outbox de integración para desacoplar Agenda de EROSS CRM.
+- Agenda puede emitir eventos como `appointment.created`, `appointment.updated`, cambios de estado y `appointment.attended`.
+- Las señales para Meta no convierten Agenda en CRM: se preparan como eventos de integración.
+- EROSS CRM será otro producto separado y consumirá estos eventos.
 
 ## Enfoque funcional del producto
 - EROSS Agenda NO se diseña para ópticas ni para una industria específica.
 - Es una agenda comercial genérica para PYMES y clientes de EROSSCR.
-- Debe recibir y gestionar leads provenientes de CRM, formularios, campañas, WhatsApp, canales externos o carga manual.
-- Una cita o gestión debe poder asociarse a un lead/prospecto/cliente, empresa, responsable, sede o equipo, origen y estado.
-- El ciclo comercial esperado es: lead entra → se agenda una cita/gestión → se confirma/reprograma/cancela → se atiende o se marca ausencia → se registra el resultado.
-- Cuando una cita/gestión realmente se ejecuta, el sistema debe generar una señal comercial utilizable por el CRM y por integraciones futuras con plataformas publicitarias como Meta.
-- La integración futura con Meta/CRM debe permitir distinguir una simple cita creada de una gestión realmente efectiva, para atribución, medición y optimización de campañas.
-- El CRM principal será construido como otro módulo/plataforma del ecosistema EROSSCR; EROSS Agenda debe quedar preparado para interoperar con él mediante API/webhooks/eventos, sin acoplarse a una sola plataforma.
+- Puede recibir leads provenientes de CRM, formularios, campañas, WhatsApp, canales externos o carga manual.
+- Ciclo: lead/cliente → cita → confirmación/reprogramación → atención/no asistencia → resultado → evento hacia integraciones.
 
 ## Límite de producto: Agenda ≠ CRM
 - EROSS Agenda NO debe convertirse en un CRM ni intentar replicar Kommo.
-- Su responsabilidad termina en la gestión de citas, disponibilidad, responsables, clientes/prospectos vinculados a la cita, estados de asistencia, recordatorios, notas operativas, reportes de agenda y emisión/recepción de eventos.
-- No debe incluir pipelines comerciales completos, embudos de ventas, gestión de oportunidades/deals, bandeja omnicanal, automatizaciones comerciales complejas, seguimiento integral del ciclo de ventas ni otras funciones propias de un CRM.
-- EROSS CRM será un producto/módulo separado que se desarrollará después, inspirado funcionalmente en herramientas como Kommo pero bajo la marca y ecosistema EROSS.
-- EROSS Agenda y EROSS CRM deben quedar fuertemente integrados, pero desacoplados: cada uno con su propia responsabilidad, datos y lógica.
-- La Agenda debe poder recibir un lead/cliente desde el CRM y devolver eventos como cita creada, confirmada, reprogramada, cancelada, atendida, no asistió y resultado de la gestión.
-- El CRM será quien mantenga el historial comercial completo, pipeline, oportunidades y automatizaciones; la Agenda será la fuente especializada de verdad sobre citas y asistencia.
-
-## Principio de arquitectura
-La agenda debe funcionar como una pieza del ecosistema comercial EROSSCR, no como un sistema aislado ni como sustituto del futuro CRM. Los eventos importantes deben quedar preparados para interoperar mediante API/webhooks/eventos con EROSS CRM y otras integraciones.
+- No incluir pipelines completos, deals, bandeja omnicanal ni automatizaciones comerciales complejas.
+- EROSS CRM se desarrollará después como módulo/producto independiente pero fuertemente integrado.
 
 ## Regla para próximos cambios
-Tomar este checkpoint como base. No retroceder a versiones anteriores ni reemplazar funciones aprobadas al hacer ajustes visuales o funcionales. Evitar cualquier alcance que convierta EROSS Agenda en un CRM.
+Tomar este checkpoint como base. No retroceder a versiones anteriores ni reemplazar funciones aprobadas sin revisar qué se conserva. Las mejoras deben sumar sobre lo ya aprobado.
