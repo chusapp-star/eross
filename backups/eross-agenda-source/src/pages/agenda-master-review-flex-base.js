@@ -97,6 +97,23 @@ export default function AgendaConfigurationV2(){
     return()=>window.removeEventListener("click",close);
   },[]);
 
+  const [savingConfig,setSavingConfig]=useState(false);
+  const saveConfig=async()=>{
+    if(savingConfig)return;
+    setSavingConfig(true);
+    try{
+      const response=await fetch("/api/agenda/config",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({timezone,types})
+      });
+      const result=await response.json();
+      if(!response.ok || !result.ok)throw new Error(result.error||"No se pudo guardar");
+      flash("Tipos de cita y zona horaria guardados en Neon");
+    }catch(error){
+      flash(error.message||"Error al guardar en Neon");
+    }finally{setSavingConfig(false);}
+  };
+
   const flash=(m)=>{
     setToast(m);
     setTimeout(()=>setToast(""),1800);
@@ -172,7 +189,7 @@ export default function AgendaConfigurationV2(){
             <h1>Configuración de agenda</h1>
             <p>Definí cómo puede reservarse el tiempo de tu empresa. Esta configuración aplica a citas internas y futuras reservas públicas.</p>
           </div>
-          <button className="ec-save" onClick={()=>flash("Cambios guardados en esta vista previa")}><span>✓</span> Guardar cambios</button>
+          <button className="ec-save" onClick={saveConfig} disabled={savingConfig}><span>✓</span> {savingConfig?"Guardando…":"Guardar cambios"}</button>
         </header>
 
         <section className="ec-summary">
