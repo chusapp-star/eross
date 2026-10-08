@@ -30,8 +30,17 @@ Fecha de aprobación: 2026-10-07
 - La integración futura con Meta/CRM debe permitir distinguir una simple cita creada de una gestión realmente efectiva, para atribución, medición y optimización de campañas.
 - El CRM principal será construido como otro módulo/plataforma del ecosistema EROSSCR; EROSS Agenda debe quedar preparado para interoperar con él mediante API/webhooks/eventos, sin acoplarse a una sola plataforma.
 
+## Límite de producto: Agenda ≠ CRM
+- EROSS Agenda NO debe convertirse en un CRM ni intentar replicar Kommo.
+- Su responsabilidad termina en la gestión de citas, disponibilidad, responsables, clientes/prospectos vinculados a la cita, estados de asistencia, recordatorios, notas operativas, reportes de agenda y emisión/recepción de eventos.
+- No debe incluir pipelines comerciales completos, embudos de ventas, gestión de oportunidades/deals, bandeja omnicanal, automatizaciones comerciales complejas, seguimiento integral del ciclo de ventas ni otras funciones propias de un CRM.
+- EROSS CRM será un producto/módulo separado que se desarrollará después, inspirado funcionalmente en herramientas como Kommo pero bajo la marca y ecosistema EROSS.
+- EROSS Agenda y EROSS CRM deben quedar fuertemente integrados, pero desacoplados: cada uno con su propia responsabilidad, datos y lógica.
+- La Agenda debe poder recibir un lead/cliente desde el CRM y devolver eventos como cita creada, confirmada, reprogramada, cancelada, atendida, no asistió y resultado de la gestión.
+- El CRM será quien mantenga el historial comercial completo, pipeline, oportunidades y automatizaciones; la Agenda será la fuente especializada de verdad sobre citas y asistencia.
+
 ## Principio de arquitectura
-La agenda debe funcionar como una pieza del ecosistema comercial EROSSCR, no como un sistema aislado. Los eventos importantes (por ejemplo: cita creada, confirmada, reprogramada, cancelada, atendida, no asistió y resultado registrado) deben quedar preparados para emitir eventos hacia otros módulos e integraciones.
+La agenda debe funcionar como una pieza del ecosistema comercial EROSSCR, no como un sistema aislado ni como sustituto del futuro CRM. Los eventos importantes deben quedar preparados para interoperar mediante API/webhooks/eventos con EROSS CRM y otras integraciones.
 
 ## Regla para próximos cambios
-Tomar este checkpoint como base. No retroceder a versiones anteriores ni reemplazar funciones aprobadas al hacer ajustes visuales o funcionales.
+Tomar este checkpoint como base. No retroceder a versiones anteriores ni reemplazar funciones aprobadas al hacer ajustes visuales o funcionales. Evitar cualquier alcance que convierta EROSS Agenda en un CRM.
