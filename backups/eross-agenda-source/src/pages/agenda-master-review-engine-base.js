@@ -19,6 +19,33 @@ function FlexibleAvailability(){
   const [notice,setNotice]=useState("120");
   const [toast,setToast]=useState("");
 
+  // El panel flexible se monta al abrir Disponibilidad: cargar valores persistidos, no los de demostración.
+  useEffect(()=>{
+    const controller=new AbortController();
+    (async()=>{
+      try{
+        const response=await fetch("/api/agenda/config",{cache:"no-store",signal:controller.signal});
+        if(!response.ok)throw new Error("Error al cargar disponibilidad");
+        const saved=await response.json();
+        if(controller.signal.aborted)return;
+        if(saved.timezone)setTimezone(saved.timezone);
+        if(Array.isArray(saved.days)){
+          setDays(INITIAL_DAYS.map(day=>{
+            const rule=saved.days.find(x=>x.day===day.day && !x.user_id && !x.location_id);
+            if(!rule)return day;
+            return {...day,active:rule.active!==false,allDay:!!rule.allDay,
+              slots:Array.isArray(rule.slots)?rule.slots.map((slot,i)=>({
+                id:slot.id||i+1,start:slot.start||"08:00",end:slot.end||"17:00"
+              })):day.slots};
+          }));
+        }
+      }catch(error){
+        if(!controller.signal.aborted)setToast("No se pudo cargar la disponibilidad de Neon");
+      }
+    })();
+    return ()=>controller.abort();
+  },[]);
+
   const flash=(m)=>{setToast(m);setTimeout(()=>setToast(""),1600);};
 
   const updateDay=(idx,patch)=>{
