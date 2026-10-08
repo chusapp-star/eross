@@ -73,6 +73,11 @@ export default function AgendaConfigurationV2(){
         if(!response.ok)throw new Error("No se pudo leer la configuración");
         const saved=await response.json();
         if(controller.signal.aborted)return;
+        const blockResponse=await fetch("/api/agenda/blocks",{cache:"no-store",signal:controller.signal});
+        if(!blockResponse.ok)throw new Error("No se pudieron cargar los bloqueos");
+        const blockData=await blockResponse.json();
+        if(controller.signal.aborted)return;
+        if(Array.isArray(blockData.blocks))setBlocks(blockData.blocks);
         if(saved.timezone)setTimezone(saved.timezone);
         if(Array.isArray(saved.types))setTypes(saved.types);
         if(Array.isArray(saved.days)){
@@ -173,11 +178,35 @@ export default function AgendaConfigurationV2(){
     flash("Tipo desactivado. Guardá los cambios para confirmar.");
   };
 
-  const addBlock=()=>{
-    if(!newBlock.date || !newBlock.reason.trim()) return;
-    setBlocks(v=>[...v,{id:Date.now(),...newBlock,reason:newBlock.reason.trim()}]);
-    setShowBlockForm(false);
-    flash("Bloqueo agregado");
+  const [savingBlock,setSavingBlock]=useState(false);
+  const addBlock=async()=>{
+    if(!newBlock.date||!newBlock.reason.trim()||savingBlock)return;
+    setSavingBlock(true);
+    try{
+      const response=await fetch("/api/agenda/blocks",{
+        method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(newBlock)
+      });
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error(result.error||"Error al crear bloqueo");
+      const latest=await fetch("/api/agenda/blocks",{cache:"no-store"});
+      if(!latest.ok)throw new Error("Bloqueo creado; recargá para ver la lista");
+      const data=await latest.json();
+      setBlocks(data.blocks||[]);
+      setShowBlockForm(false);
+      flash("Bloqueo guardado en Neon");
+    }catch(error){flash(error.message||"No se pudo guardar el bloqueo")}
+    finally{setSavingBlock(false)}
+  };
+  const deleteBlock=async(id)=>{
+    try{
+      const response=await fetch("/api/agenda/blocks",{
+        method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})
+      });
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error(result.error||"No se pudo eliminar");
+      setBlocks(v=>v.filter(x=>x.id!==id));
+      flash("Bloqueo eliminado de Neon");
+    }catch(error){flash(error.message||"No se pudo eliminar el bloqueo")}
   };
 
   return <>
@@ -302,15 +331,15 @@ export default function AgendaConfigurationV2(){
             <label><span>Desde</span><input type="time" value={newBlock.from} onChange={e=>setNewBlock({...newBlock,from:e.target.value})}/></label>
             <label><span>Hasta</span><input type="time" value={newBlock.to} onChange={e=>setNewBlock({...newBlock,to:e.target.value})}/></label>
             <label className="wide"><span>Motivo</span><input value={newBlock.reason} onChange={e=>setNewBlock({...newBlock,reason:e.target.value})} placeholder="Ej. Reunión interna"/></label>
-            <div className="ec-formActions"><button onClick={()=>setShowBlockForm(false)}>Cancelar</button><button className="ec-primary" onClick={addBlock}>Agregar bloqueo</button></div>
+            <div className="ec-formActions"><button onClick={()=>setShowBlockForm(false)}>Cancelar</button><button className="ec-primary" onClick={addBlock} disabled={savingBlock}>{savingBlock?"Guardando…":"Agregar bloqueo"}</button></div>
           </div>}
 
           <div className="ec-blocks">
             {blocks.map(b=><article key={b.id}>
-              <div className="ec-dateBox"><strong>{b.date.slice(8,10)}</strong><span>OCT</span></div>
+              <div className="ec-dateBox"><strong>{b.date.slice(8,10)}</strong><span>{new Date(b.date+"T12:00:00").toLocaleDateString("es-CR",{month:"short"}).toUpperCase()}</span></div>
               <div className="ec-blockMain"><strong>{b.reason}</strong><span>{b.from} – {b.to}</span></div>
               <span className="ec-private">No disponible para reservas</span>
-              <button className="ec-delete" onClick={()=>setBlocks(v=>v.filter(x=>x.id!==b.id))}>Eliminar</button>
+              <button className="ec-delete" onClick={()=>deleteBlock(b.id)}>Eliminar</button>
             </article>)}
             {!blocks.length && <div className="ec-empty">No hay bloqueos próximos.</div>}
           </div>
