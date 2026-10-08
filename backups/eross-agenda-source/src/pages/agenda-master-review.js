@@ -5,6 +5,13 @@ const pad=n=>String(n).padStart(2,"0");
 const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const addDays=(date,n)=>{const d=new Date(date+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)};
 const startMonday=date=>{const d=new Date(date+"T12:00:00");const x=new Date(d);x.setDate(d.getDate()-((d.getDay()+6)%7));return iso(x)};
+const todayInTimezone=(timezone="America/Costa_Rica")=>{
+  const pieces=new Intl.DateTimeFormat("en-US",{
+    timeZone:timezone,year:"numeric",month:"2-digit",day:"2-digit"
+  }).formatToParts(new Date());
+  const item=type=>pieces.find(p=>p.type===type)?.value;
+  return item("year")+"-"+item("month")+"-"+item("day");
+};
 const monthName=i=>["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][i];
 const statusOptions=["No confirmada","Confirmada","Reprogramada","Atendida","No asistió","Cancelada"];
 function minutes(t){const [h,m]=(t||"00:00").split(":").map(Number);return h*60+m}
@@ -33,13 +40,13 @@ function availabilitySlots(data,date,type){
     }
   }return out;
 }
-const emptyForm=()=>({id:null,client_id:null,name:"",phone:"",email:"",date:"2026-10-08",time:"09:00",appointment_type_id:"",type:"",duration:30,responsible_user_id:"",responsible:"Sin asignar",location_id:"",modality:"Presencial",source:"Manual / Otro",status:"No confirmada",tags:"",comments:"",confirmation_channel:"WhatsApp",reminder_minutes:"1440",external_crm_lead_id:""});
+const emptyForm=()=>({id:null,client_id:null,name:"",phone:"",email:"",date:todayInTimezone(),time:"09:00",appointment_type_id:"",type:"",duration:30,responsible_user_id:"",responsible:"Sin asignar",location_id:"",modality:"Presencial",source:"Manual / Otro",status:"No confirmada",tags:"",comments:"",confirmation_channel:"WhatsApp",reminder_minutes:"1440",external_crm_lead_id:""});
 
 export default function AgendaDatabaseUnified(){
   const [agendaOpen,setAgendaOpen]=useState(false),[view,setView]=useState("Mes");
   const [data,setData]=useState({company:null,users:[],locations:[],types:[],availability:[],blocks:[],appointments:[]});
-  const [loading,setLoading]=useState(false),[error,setError]=useState(""),[date,setDate]=useState("2026-10-08");
-  const [month,setMonth]=useState({year:2026,month:9}),[typeId,setTypeId]=useState(""),[form,setForm]=useState(null),[saving,setSaving]=useState(false),[toast,setToast]=useState("");
+  const [loading,setLoading]=useState(false),[error,setError]=useState(""),[date,setDate]=useState(()=>todayInTimezone());
+  const [month,setMonth]=useState(()=>{const t=todayInTimezone();return {year:Number(t.slice(0,4)),month:Number(t.slice(5,7))-1}}),[typeId,setTypeId]=useState(""),[form,setForm]=useState(null),[saving,setSaving]=useState(false),[toast,setToast]=useState("");
 
   const load=async()=>{setLoading(true);setError("");try{const r=await fetch("/api/agenda/bootstrap",{cache:"no-store"}),j=await r.json();if(!r.ok)throw new Error(j.error||"No se pudo cargar");setData(j);if(!typeId&&j.types?.[0])setTypeId(j.types[0].id)}catch(e){setError(e.message||"Error de conexión")}finally{setLoading(false)}};
   useEffect(()=>{if(agendaOpen)load()},[agendaOpen]);
