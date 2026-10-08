@@ -63,6 +63,34 @@ export default function AgendaConfigurationV2(){
     return()=>obs.disconnect();
   },[]);
 
+  // Rehidratar la configuración visible con los valores reales guardados en Neon.
+  useEffect(()=>{
+    if(!configOpen)return;
+    const controller=new AbortController();
+    (async()=>{
+      try{
+        const response=await fetch("/api/agenda/config",{cache:"no-store",signal:controller.signal});
+        if(!response.ok)throw new Error("No se pudo leer la configuración");
+        const saved=await response.json();
+        if(controller.signal.aborted)return;
+        if(saved.timezone)setTimezone(saved.timezone);
+        if(Array.isArray(saved.types))setTypes(saved.types);
+        if(Array.isArray(saved.days)){
+          const defaultDays=INITIAL_DAYS.map(d=>({...d}));
+          setDays(defaultDays.map(d=>{
+            const rule=saved.days.find(x=>x.day===d.day && !x.user_id && !x.location_id);
+            if(!rule)return d;
+            const first=Array.isArray(rule.slots)?rule.slots[0]:null;
+            return {...d,active:rule.active!==false,start:first?.start||d.start,end:first?.end||d.end};
+          }));
+        }
+      }catch(error){
+        if(!controller.signal.aborted)setToast("No se pudo cargar la configuración de Neon");
+      }
+    })();
+    return ()=>controller.abort();
+  },[configOpen]);
+
   useEffect(()=>{
     const close=()=>setMenuId(null);
     window.addEventListener("click",close);
