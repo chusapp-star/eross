@@ -46,6 +46,26 @@ function FlexibleAvailability(){
     return ()=>controller.abort();
   },[]);
 
+  const [savingAvailability,setSavingAvailability]=useState(false);
+  const saveAvailability=async()=>{
+    if(savingAvailability)return;
+    setSavingAvailability(true);
+    try{
+      const response=await fetch("/api/agenda/config",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({timezone,days:days.map(d=>({
+          day:d.day,active:d.active,allDay:d.allDay,
+          slots:d.slots.map(({start,end})=>({start,end}))
+        }))})
+      });
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error(result.error||"No se pudo guardar");
+      flash("Disponibilidad guardada en Neon");
+    }catch(error){
+      flash(error.message||"Error al guardar disponibilidad");
+    }finally{setSavingAvailability(false);}
+  };
+
   const flash=(m)=>{setToast(m);setTimeout(()=>setToast(""),1600);};
 
   const updateDay=(idx,patch)=>{
@@ -157,7 +177,7 @@ function FlexibleAvailability(){
 
     <div className="ex-footer">
       <div><b>{days.filter(d=>d.active).length} días activos</b><span> · horarios listos para conectarse al motor del calendario</span></div>
-      <button onClick={()=>flash("Disponibilidad actualizada en esta vista previa")}>✓ Guardar disponibilidad</button>
+      <button onClick={saveAvailability} disabled={savingAvailability}>✓ {savingAvailability?"Guardando…":"Guardar disponibilidad"}</button>
     </div>
 
     {toast && <div className="ex-toast">✓ {toast}</div>}
