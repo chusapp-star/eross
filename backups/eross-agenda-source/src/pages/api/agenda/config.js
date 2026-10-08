@@ -32,10 +32,29 @@ export default async function handler(req,res){
     const body=req.body||{};
     if(body.timezone) await sql`UPDATE agenda_companies SET timezone=${String(body.timezone)},updated_at=now() WHERE id=${companyId}::uuid`;
     if(Array.isArray(body.types)) for(const t of body.types){
-      await sql`INSERT INTO agenda_appointment_types(company_id,name,duration_min,modality,color,buffer_before_min,buffer_after_min,active)
-                VALUES(${companyId}::uuid,${String(t.name)},${Number(t.duration||30)},${String(t.mode||"Presencial / virtual")},${String(t.color||"#C89B3C")},${Number(t.bufferBefore||0)},${Number(t.bufferAfter||0)},${t.active!==false})
-                ON CONFLICT(company_id,name) DO UPDATE SET duration_min=EXCLUDED.duration_min,modality=EXCLUDED.modality,color=EXCLUDED.color,
-                buffer_before_min=EXCLUDED.buffer_before_min,buffer_after_min=EXCLUDED.buffer_after_min,active=EXCLUDED.active,updated_at=now()`;
+      const name=String(t.name||"").trim();
+      const duration=Number(t.duration);
+      const before=Number(t.bufferBefore||0),after=Number(t.bufferAfter||0);
+      if(!name || !Number.isInteger(duration) || duration<1 || duration>1440
+          || !Number.isInteger(before) || before<0 || before>1440
+          || !Number.isInteger(after) || after<0 || after>1440)
+        return res.status(400).json({error:"Datos de tipo de cita inválidos"});
+      const modality=String(t.mode||"Presencial / virtual");
+      const color=String(t.color||"#C89B3C");
+      const active=t.active!==false;
+      if(typeof t.id==="string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(t.id)){
+        const updated=await sql`UPDATE agenda_appointment_types SET name=${name},duration_min=${duration},
+          modality=${modality},color=${color},buffer_before_min=${before},
+          buffer_after_min=${after},active=${active},updated_at=now()
+          WHERE id=${t.id}::uuid AND company_id=${companyId}::uuid RETURNING id`;
+        if(!updated.length)return res.status(404).json({error:"Tipo de cita no encontrado en esta empresa"});
+      }else{
+        await sql`INSERT INTO agenda_appointment_types(company_id,name,duration_min,modality,color,buffer_before_min,buffer_after_min,active)
+          VALUES(${companyId}::uuid,${name},${duration},${modality},${color},${before},${after},${active})
+          ON CONFLICT(company_id,name) DO UPDATE SET duration_min=EXCLUDED.duration_min,modality=EXCLUDED.modality,
+          color=EXCLUDED.color,buffer_before_min=EXCLUDED.buffer_before_min,buffer_after_min=EXCLUDED.buffer_after_min,
+          active=EXCLUDED.active,updated_at=now()`;
+      }
     }
     if(Array.isArray(body.days)) for(const d of body.days){
       const weekday=dayMap[d.day]; if(weekday===undefined) continue;
