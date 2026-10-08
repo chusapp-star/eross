@@ -15,11 +15,11 @@ const todayInTimezone=(timezone="America/Costa_Rica")=>{
 const monthName=i=>["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][i];
 const statusOptions=["No confirmada","Confirmada","Reprogramada","Atendida","No asistió","Cancelada"];
 function minutes(t){const [h,m]=(t||"00:00").split(":").map(Number);return h*60+m}
-function availabilitySlots(data,date,type){
+function availabilitySlots(data,date,type,bookingSettings={slotStep:30,notice:120}){
   const d=new Date(date+"T12:00:00"),weekday=d.getDay();
   const rule=(data.availability||[]).find(x=>Number(x.weekday)===weekday&&!x.user_id&&!x.location_id);
   if(!rule||!rule.active)return[];
-  const step=30,dur=Number(type?.duration||30),before=Number(type?.bufferBefore||0),after=Number(type?.bufferAfter||0);
+  const step=Number(bookingSettings.slotStep||30),dur=Number(type?.duration||30),before=Number(type?.bufferBefore||0),after=Number(type?.bufferAfter||0);
   const windows=rule.all_day?[{start:"00:00",end:"23:59"}]:(rule.slots||[]),out=[];
   for(const w of windows){
     let a=minutes(w.start),b=minutes(w.end);if(b<=a)b+=1440;
@@ -45,10 +45,16 @@ const emptyForm=()=>({id:null,client_id:null,name:"",phone:"",email:"",date:toda
 export default function AgendaDatabaseUnified(){
   const [agendaOpen,setAgendaOpen]=useState(false),[view,setView]=useState("Mes");
   const [data,setData]=useState({company:null,users:[],locations:[],types:[],availability:[],blocks:[],appointments:[]});
+  const [bookingSettings,setBookingSettings]=useState({slotStep:30,notice:120});
   const [loading,setLoading]=useState(false),[error,setError]=useState(""),[date,setDate]=useState(()=>todayInTimezone());
   const [month,setMonth]=useState(()=>{const t=todayInTimezone();return {year:Number(t.slice(0,4)),month:Number(t.slice(5,7))-1}}),[typeId,setTypeId]=useState(""),[form,setForm]=useState(null),[saving,setSaving]=useState(false),[toast,setToast]=useState("");
 
-  const load=async()=>{setLoading(true);setError("");try{const r=await fetch("/api/agenda/bootstrap",{cache:"no-store"}),j=await r.json();if(!r.ok)throw new Error(j.error||"No se pudo cargar");setData(j);if(!typeId&&j.types?.[0])setTypeId(j.types[0].id)}catch(e){setError(e.message||"Error de conexión")}finally{setLoading(false)}};
+  const load=async()=>{setLoading(true);setError("");try{const r=await fetch("/api/agenda/bootstrap",{cache:"no-store"}),j=await r.json();if(!r.ok)throw new Error(j.error||"No se pudo cargar");setData(j);if(!typeId&&j.types?.[0])setTypeId(j.types[0].id);
+      const settingsResponse=await fetch("/api/agenda/booking-settings",{cache:"no-store"});
+      if(settingsResponse.ok){
+        const settings=await settingsResponse.json();
+        setBookingSettings({slotStep:Number(settings.slotStep||30),notice:Number(settings.notice??120)});
+      }}catch(e){setError(e.message||"Error de conexión")}finally{setLoading(false)}};
   useEffect(()=>{if(agendaOpen)load()},[agendaOpen]);
 
   useEffect(()=>{
@@ -62,7 +68,7 @@ export default function AgendaDatabaseUnified(){
   const monthDays=useMemo(()=>{const first=new Date(month.year,month.month,1),last=new Date(month.year,month.month+1,0),blanks=(first.getDay()+6)%7,arr=[];for(let i=0;i<blanks;i++)arr.push(null);for(let d=1;d<=last.getDate();d++)arr.push(iso(new Date(month.year,month.month,d)));while(arr.length%7)arr.push(null);return arr},[month]);
   const apptsByDate=useMemo(()=>{const m={};for(const a of data.appointments||[])(m[a.date]||(m[a.date]=[])).push(a);return m},[data.appointments]);
   const selectedAppts=(data.appointments||[]).filter(a=>a.date===date).sort((a,b)=>a.time.localeCompare(b.time));
-  const weekStart=startMonday(date),week=Array.from({length:7},(_,i)=>addDays(weekStart,i)),slots=availabilitySlots(data,date,activeType);
+  const weekStart=startMonday(date),week=Array.from({length:7},(_,i)=>addDays(weekStart,i)),slots=availabilitySlots(data,date,activeType,bookingSettings);
 
   const openNew=(preset={})=>{const t=data.types.find(x=>x.id===(preset.appointment_type_id||typeId))||data.types[0],f=emptyForm();f.date=preset.date||date;f.time=preset.time||"09:00";f.appointment_type_id=t?.id||"";f.type=t?.name||"";f.duration=t?.duration||30;f.responsible_user_id=data.users?.[0]?.id||"";f.responsible=data.users?.[0]?.name||"Sin asignar";f.location_id=data.locations?.[0]?.id||"";setForm(f)};
   const openEdit=a=>setForm({...emptyForm(),...a,tags:Array.isArray(a.tags)?a.tags.join(", "):a.tags||"",modality:a.modality||"Presencial",confirmation_channel:a.confirmation_channel||"WhatsApp",reminder_minutes:a.reminder_minutes??1440});
