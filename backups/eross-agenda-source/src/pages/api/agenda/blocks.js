@@ -36,6 +36,17 @@ export default async function handler(req,res){
     if(String(reason).trim().length>250)return res.status(400).json({error:"Motivo demasiado largo"});
     const endDate=to<from?await sql`SELECT to_char(${date}::date+1,'YYYY-MM-DD') date`:null;
     const ending=endDate?endDate[0].date:date;
+    // Evitar crear un bloqueo global que invalide citas ya confirmadas o pendientes.
+    const conflicts=await sql`SELECT a.id::text FROM agenda_appointments a
+      JOIN agenda_companies c ON c.id=a.company_id
+      WHERE a.company_id=${companyId}::uuid AND a.status<>'cancelled'
+      AND tstzrange(a.starts_at,a.ends_at,'[)') &&
+        tstzrange((${date}::date+${from}::time) AT TIME ZONE c.timezone,
+          (${ending}::date+${to}::time) AT TIME ZONE c.timezone,'[)')
+      LIMIT 1`;
+    if(conflicts.length)return res.status(409).json({
+      error:"Ya existe una cita en ese horario. Reprogramala antes de bloquearlo."
+    });
     const inserted=await sql`INSERT INTO agenda_blocks(company_id,starts_at,ends_at,reason)
       SELECT c.id,(${date}::date+${from}::time) AT TIME ZONE c.timezone,
         (${ending}::date+${to}::time) AT TIME ZONE c.timezone,${String(reason).trim()}
