@@ -48,12 +48,6 @@ export default function AgendaDatabaseUnified(){
     const click=e=>{const btn=e.target.closest("button");if(!btn)return;const t=norm(btn.textContent);
       if(t==="agenda"){setAgendaOpen(true);return}
       if(["dashboard","clientes","estadisticas","reportes","empresas","usuarios","configuracion"].includes(t))setAgendaOpen(false);
-      if(t.includes("guardar disponibilidad")||t==="guardar cambios")setTimeout(async()=>{try{
-        const days=[...document.querySelectorAll(".ex-day")].map(el=>({day:(el.querySelector(".ex-dayName strong")?.textContent||"").trim(),active:!!el.querySelector(".ex-switch.on"),allDay:!!el.querySelector(".ex-24 input:checked"),slots:[...el.querySelectorAll(".ex-slot")].map(s=>{const ins=[...s.querySelectorAll('input[type="time"]')];return{start:ins[0]?.value||"08:00",end:ins[1]?.value||"17:00"}})}));
-        const timezone=document.querySelector(".ex-timezone select")?.value||data.company?.timezone||"America/Costa_Rica";
-        const types=[...document.querySelectorAll(".ec-type")].map((el,i)=>{const name=el.querySelector(".ec-typeMain strong")?.textContent?.trim()||"Tipo "+(i+1),meta=el.querySelector(".ec-typeMain span")?.textContent||"30 min · Presencial / virtual",extra=el.querySelector(".ec-typeMain small")?.textContent||"",nums=extra.match(/\d+/g)||[];let before=0,after=0;if(/antes/i.test(extra)&&!/sin margen antes/i.test(extra))before=Number(nums[0]||0);if(/después|despues/i.test(extra))after=Number(nums[nums.length-1]||0);const mark=el.querySelector(".ec-typeMark"),rgb=mark?getComputedStyle(mark).backgroundColor.match(/\d+/g):null,color=rgb?"#"+rgb.slice(0,3).map(n=>Number(n).toString(16).padStart(2,"0")).join(""):"#C89B3C";return{name,duration:Number(meta.match(/\d+/)?.[0]||30),mode:(meta.split("·")[1]||"Presencial / virtual").trim(),color,bufferBefore:before,bufferAfter:after,active:!!el.querySelector(".ec-state.active")}});
-        await fetch("/api/agenda/config",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({timezone,days,types})});
-      }catch{}},120);
     };document.addEventListener("click",click,true);return()=>document.removeEventListener("click",click,true);
   },[data.company]);
 
