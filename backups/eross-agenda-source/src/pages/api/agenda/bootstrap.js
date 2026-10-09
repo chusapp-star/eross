@@ -1,11 +1,26 @@
-import {requireAgendaAdmin} from "../../../lib/agenda-auth";
+import {sessionValid} from "../../../lib/agenda-auth";
+import {verifyIdentitySession} from "../../../lib/agenda-identity-auth";
+import {resolveTenantMembership} from "../../../lib/agenda-tenant";
+import {roleCan} from "../../../lib/agenda-role-policy";
 import {getSql,getCompanyId,statusToUi} from "../../../lib/agenda-db";
 
 export default async function handler(req,res){
-  if(!requireAgendaAdmin(req,res))return;
+  res.setHeader("Cache-Control","no-store");
   if(req.method!=="GET") return res.status(405).json({error:"Método no permitido"});
   try{
-    const sql=getSql(); const companyId=getCompanyId();
+    const sql=getSql();
+    const tenantEnabled=process.env.EROSS_MULTIEMPRESA_QA_ENABLED==="true"&&process.env.EROSS_EVENT_HUB_QA_ENABLED==="true";
+    const token=String(req.headers.cookie||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("eross_identity_qa="))?.slice("eross_identity_qa=".length);
+    let companyId;
+    if(tenantEnabled&&token){
+      const session=verifyIdentitySession(token);
+      if(!session)return res.status(401).json({error:"Sesión individual inválida"});
+      const membership=await resolveTenantMembership(sql,{identityId:session.sub,companyId:session.tenant});
+      if(!membership||membership.membership_id!==session.membership||membership.role!==session.role||!roleCan(membership.role,"appointments.read"))return res.status(403).json({error:"Acceso denegado"});
+      companyId=membership.company_id;
+    }else if(sessionValid(req)){
+      companyId=getCompanyId();
+    }else return res.status(401).json({error:"Sesión requerida"});
     const [companyRows,userRows,locationRows,typeRows,availabilityRows,blockRows,appointmentRows]=await Promise.all([
       sql`SELECT id::text,name,slug,timezone FROM agenda_companies WHERE id=${companyId}::uuid AND active=true`,
       sql`SELECT id::text,name,email,role,active FROM agenda_users WHERE company_id=${companyId}::uuid AND active=true ORDER BY name`,
