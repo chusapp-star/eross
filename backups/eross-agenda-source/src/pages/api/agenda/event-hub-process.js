@@ -7,10 +7,13 @@ function equal(a,b){
   return x.length===y.length&&x.length>0&&timingSafeEqual(x,y);
 }
 export default async function handler(req,res){
-  if(req.method!=="POST")return res.status(405).json({error:"Método no permitido"});
+  if(!["POST","GET"].includes(req.method))return res.status(405).json({error:"Método no permitido"});
   // A Vercel cron can invoke this using Bearer CRON_SECRET; admin session may invoke manually.
   const bearer=String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
-  if(!(process.env.CRON_SECRET&&equal(bearer,process.env.CRON_SECRET))&&!requireAgendaAdmin(req,res))return;
+  const cronAuthorized=Boolean(process.env.CRON_SECRET&&equal(bearer,process.env.CRON_SECRET));
+  if(req.method==="GET"&&!cronAuthorized)return res.status(401).json({error:"No autorizado"});
+  if(req.method==="POST"&&!cronAuthorized&&!requireAgendaAdmin(req,res))return;
+  if(req.method==="GET"&&process.env.EROSS_EVENT_HUB_QA_ENABLED!=="true")return res.status(503).json({error:"Cron solo habilitado en QA"});
   const endpoint=process.env.EROSS_CRM_EVENTS_URL;
   const token=process.env.EROSS_CRM_EVENTS_TOKEN;
   // No configured receiver: do not consume or mark events as delivered.
