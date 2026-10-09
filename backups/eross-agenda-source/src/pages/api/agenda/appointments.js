@@ -79,7 +79,7 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
 export default async function handler(req,res){
   if(!["POST","PATCH"].includes(req.method)) return res.status(405).json({error:"Método no permitido"});
   let authorization;
-  try{authorization=await authorizeAgendaWrite(req,res)}catch(error){console.error("agenda authorization",error);return res.status(500).json({error:"No se pudo verificar el acceso"})}
+  try{authorization=await authorizeAgendaWrite(req,res,{action:req.method==="POST"?"appointments.create":"appointments.edit"})}catch(error){console.error("agenda authorization",error);return res.status(500).json({error:"No se pudo verificar el acceso"})}
   if(!authorization)return;
   const {sql,companyId}=authorization,body=req.body||{};
   try{
