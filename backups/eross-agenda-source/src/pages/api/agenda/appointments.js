@@ -19,6 +19,10 @@ async function resolveContext(sql,companyId,body){
   }else{
     location=(await sql`SELECT id::text,name FROM agenda_locations WHERE company_id=${companyId}::uuid AND active=true ORDER BY created_at LIMIT 1`)[0]||null;
   }
+  // Never silently replace an explicitly selected cross-company or inactive assignment.
+  if(body.responsible_user_id&&!user)throw new Error("USER_NOT_FOUND");
+  if(body.location_id&&!location)throw new Error("LOCATION_NOT_FOUND");
+  if(!body.responsible_user_id&&clean(body.responsible)&&clean(body.responsible)!=="Sin asignar"&&!user)throw new Error("USER_NOT_FOUND");
   return {type:typeRows[0],user,location};
 }
 
@@ -172,6 +176,8 @@ export default async function handler(req,res){
     console.error("agenda appointment",error);
     const m=String(error?.message||error);
     if(m.includes("TYPE_NOT_FOUND")) return res.status(400).json({error:"Tipo de cita inválido"});
+    if(m.includes("USER_NOT_FOUND")) return res.status(400).json({error:"El responsable seleccionado no pertenece a esta empresa o está inactivo"});
+    if(m.includes("LOCATION_NOT_FOUND")) return res.status(400).json({error:"La sede seleccionada no pertenece a esta empresa o está inactiva"});
     if(m.includes("CLIENT_REQUIRED")) return res.status(400).json({error:"Nombre del cliente requerido"});
     if(m.includes("DATE_REQUIRED")) return res.status(400).json({error:"Fecha y hora requeridas"});
     if(m.includes("MIN_NOTICE")) return res.status(409).json({error:"La cita no cumple la anticipación mínima configurada"});
