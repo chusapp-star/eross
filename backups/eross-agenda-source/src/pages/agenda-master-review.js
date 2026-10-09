@@ -20,6 +20,14 @@ function availabilitySlots(data,date,type,bookingSettings={slotStep:30,notice:12
   const rule=(data.availability||[]).find(x=>Number(x.weekday)===weekday&&!x.user_id&&!x.location_id);
   if(!rule||!rule.active)return[];
   const step=Number(bookingSettings.slotStep||30),dur=Number(type?.duration||30),before=Number(type?.bufferBefore||0),after=Number(type?.bufferAfter||0);
+  const nowParts=new Intl.DateTimeFormat("en-CA",{
+    timeZone:data.company?.timezone||"America/Costa_Rica",
+    year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",
+    hourCycle:"h23"
+  }).formatToParts(new Date());
+  const part=name=>nowParts.find(p=>p.type===name)?.value;
+  const nowWall=Date.UTC(Number(part("year")),Number(part("month"))-1,Number(part("day")),
+    Number(part("hour")),Number(part("minute")));
   const windows=rule.all_day?[{start:"00:00",end:"23:59"}]:(rule.slots||[]),out=[];
   for(const w of windows){
     let a=minutes(w.start),b=minutes(w.end);if(b<=a)b+=1440;
@@ -36,14 +44,6 @@ function availabilitySlots(data,date,type,bookingSettings={slotStep:30,notice:12
         if(bl.date!==actualDate)continue;const st=minutes(bl.from),en=minutes(bl.to);
         if(s-before<en&&s+dur+after>st){busy=true;reason="Bloqueado · "+(bl.reason||"Bloqueo");break}
       }
-      const nowParts=new Intl.DateTimeFormat("en-CA",{
-        timeZone:data.company?.timezone||"America/Costa_Rica",
-        year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",
-        hourCycle:"h23"
-      }).formatToParts(new Date());
-      const part=name=>nowParts.find(p=>p.type===name)?.value;
-      const nowWall=Date.UTC(Number(part("year")),Number(part("month"))-1,Number(part("day")),
-        Number(part("hour")),Number(part("minute")));
       const startWall=Date.UTC(Number(actualDate.slice(0,4)),Number(actualDate.slice(5,7))-1,
         Number(actualDate.slice(8,10)),Math.floor(mm/60),mm%60);
       if(startWall-nowWall<Number(bookingSettings.notice??120)*60000){
