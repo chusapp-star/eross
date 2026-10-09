@@ -83,6 +83,14 @@ export default async function handler(req,res){
   if(!authorization)return;
   const {sql,companyId}=authorization,body=req.body||{};
   try{
+    // Reject cross-tenant edits before touching client records or appointment context.
+    if(req.method==="PATCH"){
+      const id=String(body.id||"");
+      if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
+        return res.status(400).json({error:"ID de cita inválido"});
+      const owned=await sql`SELECT id FROM agenda_appointments WHERE id=${id}::uuid AND company_id=${companyId}::uuid LIMIT 1`;
+      if(!owned.length)return res.status(404).json({error:"Cita no encontrada"});
+    }
     const {type,user,location}=await resolveContext(sql,companyId,body);
     const status=statusToDb(body.status),userId=user?.id||null;
     await validateWindow(sql,companyId,body,type,userId,req.method==="PATCH"?body.id:null);
