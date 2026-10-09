@@ -92,7 +92,13 @@ export default async function handler(req,res){
       if(!owned.length)return res.status(404).json({error:"Cita no encontrada"});
     }
     const {type,user,location}=await resolveContext(sql,companyId,body);
-    const status=statusToDb(body.status),userId=user?.id||null;
+    let status=statusToDb(body.status);const userId=user?.id||null;
+    // Keep the existing status on edits when the client omits the status field.
+    if(req.method==="PATCH"&&(body.status===undefined||body.status===null||String(body.status).trim()==="")){
+      const existing=await sql`SELECT status FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid`;
+      if(!existing.length)return res.status(404).json({error:"Cita no encontrada"});
+      status=existing[0].status;
+    }
     await validateWindow(sql,companyId,body,type,userId,req.method==="PATCH"?body.id:null);
     if(!clean(body.name))throw new Error("CLIENT_REQUIRED");
     const duration=Number(body.duration||type.duration_min||30);
