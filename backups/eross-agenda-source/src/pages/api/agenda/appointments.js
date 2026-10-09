@@ -91,26 +91,20 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
   }
 }
 
-async function emitEvent(sql,companyId,appointmentId,eventType,payload,status){
-  await sql`INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload) VALUES(${companyId}::uuid,${appointmentId}::uuid,${eventType},${JSON.stringify(payload)}::jsonb)`;
-  await sql`INSERT INTO agenda_integration_outbox(company_id,appointment_id,event_type,destination,payload) VALUES(${companyId}::uuid,${appointmentId}::uuid,${eventType},'eross_crm',${JSON.stringify(payload)}::jsonb)`;
-  // Meta signals are selected and delivered by the future CRM, never by Agenda directly.
-}
-
 export default async function handler(req,res){
   if(!requireAgendaAdmin(req,res))return;
   if(!["POST","PATCH"].includes(req.method)) return res.status(405).json({error:"Método no permitido"});
   const sql=getSql(),companyId=getCompanyId(),body=req.body||{};
   try{
     const {type,user,location}=await resolveContext(sql,companyId,body);
-    const clientId=await resolveClient(sql,companyId,body);
     const status=statusToDb(body.status),userId=user?.id||null;
     await validateWindow(sql,companyId,body,type,userId,req.method==="PATCH"?body.id:null);
+    const clientId=await resolveClient(sql,companyId,body);
     const duration=Number(body.duration||type.duration_min||30);
     const tags=Array.isArray(body.tags)?body.tags:clean(body.tags).split(",").map(x=>x.trim()).filter(Boolean);
     let row;
     if(req.method==="POST"){
-      row=(await sql`INSERT INTO agenda_appointments(company_id,client_id,appointment_type_id,responsible_user_id,location_id,external_crm_lead_id,starts_at,ends_at,reserved_starts_at,reserved_ends_at,status,modality,source,comments,confirmation_channel,reminder_minutes,tags,color)
+      row=(await sql`WITH changed AS (INSERT INTO agenda_appointments(company_id,client_id,appointment_type_id,responsible_user_id,location_id,external_crm_lead_id,starts_at,ends_at,reserved_starts_at,reserved_ends_at,status,modality,source,comments,confirmation_channel,reminder_minutes,tags,color)
         SELECT ${companyId}::uuid,${clientId}::uuid,${type.id}::uuid,${userId}::uuid,${location?.id||null}::uuid,${clean(body.external_crm_lead_id)||null},
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone),
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration}),
@@ -118,13 +112,18 @@ export default async function handler(req,res){
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration+Number(type.buffer_after_min||0)}),
           ${status},${clean(body.modality||body.location)||null},${clean(body.source)||null},${clean(body.comments)||null},
           ${clean(body.confirmation_channel)||null},${body.reminder_minutes?Number(body.reminder_minutes):null},${tags},${type.color}
-        FROM agenda_companies c WHERE c.id=${companyId}::uuid RETURNING id::text,status`)[0];
-      await emitEvent(sql,companyId,row.id,"appointment.created",{source:clean(body.source),crm_lead_id:clean(body.external_crm_lead_id)},status);
+        FROM agenda_companies c WHERE c.id=${companyId}::uuid RETURNING id,company_id,client_id,status
+      ), logged AS (INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload)
+       SELECT company_id,id,'appointment.created',jsonb_build_object('schema_version',1,'client_id',client_id::text,'status',status,'source',${clean(body.source)}) FROM changed
+       RETURNING id,company_id,appointment_id,event_type,payload
+      ), queued AS (INSERT INTO agenda_integration_outbox(company_id,appointment_id,event_type,destination,payload)
+       SELECT company_id,appointment_id,event_type,'eross_crm',payload||jsonb_build_object('event_id',id::text,'occurred_at',now()) FROM logged RETURNING id
+      ) SELECT id::text,status,(SELECT count(*) FROM queued) AS events_queued FROM changed`)[0];
     }else{
       if(!body.id) return res.status(400).json({error:"Falta id de cita"});
       const old=(await sql`SELECT status FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid`)[0];
       if(!old) return res.status(404).json({error:"Cita no encontrada"});
-      row=(await sql`UPDATE agenda_appointments a SET
+      row=(await sql`WITH previous AS (SELECT id,status,starts_at FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid), changed AS (UPDATE agenda_appointments a SET
           client_id=${clientId}::uuid,appointment_type_id=${type.id}::uuid,responsible_user_id=${userId}::uuid,location_id=${location?.id||null}::uuid,
           external_crm_lead_id=${clean(body.external_crm_lead_id)||null},
           starts_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone),
@@ -134,8 +133,18 @@ export default async function handler(req,res){
           status=${status},modality=${clean(body.modality||body.location)||null},source=${clean(body.source)||null},comments=${clean(body.comments)||null},
           confirmation_channel=${clean(body.confirmation_channel)||null},reminder_minutes=${body.reminder_minutes?Number(body.reminder_minutes):null},
           tags=${tags},color=${type.color},updated_at=now()
-        FROM agenda_companies c WHERE a.id=${body.id}::uuid AND a.company_id=${companyId}::uuid AND c.id=a.company_id RETURNING a.id::text,a.status`)[0];
-      await emitEvent(sql,companyId,row.id,old.status!==status?"appointment."+status:"appointment.updated",{previous_status:old.status},status);
+        FROM agenda_companies c WHERE a.id=${body.id}::uuid AND a.company_id=${companyId}::uuid AND c.id=a.company_id RETURNING a.id,a.company_id,a.client_id,a.status,a.starts_at
+      ), logged AS (INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload)
+       SELECT c.company_id,c.id,
+       CASE WHEN p.starts_at IS DISTINCT FROM c.starts_at THEN 'appointment.rescheduled'
+            WHEN p.status IS DISTINCT FROM c.status THEN 'appointment.'||c.status ELSE 'appointment.updated' END,
+       jsonb_build_object('schema_version',1,'client_id',c.client_id::text,'previous_status',p.status,'status',c.status,
+         'previous_starts_at',p.starts_at,'starts_at',c.starts_at,'source','eross_agenda')
+       FROM changed c JOIN previous p ON p.id=c.id RETURNING id,company_id,appointment_id,event_type,payload
+      ), queued AS (INSERT INTO agenda_integration_outbox(company_id,appointment_id,event_type,destination,payload)
+       SELECT company_id,appointment_id,event_type,'eross_crm',payload||jsonb_build_object('event_id',id::text,'occurred_at',now())
+       FROM logged RETURNING id
+      ) SELECT id::text,status,(SELECT count(*) FROM queued) AS events_queued FROM changed`)[0];
     }
     return res.status(200).json({ok:true,id:row.id,status:statusToUi(row.status)});
   }catch(error){
