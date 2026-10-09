@@ -28,7 +28,7 @@ async function resolveContext(sql,companyId,body){
 
 async function validateWindow(sql,companyId,body,type,userId,ignoreId){
   const date=clean(body.date),time=clean(body.time);
-  if(!date||!time) throw new Error("DATE_REQUIRED");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))throw new Error("DATE_REQUIRED");
   const weekday=(await sql`SELECT EXTRACT(DOW FROM ${date}::date)::int weekday`)[0].weekday;
   const rule=(await sql`SELECT active,all_day,slots FROM agenda_availability_rules WHERE company_id=${companyId}::uuid AND weekday=${weekday} AND user_id IS NULL AND location_id IS NULL LIMIT 1`)[0];
   if(!rule||!rule.active) throw new Error("OUTSIDE_AVAILABILITY");
@@ -49,8 +49,8 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
   if(!startRows.length)throw new Error("COMPANY_NOT_FOUND");
   if(new Date(startRows[0].start_at).getTime()-new Date(startRows[0].server_now).getTime()<minNotice*60000)
     throw new Error("MIN_NOTICE");
-  if(mins%interval!==0)throw new Error("INVALID_SLOT_INTERVAL");
-  const dur=Number(body.duration||type.duration_min||30),before=Number(type.buffer_before_min||0),after=Number(type.buffer_after_min||0);
+  if(!Number.isInteger(interval)||interval<1||mins%interval!==0)throw new Error("INVALID_SLOT_INTERVAL");
+  const dur=Number(type.duration_min),before=Number(type.buffer_before_min||0),after=Number(type.buffer_after_min||0);
   let fits=!!rule.all_day;
   if(!fits){
     for(const slot of (rule.slots||[])){
@@ -105,7 +105,8 @@ export default async function handler(req,res){
     }
     await validateWindow(sql,companyId,body,type,userId,req.method==="PATCH"?body.id:null);
     if(!clean(body.name))throw new Error("CLIENT_REQUIRED");
-    const duration=Number(body.duration||type.duration_min||30);
+    // Appointment duration comes from the company-owned service type, never an untrusted browser override.
+    const duration=Number(type.duration_min);
     const tags=Array.isArray(body.tags)?body.tags:clean(body.tags).split(",").map(x=>x.trim()).filter(Boolean);
     let row;
     if(req.method==="POST"){
