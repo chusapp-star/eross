@@ -1,5 +1,5 @@
-import {requireAgendaAdmin} from "../../../lib/agenda-auth";
-import {getSql,getCompanyId,statusToDb,statusToUi} from "../../../lib/agenda-db";
+import {authorizeAgendaWrite} from "../../../lib/agenda-write-auth";
+import {statusToDb,statusToUi} from "../../../lib/agenda-db";
 const clean=v=>String(v??"").trim();
 
 async function resolveContext(sql,companyId,body){
@@ -77,9 +77,11 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
 }
 
 export default async function handler(req,res){
-  if(!requireAgendaAdmin(req,res))return;
   if(!["POST","PATCH"].includes(req.method)) return res.status(405).json({error:"Método no permitido"});
-  const sql=getSql(),companyId=getCompanyId(),body=req.body||{};
+  let authorization;
+  try{authorization=await authorizeAgendaWrite(req,res)}catch(error){console.error("agenda authorization",error);return res.status(500).json({error:"No se pudo verificar el acceso"})}
+  if(!authorization)return;
+  const {sql,companyId}=authorization,body=req.body||{};
   try{
     const {type,user,location}=await resolveContext(sql,companyId,body);
     const status=statusToDb(body.status),userId=user?.id||null;
