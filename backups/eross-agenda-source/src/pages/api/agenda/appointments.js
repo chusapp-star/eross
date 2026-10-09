@@ -1,3 +1,4 @@
+import {requireAgendaAdmin} from "../../../lib/agenda-auth";
 import {getSql,getCompanyId,statusToDb,statusToUi} from "../../../lib/agenda-db";
 const clean=v=>String(v??"").trim();
 
@@ -99,6 +100,7 @@ async function emitEvent(sql,companyId,appointmentId,eventType,payload,status){
 }
 
 export default async function handler(req,res){
+  if(!requireAgendaAdmin(req,res))return;
   if(!["POST","PATCH"].includes(req.method)) return res.status(405).json({error:"Método no permitido"});
   const sql=getSql(),companyId=getCompanyId(),body=req.body||{};
   try{
