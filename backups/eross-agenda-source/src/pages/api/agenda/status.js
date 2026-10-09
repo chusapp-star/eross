@@ -13,7 +13,7 @@ export default async function handler(req,res){
   if(!uuid.test(id)||!requested||!allowed.has(requested)&&!["confirmada","confirmado","reprogramada","cancelada","atendida","no asistió","no confirmada"].includes(requested))
     return res.status(400).json({error:"ID o estado inválido"});
   let authorization;
-  try{authorization=await authorizeAgendaWrite(req,res)}catch(error){console.error("agenda authorization",error);return res.status(500).json({error:"No se pudo verificar el acceso"})}
+  try{authorization=await authorizeAgendaWrite(req,res,{action:"appointments.status"})}catch(error){console.error("agenda authorization",error);return res.status(500).json({error:"No se pudo verificar el acceso"})}
   if(!authorization)return;
   const {companyId,sql}=authorization;
   const eventType={
