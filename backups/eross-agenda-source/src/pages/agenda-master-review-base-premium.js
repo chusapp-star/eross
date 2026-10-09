@@ -1,4 +1,4 @@
-import {useMemo,useState} from "react";
+import {useEffect,useMemo,useState} from "react";
 
 const MONTHS=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const YEARS=[2025,2026,2027,2028,2029,2030];
@@ -64,6 +64,10 @@ export default function AgendaMasterReview(){
  const [statsYear,setStatsYear]=useState(2026);
  const [filterFrom,setFilterFrom]=useState("2026-01-01");
  const [filterTo,setFilterTo]=useState("2026-12-31");
+ const [realCitas,setRealCitas]=useState([]);
+ const [realLoad,setRealLoad]=useState("loading");
+ useEffect(()=>{let cancelled=false;fetch("/api/agenda/bootstrap",{credentials:"same-origin",cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("No se pudo consultar Neon");return r.json()}).then(j=>{if(cancelled)return;setRealCitas(Array.isArray(j.appointments)?j.appointments:[]);setRealLoad("ok")}).catch(()=>{if(!cancelled)setRealLoad("error")});return ()=>{cancelled=true}},[]);
+
  const [form,setForm]=useState({name:"",phone:"",email:"",date:"2026-10-07",time:"10:00",branch:"Escazú",person:"Laura",type:"Reunión inicial",source:"Instagram",status:"No confirmada",duration:"30 minutos",tags:["Seguimiento"],notes:"",channel:"Correo",reminder:"24 horas antes",color:"#2e9fd8"});
 
  const current=parseISO(selectedDate), year=current.getFullYear(), month=current.getMonth(), day=current.getDate();
@@ -82,23 +86,31 @@ export default function AgendaMasterReview(){
  const weekCells=[];
  hours.forEach(h=>{weekCells.push(<div className="em-time" key={"t"+h}>{h}</div>);weekDates.forEach(date=>{const a=appointments.find(x=>x.date===date&&x.time===h);weekCells.push(<div className="em-slot" key={date+h} onClick={()=>resetForm(date,h)}>{a?<button className="em-appt" style={{borderLeftColor:a.color,background:a.color+"18"}} onClick={e=>{e.stopPropagation();editAppt(a)}}><b>{a.name}</b><span>{a.type}</span><small>{a.person} · {a.status}</small></button>:null}</div>)})});
 
+
  const periodValid=filterFrom<=filterTo;
- const periodAppointments=appointments.filter(a=>periodValid&&a.date>=filterFrom&&a.date<=filterTo&&(statsBranch==="Todas"||a.branch===statsBranch));
- const reportAppointments=appointments.filter(a=>periodValid&&a.date>=filterFrom&&a.date<=filterTo);
+ const inPeriod=a=>periodValid&&a.date>=filterFrom&&a.date<=filterTo;
+ const reportAppointments=realCitas.filter(inPeriod);
+ const periodAppointments=reportAppointments.filter(a=>statsBranch==="Todas"||a.branch===statsBranch);
+ const statTotal=periodAppointments.length;
+ const statConfirmed=periodAppointments.filter(a=>a.status==="Confirmada").length;
+ const statAttended=periodAppointments.filter(a=>a.status==="Atendida").length;
+ const statCancelled=periodAppointments.filter(a=>a.status==="Cancelada").length;
+ const statNoShow=periodAppointments.filter(a=>a.status==="No asistió").length;
+ const statAttendance=statAttended+statNoShow?Math.round(100*statAttended/(statAttended+statNoShow)):0;
+ const monthCounts=MONTHS.map((_,i)=>periodAppointments.filter(a=>Number(a.date?.slice(5,7))===i+1).length);
+ const branchOptions=["Todas",...new Set(realCitas.map(a=>a.branch).filter(Boolean))];
  const rangeFilter=<div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:8}}>
    <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,fontWeight:700}}>Desde <input aria-label="Fecha inicial" type="date" value={filterFrom} onChange={e=>setFilterFrom(e.target.value)} style={{padding:8,border:"1px solid #d4dce3",borderRadius:8}}/></label>
    <label style={{display:"flex",alignItems:"center",gap:5,fontSize:12,fontWeight:700}}>Hasta <input aria-label="Fecha final" type="date" min={filterFrom} value={filterTo} onChange={e=>setFilterTo(e.target.value)} style={{padding:8,border:"1px solid #d4dce3",borderRadius:8}}/></label>
    <button className="em-btn" type="button" onClick={()=>{setFilterFrom("2026-01-01");setFilterTo("2026-12-31")}}>Restablecer</button>
    {!periodValid&&<span role="alert" style={{color:"#a22"}}>Revisá las fechas</span>}
  </div>;
- const trend=statsByBranch[statsBranch];
- const totalYear=trend.reduce((a,b)=>a+b,0);
- const confirmed=Math.round(totalYear*.73);
- const attended=Math.round(totalYear*.61);
- const noShow=Math.round(totalYear*.06);
- const attendanceRate=Math.round((attended/Math.max(1,confirmed))*100);
- const statusParts=[["Confirmadas",73],["Atendidas",61],["No asistió",6],["Canceladas",4]];
-
+ const exportCsv=()=>{
+  const cells=[["Fecha","Hora","Cliente","Sede","Responsable","Tipo","Origen","Estado"],...reportAppointments.map(a=>[a.date,a.time,a.name,a.branch,a.responsible||a.person,a.type,a.source,a.status])];
+  const csv="\\uFEFF"+cells.map(row=>row.map(c=>'"'+String(c??"").replace(/"/g,'""')+'"').join(";")).join("\\r\\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download="EROSS_Reporte_"+filterFrom+"_"+filterTo+".csv";link.click();URL.revokeObjectURL(url);
+ };
  return <div className="em-root">
  <style jsx global>{`
  html,body,#__next{margin:0!important;min-height:100%!important;width:100%!important;background:#f4f5f6!important;color:#17283a!important;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;overflow-x:hidden!important}*{box-sizing:border-box}button,input,select,textarea{font:inherit}
@@ -144,25 +156,31 @@ export default function AgendaMasterReview(){
 
    {section==="Clientes"&&<section className="em-card"><div className="em-cardhead"><h3>Clientes / Prospectos</h3><input className="em-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar nombre, teléfono o correo"/></div><table className="em-table"><thead><tr><th>Cliente</th><th>Contacto</th><th>Origen</th><th>Etiqueta</th><th>Próxima cita</th><th></th></tr></thead><tbody>{filteredClients.map(c=><tr key={c.id}><td><b>{c.name}</b></td><td>{c.phone}<br/>{c.email}</td><td>{c.source}</td><td><span className="em-badge">{c.tag}</span></td><td>{c.next}</td><td><button className="em-btn" onClick={()=>{setSection("Agenda");setForm(f=>({...f,name:c.name,phone:c.phone,email:c.email,source:c.source}));setModal(true)}}>Crear cita</button></td></tr>)}</tbody></table></section>}
 
-   {section==="Estadísticas"&&<>
-     <div className="em-toolbar" style={{flexWrap:"wrap",gap:10}}><div className="em-statfilters" style={{flexWrap:"wrap"}}><b style={{color:"#071927"}}>Panel estadístico</b>{rangeFilter}<select className="em-selectSmall" value={statsYear} onChange={e=>setStatsYear(Number(e.target.value))}>{YEARS.map(y=><option key={y}>{y}</option>)}</select><select className="em-selectSmall" value={statsBranch} onChange={e=>setStatsBranch(e.target.value)}>{["Todas","Escazú","San José","Lead Center"].map(x=><option key={x}>{x}</option>)}</select></div><span style={{fontSize:10,color:"#8a98a4"}}>Gráficos demostrativos · Filtro de período: {periodAppointments.length} citas de muestra</span></div>
+   {section==="Estadísticas"&&<section className="em-card">
+    <div className="em-cardhead" style={{flexWrap:"wrap",gap:12}}><h3>Estadísticas reales · Neon</h3>{rangeFilter}
+      <label>Sede <select className="em-selectSmall" value={statsBranch} onChange={e=>setStatsBranch(e.target.value)}>{branchOptions.map(v=><option key={v}>{v}</option>)}</select></label>
+    </div>
+    {realLoad!=="ok"?<p role="status">{realLoad==="loading"?"Consultando citas de Neon…":"No fue posible consultar Neon; no se muestran estadísticas."}</p>:<>
      <div className="em-stats">
-       <div className="em-stat"><small>Citas del año</small><b>{totalYear.toLocaleString("es-CR")}</b><em>{statsBranch} · {statsYear}</em></div>
-       <div className="em-stat"><small>Confirmadas</small><b>{confirmed.toLocaleString("es-CR")}</b><em>73% de las citas</em></div>
-       <div className="em-stat"><small>Atendidas</small><b>{attended.toLocaleString("es-CR")}</b><em>61% del total</em></div>
-       <div className="em-stat"><small>Tasa de asistencia</small><b>{attendanceRate}%</b><em>Sobre citas confirmadas</em></div>
+      <div className="em-stat"><small>Citas del período</small><b>{statTotal}</b><em>{filterFrom} — {filterTo}</em></div>
+      <div className="em-stat"><small>Confirmadas</small><b>{statConfirmed}</b></div>
+      <div className="em-stat"><small>Atendidas</small><b>{statAttended}</b></div>
+      <div className="em-stat"><small>Canceladas</small><b>{statCancelled}</b></div>
+      <div className="em-stat"><small>No asistió</small><b>{statNoShow}</b></div>
+      <div className="em-stat"><small>Asistencia*</small><b>{statAttendance}%</b></div>
      </div>
-     <div className="em-statgrid">
-       <section className="em-chartcard"><div className="em-charttitle"><div><b>Citas por mes</b><small>Tendencia de actividad durante {statsYear}</small></div><span className="em-badge">{statsBranch}</span></div><div className="em-linewrap"><svg viewBox="0 0 800 230" preserveAspectRatio="none"><defs><linearGradient id="areaGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e4ad32" stopOpacity=".30"/><stop offset="100%" stopColor="#e4ad32" stopOpacity="0"/></linearGradient></defs><line x1="28" y1="45" x2="772" y2="45" stroke="#edf1f3"/><line x1="28" y1="100" x2="772" y2="100" stroke="#edf1f3"/><line x1="28" y1="155" x2="772" y2="155" stroke="#edf1f3"/><polygon points={"28,202 "+linePoints(trend).replace(/ /g," ")+" 772,202"} fill="url(#areaGold)"/><polyline points={linePoints(trend)} fill="none" stroke="#d7a12a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>{trend.map((v,i)=>{const pts=linePoints(trend).split(" ")[i].split(",");return <circle key={i} cx={pts[0]} cy={pts[1]} r="5" fill="#071927" stroke="#f4c85b" strokeWidth="3"/>})}</svg><div className="em-axislabels">{MONTHS.map(m=><span key={m}>{m.slice(0,3)}</span>)}</div></div></section>
-       <section className="em-chartcard"><div className="em-charttitle"><div><b>Estado de las citas</b><small>Distribución general del período</small></div></div><div className="em-donutwrap"><div className="em-donut"><div className="em-donutcenter"><b>{totalYear}</b><small>Total</small></div></div><div className="em-legend"><div className="em-legendrow"><span><i className="em-legdot" style={{background:"#2fb383"}}></i>Atendidas</span><b>61%</b></div><div className="em-legendrow"><span><i className="em-legdot" style={{background:"#2e9fd8"}}></i>Confirmadas</span><b>12%</b></div><div className="em-legendrow"><span><i className="em-legdot" style={{background:"#d4a62f"}}></i>No asistió</span><b>6%</b></div><div className="em-legendrow"><span><i className="em-legdot" style={{background:"#d96767"}}></i>Canceladas</span><b>4%</b></div><div className="em-legendrow"><span><i className="em-legdot" style={{background:"#e8edf0"}}></i>Otros</span><b>17%</b></div></div></div></section>
-     </div>
-     <div className="em-barsgrid">
-       <section className="em-chartcard"><div className="em-charttitle"><div><b>Origen de las citas</b><small>Participación por canal</small></div></div>{sourceStats[statsBranch].map(([name,val])=><div className="em-barrow" key={name}><span>{name}</span><div className="em-bartrack"><div className="em-barfill blue" style={{width:val+"%"}}></div></div><b>{val}%</b></div>)}</section>
-       <section className="em-chartcard"><div className="em-charttitle"><div><b>Gestión por responsable</b><small>Citas trabajadas en el período</small></div></div>{responsibleStats[statsBranch].map(([name,val])=><div className="em-barrow" key={name}><span>{name}</span><div className="em-bartrack"><div className="em-barfill green" style={{width:(val/80*100)+"%"}}></div></div><b>{val}</b></div>)}</section>
-     </div>
-   </>}
+     <p style={{fontSize:12,color:"#607483"}}>*Atendidas / (atendidas + ausencias); cuando no hay citas finalizadas muestra 0%. Datos obtenidos de la API protegida de Neon.</p>
+     <section className="em-chartcard"><div className="em-charttitle"><b>Citas por mes en el período seleccionado</b></div>
+       <div style={{display:"grid",gridTemplateColumns:"repeat(12,minmax(0,1fr))",gap:8,minHeight:140,alignItems:"end"}}>
+        {monthCounts.map((n,i)=><div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6}}><b>{n}</b><div style={{height:Math.max(5,n/(Math.max(1,...monthCounts))*95),width:"70%",maxWidth:32,background:"#bd9133",borderRadius:4}}/><small style={{fontSize:10}}>{MONTHS[i].slice(0,3)}</small></div>)}
+       </div>
+     </section>
+    </>}
+   </section>}
 
-   {section==="Reportes"&&<section className="em-card"><div className="em-cardhead" style={{flexWrap:"wrap",gap:12}}><h3>Reporte de citas / gestiones</h3>{rangeFilter}<button className="em-btn primary" onClick={()=>showToast("Excel preparado en preview")}>Exportar Excel</button></div><table className="em-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Sede</th><th>Responsable</th><th>Origen</th><th>Estado</th><th>Etiqueta</th></tr></thead><tbody>{appointments.map(a=><tr key={a.id}><td>{a.date} {a.time}</td><td>{a.name}</td><td>{a.branch}</td><td>{a.person}</td><td>{a.source}</td><td><span className="em-badge">{a.status}</span></td><td>{a.tag}</td></tr>)}{reportAppointments.length===0&&<tr><td colSpan={7}>No hay registros en el rango seleccionado.</td></tr>}</tbody></table></section>}
+   {section==="Reportes"&&<section className="em-card"><div className="em-cardhead" style={{flexWrap:"wrap",gap:12}}><h3>Reportes de citas · Neon</h3>{rangeFilter}<button className="em-btn primary" disabled={realLoad!=="ok"} onClick={exportCsv}>Exportar CSV para Excel</button></div>
+     {realLoad!=="ok"?<p role="status">{realLoad==="loading"?"Cargando citas…":"No fue posible cargar los reportes desde Neon."}</p>:<><p>{reportAppointments.length} citas en el período seleccionado</p><table className="em-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Sede</th><th>Responsable</th><th>Origen</th><th>Estado</th><th>Tipo</th></tr></thead><tbody>{reportAppointments.map(a=><tr key={a.id}><td>{a.date} {a.time}</td><td>{a.name}</td><td>{a.branch}</td><td>{a.responsible||a.person}</td><td>{a.source}</td><td><span className="em-badge">{a.status}</span></td><td>{a.type}</td></tr>)}{reportAppointments.length===0&&<tr><td colSpan={7}>No hay citas en este rango.</td></tr>}</tbody></table></>}
+   </section>}
    {section==="Empresas"&&<section className="em-card"><div className="em-cardhead"><h3>Empresas conectadas</h3><button className="em-btn primary">+ Nueva empresa</button></div><div className="em-cards3">{["EROSS Demo","Zarah Carter","Medical Óptica"].map(x=><div className="em-smallcard" key={x}><b>{x}</b><small>Cuenta activa · Agenda y comunicaciones</small><br/><button className="em-btn">Configurar</button></div>)}</div></section>}
    {section==="Usuarios"&&<section className="em-card"><div className="em-cardhead"><h3>Usuarios y responsables</h3><button className="em-btn primary">+ Nuevo usuario</button></div><div className="em-cards3">{[["JP · EROSS","Superadministrador"],["Laura","Responsable"],["Antony","Responsable"]].map(x=><div className="em-smallcard" key={x[0]}><b>{x[0]}</b><small>{x[1]} · Activo</small><br/><button className="em-btn">Editar</button></div>)}</div></section>}
    {section==="Configuración"&&<section className="em-card"><div className="em-cardhead"><h3>Configuración de Agenda</h3></div><div className="em-cards3">{[["Confirmaciones por correo","email"],["WhatsApp","whatsapp"],["Recordatorios","reminders"]].map(([label,key])=><div className="em-smallcard" key={key}><b>{label}</b><small>Configuración general de la empresa.</small><br/><button className={"em-btn "+(settings[key]?"primary":"")} onClick={()=>setSettings(s=>({...s,[key]:!s[key]}))}>{settings[key]?"Activo":"Inactivo"}</button></div>)}</div></section>}
