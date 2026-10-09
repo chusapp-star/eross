@@ -24,7 +24,7 @@ export default async function handler(req,res){
        UPDATE agenda_integration_outbox o SET delivery_status='delivered',delivered_at=now(),updated_at=now(),
         last_error=NULL,attempt_count=attempt_count+1
        WHERE o.id IN (SELECT e.id FROM eligible e)
-         AND EXISTS(SELECT 1 FROM eross_crm_qa_received r WHERE r.event_id=(o.payload->>'event_id')::uuid)
+         AND (EXISTS(SELECT 1 FROM received r WHERE r.event_id=(o.payload->>'event_id')::uuid) OR EXISTS(SELECT 1 FROM eross_crm_qa_received r WHERE r.event_id=(o.payload->>'event_id')::uuid))
        RETURNING o.id
       )
       SELECT (SELECT count(*)::int FROM eligible) AS selected,
