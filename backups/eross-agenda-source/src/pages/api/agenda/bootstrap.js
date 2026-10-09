@@ -1,6 +1,8 @@
+import {requireAgendaAdmin} from "../../../lib/agenda-auth";
 import {getSql,getCompanyId,statusToUi} from "../../../lib/agenda-db";
 
 export default async function handler(req,res){
+  if(!requireAgendaAdmin(req,res))return;
   if(req.method!=="GET") return res.status(405).json({error:"Método no permitido"});
   try{
     const sql=getSql(); const companyId=getCompanyId();
