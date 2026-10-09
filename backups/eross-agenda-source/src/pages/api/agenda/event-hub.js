@@ -13,7 +13,7 @@ export default async function handler(req,res){
       GROUP BY delivery_status ORDER BY delivery_status`;
     const latest=await sql`
       SELECT id::text,event_type,delivery_status,attempt_count,created_at,
-             next_attempt_at,delivered_at
+             next_attempt_at,delivered_at,last_error,destination
       FROM agenda_integration_outbox
       WHERE company_id=${companyId}::uuid AND destination='eross_crm'
       ORDER BY created_at DESC LIMIT 30`;
