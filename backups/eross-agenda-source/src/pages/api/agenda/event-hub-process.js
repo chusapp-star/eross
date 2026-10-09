@@ -27,6 +27,7 @@ export default async function handler(req,res){
         SELECT id FROM agenda_integration_outbox
         WHERE company_id=${companyId}::uuid AND destination='eross_crm'
           AND attempt_count<8
+          AND (${process.env.EROSS_EVENT_HUB_QA_ENABLED==='true'?'qa.delivery.test':'__no_qa_override__'} = '__no_qa_override__' OR event_type='qa.delivery.test')
           AND ((delivery_status IN ('pending','retry') AND next_attempt_at<=now())
             OR (delivery_status='processing' AND leased_until<now()))
         ORDER BY next_attempt_at,created_at LIMIT 10 FOR UPDATE SKIP LOCKED
