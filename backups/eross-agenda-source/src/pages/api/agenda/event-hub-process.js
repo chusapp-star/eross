@@ -12,6 +12,7 @@ export default async function handler(req,res){
   const bearer=String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
   const cronAuthorized=Boolean(process.env.CRON_SECRET&&equal(bearer,process.env.CRON_SECRET));
   if(req.method==="GET"&&!cronAuthorized)return res.status(401).json({error:"No autorizado"});
+  if(req.method==="POST"&&process.env.EROSS_EVENT_HUB_QA_ENABLED!=="true")return res.status(403).json({error:"Ejecución manual deshabilitada"});
   if(req.method==="POST"&&!cronAuthorized&&!requireAgendaAdmin(req,res))return;
   if(req.method==="GET"&&process.env.EROSS_EVENT_HUB_QA_ENABLED!=="true")return res.status(503).json({error:"Cron solo habilitado en QA"});
   const endpoint=process.env.EROSS_CRM_EVENTS_URL;
