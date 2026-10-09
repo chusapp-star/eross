@@ -1,19 +1,21 @@
-import {requireAgendaAdmin} from "../../../lib/agenda-auth";
-import {getSql,getCompanyId,statusToDb,statusToUi} from "../../../lib/agenda-db";
+import {authorizeAgendaWrite} from "../../../lib/agenda-write-auth";
+import {statusToDb,statusToUi} from "../../../lib/agenda-db";
 
 const allowed=new Set(["confirmed","rescheduled","cancelled","attended","no_show","pending"]);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // Atomic change + event + CRM outbox. No direct connection to Meta.
 export default async function handler(req,res){
-  if(!requireAgendaAdmin(req,res))return;
   if(req.method!=="PATCH")return res.status(405).json({error:"Método no permitido"});
   const id=String(req.body?.id||"");
   const requested=String(req.body?.status||"").trim().toLowerCase();
   const status=statusToDb(requested);
   if(!uuid.test(id)||!requested||!allowed.has(requested)&&!["confirmada","confirmado","reprogramada","cancelada","atendida","no asistió","no confirmada"].includes(requested))
     return res.status(400).json({error:"ID o estado inválido"});
-  const companyId=getCompanyId(),sql=getSql();
+  let authorization;
+  try{authorization=await authorizeAgendaWrite(req,res)}catch(error){console.error("agenda authorization",error);return res.status(500).json({error:"No se pudo verificar el acceso"})}
+  if(!authorization)return;
+  const {companyId,sql}=authorization;
   const eventType={
     confirmed:"appointment.confirmed",rescheduled:"appointment.rescheduled",
     cancelled:"appointment.cancelled",attended:"appointment.attended",
