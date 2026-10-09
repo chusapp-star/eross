@@ -12,7 +12,7 @@ export default function TenantQA(){
   const foreignId=ownSol?"a0000000-0000-4000-8000-000000001002":"a0000000-0000-4000-8000-000000001001";
   const body={type:"Reunión QA",date:"2026-12-09",time:"10:00",name:ownSol?"Cliente ficticio Sol":"Cliente ficticio Luna",source:"qa-multiempresa",comments:"Operación QA con aislamiento",status:"No confirmada",duration:30};
   const method=operation==="create"?"POST":"PATCH";
-  if(operation!=="create"){body.id=operation==="edit_foreign"?foreignId:ownId;body.date="2026-12-10";body.time="11:00";body.status=ownSol?"pending":"pending";}
+  if(operation!=="create"){body.id=operation==="edit_foreign"?foreignId:ownId;body.date="2026-12-10";body.time="11:00";delete body.status;}
   setCrudResult(null);
   try{const r=await fetch("/api/agenda/appointments",{method,headers:{"content-type":"application/json"},body:JSON.stringify(body)});const json=await r.json();setCrudResult({operation,httpStatus:r.status,...json})}catch(e){setCrudResult({operation,error:String(e)})}
  };
