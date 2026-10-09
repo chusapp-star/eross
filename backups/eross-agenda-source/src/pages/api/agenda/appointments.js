@@ -44,8 +44,14 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
   if(!rule||!rule.active) throw new Error("OUTSIDE_AVAILABILITY");
   const mins=Number(time.slice(0,2))*60+Number(time.slice(3,5));
   // No confiar solo en el calendario del navegador: aplicar reglas también en el servidor.
-  const bookingSettings=await sql`SELECT slot_interval_min,min_notice_min
-    FROM agenda_booking_settings WHERE company_id=${companyId}::uuid`;
+  let bookingSettings=[];
+  try{
+    bookingSettings=await sql`SELECT slot_interval_min,min_notice_min
+      FROM agenda_booking_settings WHERE company_id=${companyId}::uuid`;
+  }catch(error){
+    // Compatibilidad de despliegues anteriores mientras la migración 001 sigue pendiente.
+    if(error?.code!=="42P01"&&!String(error?.message||"").includes("agenda_booking_settings"))throw error;
+  }
   const interval=Number(bookingSettings[0]?.slot_interval_min??30);
   const minNotice=Number(bookingSettings[0]?.min_notice_min??120);
   const startRows=await sql`SELECT ((${date}::date+${time}::time) AT TIME ZONE c.timezone) start_at,
