@@ -1,3 +1,4 @@
+import {requireAgendaAdmin} from "../../../lib/agenda-auth";
 import {getSql,getCompanyId} from "../../../lib/agenda-db";
 
 const validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||""));
@@ -5,6 +6,7 @@ const validTime=v=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(v||""));
 const validUuid=v=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(v||""));
 
 export default async function handler(req,res){
+  if(!requireAgendaAdmin(req,res))return;
   res.setHeader("Cache-Control","no-store");
   if(!["GET","POST","DELETE"].includes(req.method)){
     res.setHeader("Allow","GET, POST, DELETE");
