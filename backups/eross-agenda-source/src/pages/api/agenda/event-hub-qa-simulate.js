@@ -13,7 +13,7 @@ export default async function handler(req,res){
     const result=await sql`
       WITH eligible AS (
        SELECT id,event_type,payload FROM agenda_integration_outbox
-       WHERE company_id=${companyId}::uuid AND destination='eross_crm' AND delivery_status IN ('pending','retry')
+       WHERE company_id=${companyId}::uuid AND destination='eross_crm' AND event_type='qa.delivery.test' AND delivery_status IN ('pending','retry')
          AND (payload->>'event_id') IS NOT NULL
        ORDER BY created_at LIMIT 10 FOR UPDATE SKIP LOCKED
       ), received AS (
