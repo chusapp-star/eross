@@ -1,6 +1,8 @@
+import {requireAgendaAdmin} from "../../../lib/agenda-auth";
 import {getSql,getCompanyId} from "../../../lib/agenda-db";
 const dayMap={Domingo:0,Lunes:1,Martes:2,"Miércoles":3,Miercoles:3,Jueves:4,Viernes:5,"Sábado":6,Sabado:6};
 export default async function handler(req,res){
+  if(!requireAgendaAdmin(req,res))return;
   if(req.method!=="POST" && req.method!=="GET") {
     res.setHeader("Allow","GET, POST");
     return res.status(405).json({error:"Método no permitido"});
