@@ -109,7 +109,7 @@ export default async function handler(req,res){
           ${clean(body.confirmation_channel)||null},${body.reminder_minutes?Number(body.reminder_minutes):null},${tags},${type.color}
         FROM agenda_companies c WHERE c.id=${companyId}::uuid RETURNING id,company_id,client_id,status
       ), logged AS (INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload)
-       SELECT company_id,id,'appointment.created',jsonb_build_object('schema_version',1,'client_id',client_id::text,'status',status,'source',${clean(body.source)}) FROM changed
+       SELECT company_id,id,'appointment.created',jsonb_build_object('schema_version',1,'client_id',client_id::text,'status',status,'source',${clean(body.source)}::text) FROM changed
        RETURNING id,company_id,appointment_id,event_type,payload
       ), queued AS (INSERT INTO agenda_integration_outbox(company_id,appointment_id,event_type,destination,payload)
        SELECT company_id,appointment_id,event_type,'eross_crm',payload||jsonb_build_object('event_id',id::text,'occurred_at',now()) FROM logged RETURNING id
