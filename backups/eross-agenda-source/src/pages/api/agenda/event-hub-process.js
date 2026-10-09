@@ -44,7 +44,8 @@ export default async function handler(req,res){
         const result=await fetch(target.toString(),{
           method:"POST",
           headers:{"content-type":"application/json","authorization":"Bearer "+token,
-            "idempotency-key":String(event.payload?.event_id||event.id)},
+            "idempotency-key":String(event.payload?.event_id||event.id),
+            ...(process.env.VERCEL_AUTOMATION_BYPASS_SECRET?{"x-vercel-protection-bypass":process.env.VERCEL_AUTOMATION_BYPASS_SECRET}:{})},
           body:JSON.stringify({id:event.payload?.event_id||event.id,type:event.event_type,
             company_id:companyId,occurred_at:event.payload?.occurred_at||null,data:event.payload}),
           signal:AbortSignal.timeout(12000),redirect:"error"
