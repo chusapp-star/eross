@@ -92,7 +92,15 @@ export default function AgendaDatabaseUnified(){
 
   return <><AgendaBase/>{agendaOpen&&<main className="db-agenda"><div className="db-wrap">
     <header className="db-head"><div><div className="db-kicker">EROSS AGENDA · DATOS REALES</div><h1>Agenda</h1><p>{data.company?.name||"EROSS"} · {data.company?.timezone||"America/Costa_Rica"}</p></div><div className="db-headActions"><span className="db-status"><i/> Neon conectado</span><button onClick={()=>openNew()}>＋ Nueva cita</button></div></header>
-    <nav className="db-tabs">{["Mes","Semana","Día","Lista","Disponibilidad"].map(v=><button key={v} className={view===v?"on":""} onClick={()=>setView(v)}>{v}</button>)}</nav>
+    <nav className="db-tabs" style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:8}}>
+      {["Mes","Semana","Día","Lista","Disponibilidad"].map(v=><button key={v} className={view===v?"on":""} onClick={()=>setView(v)}>{v}</button>)}
+      <label style={{marginLeft:"auto",display:"inline-flex",alignItems:"center",gap:8,fontSize:13,fontWeight:700,color:"#3c5568",padding:"4px 8px"}}>
+        <span>Ir a fecha</span>
+        <input type="date" aria-label="Filtrar por fecha" value={date} min="2026-01-01" max="2035-12-31"
+          onChange={e=>{const d=e.target.value;if(!d)return;setDate(d);setMonth({year:Number(d.slice(0,4)),month:Number(d.slice(5,7))-1});}}
+          style={{padding:"8px 10px",border:"1px solid #cdd6df",borderRadius:9,background:"#fff",color:"#17334b",fontSize:14,maxWidth:180}}/>
+      </label>
+    </nav>
     {loading&&<div className="db-loading">Sincronizando con la base de datos…</div>}{error&&<div className="db-error">{error} <button onClick={load}>Reintentar</button></div>}
 
     {!loading&&!error&&view==="Mes"&&<section className="db-card"><div className="db-monthHead"><div><button onClick={()=>navMonth(-1)}>‹</button><h2>{monthName(month.month)} {month.year}</h2><button onClick={()=>navMonth(1)}>›</button></div><button className="ghost" onClick={()=>{const t=todayInTimezone(data.company?.timezone||"America/Costa_Rica");setMonth({year:Number(t.slice(0,4)),month:Number(t.slice(5,7))-1});setDate(t)}}>Hoy</button></div><div className="db-weekNames">{["LUN","MAR","MIÉ","JUE","VIE","SÁB","DOM"].map(x=><span key={x}>{x}</span>)}</div><div className="db-monthGrid">{monthDays.map((d,i)=>d?<button key={d} className={d===date?"day selected":"day"} onClick={()=>setDate(d)}><b>{Number(d.slice(8))}</b><div className="db-dayEvents">{(apptsByDate[d]||[]).slice(0,3).map(a=><span key={a.id} style={{borderLeftColor:a.color||"#C89B3C"}} onClick={e=>{e.stopPropagation();openEdit(a)}}>{a.time} · {a.name}</span>)}{(apptsByDate[d]||[]).length>3&&<small>+{(apptsByDate[d]||[]).length-3} más</small>}</div></button>:<div className="day blank" key={"b"+i}/>)}</div></section>}
