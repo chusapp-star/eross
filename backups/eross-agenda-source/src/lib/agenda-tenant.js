@@ -4,7 +4,7 @@ const allowedRoles=new Set(["admin","supervisor","collaborator"]);
 export async function resolveTenantMembership(sql,{identityId,companyId,roles}){
  if(!identityId||!companyId)return null;
  const memberships=await sql`
-  SELECT m.identity_id::text AS identity_id,m.company_id::text AS company_id,m.role
+  SELECT m.id::text AS membership_id,m.identity_id::text AS identity_id,m.company_id::text AS company_id,m.role
   FROM eross_company_memberships m
   JOIN eross_identities i ON i.id=m.identity_id
   JOIN agenda_companies c ON c.id=m.company_id
