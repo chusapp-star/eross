@@ -1,9 +1,11 @@
+import {requireAgendaAdmin} from "../../../lib/agenda-auth";
 import {getSql,getCompanyId} from "../../../lib/agenda-db";
 
 const VALID_INTERVALS=new Set([15,20,30,60]);
 const VALID_NOTICES=new Set([0,60,120,360,1440]);
 
 export default async function handler(req,res){
+  if(!requireAgendaAdmin(req,res))return;
   res.setHeader("Cache-Control","no-store");
   if(req.method!=="GET"&&req.method!=="POST"){
     res.setHeader("Allow","GET, POST");
