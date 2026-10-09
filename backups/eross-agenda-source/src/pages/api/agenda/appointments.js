@@ -94,9 +94,7 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
 async function emitEvent(sql,companyId,appointmentId,eventType,payload,status){
   await sql`INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload) VALUES(${companyId}::uuid,${appointmentId}::uuid,${eventType},${JSON.stringify(payload)}::jsonb)`;
   await sql`INSERT INTO agenda_integration_outbox(company_id,appointment_id,event_type,destination,payload) VALUES(${companyId}::uuid,${appointmentId}::uuid,${eventType},'eross_crm',${JSON.stringify(payload)}::jsonb)`;
-  if(status==="attended"){
-    await sql`INSERT INTO agenda_integration_outbox(company_id,appointment_id,event_type,destination,payload) VALUES(${companyId}::uuid,${appointmentId}::uuid,'appointment.attended','meta',${JSON.stringify(payload)}::jsonb)`;
-  }
+  // Meta signals are selected and delivered by the future CRM, never by Agenda directly.
 }
 
 export default async function handler(req,res){
