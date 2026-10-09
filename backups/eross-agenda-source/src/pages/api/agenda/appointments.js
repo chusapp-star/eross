@@ -22,21 +22,6 @@ async function resolveContext(sql,companyId,body){
   return {type:typeRows[0],user,location};
 }
 
-async function resolveClient(sql,companyId,body){
-  const name=clean(body.name),email=clean(body.email),phone=clean(body.phone),source=clean(body.source);
-  if(!name) throw new Error("CLIENT_REQUIRED");
-  let rows=[];
-  if(body.client_id) rows=await sql`SELECT id::text FROM agenda_clients WHERE id=${body.client_id}::uuid AND company_id=${companyId}::uuid`;
-  if(!rows[0]&&email) rows=await sql`SELECT id::text FROM agenda_clients WHERE company_id=${companyId}::uuid AND lower(email)=lower(${email}) LIMIT 1`;
-  if(!rows[0]&&phone) rows=await sql`SELECT id::text FROM agenda_clients WHERE company_id=${companyId}::uuid AND phone=${phone} LIMIT 1`;
-  if(rows[0]){
-    await sql`UPDATE agenda_clients SET name=${name},phone=${phone||null},email=${email||null},source=${source||null},updated_at=now() WHERE id=${rows[0].id}::uuid`;
-    return rows[0].id;
-  }
-  const inserted=await sql`INSERT INTO agenda_clients(company_id,name,phone,email,source) VALUES(${companyId}::uuid,${name},${phone||null},${email||null},${source||null}) RETURNING id::text`;
-  return inserted[0].id;
-}
-
 async function validateWindow(sql,companyId,body,type,userId,ignoreId){
   const date=clean(body.date),time=clean(body.time);
   if(!date||!time) throw new Error("DATE_REQUIRED");
@@ -99,13 +84,23 @@ export default async function handler(req,res){
     const {type,user,location}=await resolveContext(sql,companyId,body);
     const status=statusToDb(body.status),userId=user?.id||null;
     await validateWindow(sql,companyId,body,type,userId,req.method==="PATCH"?body.id:null);
-    const clientId=await resolveClient(sql,companyId,body);
+    if(!clean(body.name))throw new Error("CLIENT_REQUIRED");
     const duration=Number(body.duration||type.duration_min||30);
     const tags=Array.isArray(body.tags)?body.tags:clean(body.tags).split(",").map(x=>x.trim()).filter(Boolean);
     let row;
     if(req.method==="POST"){
-      row=(await sql`WITH changed AS (INSERT INTO agenda_appointments(company_id,client_id,appointment_type_id,responsible_user_id,location_id,external_crm_lead_id,starts_at,ends_at,reserved_starts_at,reserved_ends_at,status,modality,source,comments,confirmation_channel,reminder_minutes,tags,color)
-        SELECT ${companyId}::uuid,${clientId}::uuid,${type.id}::uuid,${userId}::uuid,${location?.id||null}::uuid,${clean(body.external_crm_lead_id)||null},
+      row=(await sql`WITH matched AS (SELECT id FROM agenda_clients WHERE company_id=${companyId}::uuid AND (
+        (${clean(body.client_id)||null}::uuid IS NOT NULL AND id=${clean(body.client_id)||null}::uuid)
+        OR (nullif(${clean(body.email)},'') IS NOT NULL AND lower(email)=lower(${clean(body.email)}))
+        OR (nullif(${clean(body.phone)},'') IS NOT NULL AND phone=${clean(body.phone)})
+      ) ORDER BY CASE WHEN id=${clean(body.client_id)||null}::uuid THEN 0 ELSE 1 END LIMIT 1),
+      updated_client AS (UPDATE agenda_clients SET name=${clean(body.name)},phone=${clean(body.phone)||null},email=${clean(body.email)||null},source=${clean(body.source)||null},updated_at=now()
+       WHERE id=(SELECT id FROM matched) AND company_id=${companyId}::uuid RETURNING id),
+      inserted_client AS (INSERT INTO agenda_clients(company_id,name,phone,email,source)
+       SELECT ${companyId}::uuid,${clean(body.name)},${clean(body.phone)||null},${clean(body.email)||null},${clean(body.source)||null}
+       WHERE NOT EXISTS(SELECT 1 FROM updated_client) RETURNING id),
+      resolved_client AS (SELECT id FROM updated_client UNION ALL SELECT id FROM inserted_client), changed AS (INSERT INTO agenda_appointments(company_id,client_id,appointment_type_id,responsible_user_id,location_id,external_crm_lead_id,starts_at,ends_at,reserved_starts_at,reserved_ends_at,status,modality,source,comments,confirmation_channel,reminder_minutes,tags,color)
+        SELECT ${companyId}::uuid,(SELECT id FROM resolved_client),${type.id}::uuid,${userId}::uuid,${location?.id||null}::uuid,${clean(body.external_crm_lead_id)||null},
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone),
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration}),
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)-make_interval(mins=>${Number(type.buffer_before_min||0)}),
@@ -123,8 +118,18 @@ export default async function handler(req,res){
       if(!body.id) return res.status(400).json({error:"Falta id de cita"});
       const old=(await sql`SELECT status FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid`)[0];
       if(!old) return res.status(404).json({error:"Cita no encontrada"});
-      row=(await sql`WITH previous AS (SELECT id,status,starts_at FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid), changed AS (UPDATE agenda_appointments a SET
-          client_id=${clientId}::uuid,appointment_type_id=${type.id}::uuid,responsible_user_id=${userId}::uuid,location_id=${location?.id||null}::uuid,
+      row=(await sql`WITH matched AS (SELECT id FROM agenda_clients WHERE company_id=${companyId}::uuid AND (
+        (${clean(body.client_id)||null}::uuid IS NOT NULL AND id=${clean(body.client_id)||null}::uuid)
+        OR (nullif(${clean(body.email)},'') IS NOT NULL AND lower(email)=lower(${clean(body.email)}))
+        OR (nullif(${clean(body.phone)},'') IS NOT NULL AND phone=${clean(body.phone)})
+      ) ORDER BY CASE WHEN id=${clean(body.client_id)||null}::uuid THEN 0 ELSE 1 END LIMIT 1),
+      updated_client AS (UPDATE agenda_clients SET name=${clean(body.name)},phone=${clean(body.phone)||null},email=${clean(body.email)||null},source=${clean(body.source)||null},updated_at=now()
+       WHERE id=(SELECT id FROM matched) AND company_id=${companyId}::uuid RETURNING id),
+      inserted_client AS (INSERT INTO agenda_clients(company_id,name,phone,email,source)
+       SELECT ${companyId}::uuid,${clean(body.name)},${clean(body.phone)||null},${clean(body.email)||null},${clean(body.source)||null}
+       WHERE NOT EXISTS(SELECT 1 FROM updated_client) RETURNING id),
+      resolved_client AS (SELECT id FROM updated_client UNION ALL SELECT id FROM inserted_client), previous AS (SELECT id,status,starts_at FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid), changed AS (UPDATE agenda_appointments a SET
+          client_id=(SELECT id FROM resolved_client),appointment_type_id=${type.id}::uuid,responsible_user_id=${userId}::uuid,location_id=${location?.id||null}::uuid,
           external_crm_lead_id=${clean(body.external_crm_lead_id)||null},
           starts_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone),
           ends_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration}),
@@ -157,7 +162,7 @@ export default async function handler(req,res){
     if(m.includes("INVALID_SLOT_INTERVAL")) return res.status(409).json({error:"La hora debe coincidir con el intervalo de reserva configurado"});
     if(m.includes("OUTSIDE_AVAILABILITY")) return res.status(409).json({error:"Ese horario está fuera de la disponibilidad configurada"});
     if(m.includes("BLOCKED:")) return res.status(409).json({error:m.split("BLOCKED:")[1]||"Horario bloqueado"});
-    if(m.includes("DOUBLE_BOOKING")||m.includes("agenda_no_buffer_overlap_responsible")||m.includes("agenda_no_double_booking_responsible")) return res.status(409).json({error:"Ese responsable ya tiene una cita que choca con ese horario"});
+    if(m.includes("DOUBLE_BOOKING")||m.includes("agenda_no_buffer_overlap_responsible")||m.includes("agenda_no_double_booking_responsible")||m.includes("agenda_no_overlapping_active_responsible")) return res.status(409).json({error:"Ese responsable ya tiene una cita que choca con ese horario"});
     return res.status(500).json({error:"No se pudo guardar la cita"});
   }
 }
