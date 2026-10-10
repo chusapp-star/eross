@@ -45,5 +45,12 @@ export default async function handler(req,res){
     const exists=await sql`SELECT status FROM agenda_appointments WHERE id=${id}::uuid AND company_id=${companyId}::uuid`;
     if(!exists.length)return res.status(404).json({error:"Cita no encontrada"});
     return res.status(200).json({ok:true,id,status:statusToUi(exists[0].status),unchanged:true,event_queued:false});
-  }catch(error){console.error("agenda status",error);return res.status(500).json({error:"No se pudo actualizar el estado"});}
+  }catch(error){
+    console.error("agenda status",error);
+    // Reopening a cancelled booking can violate the database exclusion constraint.
+    // Return a meaningful conflict rather than an opaque server error.
+    if(error?.code==="23P01"||String(error?.message||"").includes("agenda_qa_no_concurrent_responsible_overlap"))
+      return res.status(409).json({error:"No se puede reactivar: el responsable ya tiene otra cita en ese horario"});
+    return res.status(500).json({error:"No se pudo actualizar el estado"});
+  }
 }
