@@ -98,6 +98,9 @@ export default async function handler(req,res){
       if(!owned.length)return res.status(404).json({error:"Cita no encontrada"});
     }
     const {type,user,location}=await resolveContext(sql,companyId,body);
+    // A booking without a concrete responsible cannot be protected by the exclusion constraint.
+    if(!user)throw new Error("RESPONSIBLE_REQUIRED");
+    if(!location)throw new Error("LOCATION_REQUIRED");
     let status=statusToDb(body.status);const userId=user?.id||null;
     // Keep the existing status on edits when the client omits the status field.
     if(req.method==="PATCH"&&(body.status===undefined||body.status===null||String(body.status).trim()==="")){
@@ -179,6 +182,8 @@ export default async function handler(req,res){
     console.error("agenda appointment",error);
     const m=String(error?.message||error);
     if(m.includes("TYPE_NOT_FOUND")) return res.status(400).json({error:"Tipo de cita inválido"});
+    if(m.includes("RESPONSIBLE_REQUIRED")) return res.status(400).json({error:"Seleccione un responsable activo antes de guardar la cita"});
+    if(m.includes("LOCATION_REQUIRED")) return res.status(400).json({error:"Configure y seleccione una sede activa antes de guardar la cita"});
     if(m.includes("USER_NOT_FOUND")) return res.status(400).json({error:"El responsable seleccionado no pertenece a esta empresa o está inactivo"});
     if(m.includes("LOCATION_NOT_FOUND")) return res.status(400).json({error:"La sede seleccionada no pertenece a esta empresa o está inactiva"});
     if(m.includes("CLIENT_REQUIRED")) return res.status(400).json({error:"Nombre del cliente requerido"});
