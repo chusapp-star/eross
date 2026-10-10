@@ -57,7 +57,7 @@ export default function Home(){
  {section==="Clientes"&&<TenantClients/>}
  {section==="Empresas"&&<TenantCompany/>}
  {section==="Usuarios"&&<TenantUsers/>}
- {section==="Configuración"&&<><div role="status" style={{margin:"16px 0",padding:"14px 18px",borderRadius:12,background:"#fff4dc",border:"1px solid #ddb25a",color:"#6d5014",fontWeight:700}}>VISTA ORIGINAL · CONFIGURACIÓN DEMOSTRATIVA. Los botones no guardan cambios en Neon.</div><Settings/></>}
+ {section==="Configuración"&&<TenantSettings/>}
  </main></div>;
 }
 function Login({onLogin}){
@@ -113,6 +113,18 @@ function TenantClients(){
  const exportClients=()=>downloadCsv("EROSS_clientes_reales_QA.csv",[["Nombre","Correo","Teléfono","Origen","Citas","Última cita"],...filtered.map(x=>[x.name,x.email,x.phone,x.source,x.appointments,x.last_appointment||""])]);
  return <><div className="toolbar"><div><h2>Clientes de tu empresa</h2><p>Registros reales de Neon QA, aislados por empresa. Consulta y exportación.</p></div><button className="plainBtn" disabled={loading||!!error} onClick={exportClients}>↓ Exportar CSV</button></div>
  <Panel>{loading?<p>Cargando clientes de la empresa...</p>:error?<p role="alert">{error}</p>:<><div className="filters"><input aria-label="Buscar clientes" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar por nombre, correo, teléfono u origen..."/></div><div className="clientTable"><div className="clientRow head"><span>Cliente</span><span>Contacto</span><span>Origen</span><span>Citas</span><span>Última cita</span></div>{filtered.map(x=><div className="clientRow" key={x.id}><span><b>{x.name}</b></span><span>{x.phone||"—"}<small>{x.email||""}</small></span><span>{x.source||"—"}</span><span>{x.appointments||0}</span><span>{x.last_appointment?new Date(x.last_appointment).toLocaleDateString("es-CR",{timeZone:"America/Costa_Rica"}):"—"}</span></div>)}{!filtered.length&&<p>No hay clientes para esta búsqueda.</p>}</div></>}</Panel></>;
+}
+function TenantSettings(){
+ const [data,setData]=useState(null),[error,setError]=useState(""),[loading,setLoading]=useState(true);
+ useEffect(()=>{let active=true;fetch("/api/agenda/tenant-qa-settings",{cache:"no-store"}).then(async r=>{const j=await r.json();if(!r.ok)throw Error(j.error||"Error de configuración");if(active){setData(j);setLoading(false)}}).catch(e=>{if(active){setError(e.message);setLoading(false)}});return()=>{active=false}},[]);
+ const days=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+ return <><div className="toolbar"><div><h2>Configuración de la empresa</h2><p>Parámetros reales de Neon QA. Vista de consulta; no modifica datos.</p></div></div>
+ {loading?<Panel><p>Cargando configuración...</p></Panel>:error?<Panel><p role="alert">{error}</p></Panel>:<>
+ <div className="settingsGrid"><div className="settingCard"><span>Empresa</span><b>{data.company.name}</b><small>{data.company.timezone}</small></div><div className="settingCard"><span>Intervalo entre citas</span><b>{data.booking?.slot_interval_min??"Sin definir"} minutos</b></div><div className="settingCard"><span>Anticipación mínima</span><b>{data.booking?.min_notice_min??"Sin definir"} minutos</b></div><div className="settingCard"><span>Sedes registradas</span><b>{data.locations.length}</b></div></div>
+ <Panel title="Tipos de cita">{data.types.length?data.types.map(t=><div className="companyRow" key={t.name}><b>{t.name} · {t.duration_min} min</b><span>{t.active?"Activo":"Inactivo"} · márgenes {t.buffer_before_min}/{t.buffer_after_min} min</span></div>):<p>Sin tipos registrados.</p>}</Panel>
+ <Panel title="Sedes">{data.locations.length?data.locations.map(l=><div className="companyRow" key={l.name}><b>{l.name}</b><span>{l.active?"Activa":"Inactiva"} · {l.timezone||data.company.timezone}</span></div>):<p>Sin sedes registradas.</p>}</Panel>
+ <Panel title="Disponibilidad general">{data.availability.length?data.availability.map(a=><div className="companyRow" key={a.weekday}><b>{days[a.weekday]||a.weekday}</b><span>{a.active?(a.all_day?"Todo el día":(a.slots||[]).map(s=>s.start+"–"+s.end).join(", ")||"Sin franjas"):"Cerrado"}</span></div>):<p>Sin disponibilidad general registrada.</p>}</Panel>
+ </>}</>;
 }
 function TenantCompany(){
  const [data,setData]=useState(null),[err,setErr]=useState(""),[loading,setLoading]=useState(true);
