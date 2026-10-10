@@ -13,6 +13,7 @@
   .shell .db-embedded .db-monthHead { flex-wrap: wrap; gap: 8px; }
   .shell .db-embedded .db-monthHead h2 { font-size: 15px; }
   .shell .db-embedded .db-sectionHead { flex-wrap: wrap; }
+  .shell .db-embedded .db-weekToolbar { flex-wrap: wrap; }
   .shell .db-embedded .db-appt { grid-template-columns: 4px 40px minmax(0,1fr); gap: 6px; }
   .shell .db-embedded .db-appt em { grid-column: 3; justify-self: start; }
   .shell .topbar { flex-wrap: wrap; gap: 8px; }

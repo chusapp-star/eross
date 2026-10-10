@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-10T17:18:27.423Z",
+  "transport": "https://eross-agenda-qa.vercel.app",
+  "company": "da76b3f9-b110-4dc6-8177-966e93989eb6",
+  "passed": true,
+  "checks": [
+    {
+      "name": "Real admin login",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "Real admin login",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "Invalid UUID rejected",
+      "ok": true
+    },
+    {
+      "name": "Concurrent demotions preserve an admin",
+      "ok": true,
+      "admins": 1,
+      "statuses": [
+        200,
+        403
+      ]
+    },
+    {
+      "name": "Only one role mutation wins",
+      "ok": true
+    },
+    {
+      "name": "Other mutation safely denied",
+      "ok": true
+    },
+    {
+      "name": "Exactly one audited change",
+      "ok": true,
+      "changes": 1
+    }
+  ]
+}
