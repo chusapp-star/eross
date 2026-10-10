@@ -16,9 +16,10 @@ const monthName=i=>["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Ag
 const isCancelled=a=>a?.status==="Cancelada";
 const statusOptions=["No confirmada","Confirmada","Reprogramada","Atendida","No asistió","Cancelada"];
 function minutes(t){const [h,m]=(t||"00:00").split(":").map(Number);return h*60+m}
-function availabilitySlots(data,date,type,bookingSettings={slotStep:30,notice:120}){
+function availabilitySlots(data,date,type,bookingSettings={slotStep:30,notice:120},userId="",locationId=""){
   const d=new Date(date+"T12:00:00"),weekday=d.getDay();
-  const rule=(data.availability||[]).find(x=>Number(x.weekday)===weekday&&!x.user_id&&!x.location_id);
+  const matches=(data.availability||[]).filter(x=>Number(x.weekday)===weekday&&(!x.user_id||x.user_id===userId)&&(!x.location_id||x.location_id===locationId));
+  const rule=matches.sort((a,b)=>Number(Boolean(b.user_id))+Number(Boolean(b.location_id))-Number(Boolean(a.user_id))-Number(Boolean(a.location_id)))[0];
   if(!rule||!rule.active)return[];
   const step=Number(bookingSettings.slotStep||30),dur=Number(type?.duration||30),before=Number(type?.bufferBefore||0),after=Number(type?.bufferAfter||0);
   const nowParts=new Intl.DateTimeFormat("en-CA",{
@@ -38,11 +39,16 @@ function availabilitySlots(data,date,type,bookingSettings={slotStep:30,notice:12
       let busy=false,reason="";
       for(const ap of data.appointments||[]){
         if(ap.date!==actualDate||ap.status==="Cancelada")continue;
+        if(userId&&ap.responsible_user_id&&ap.responsible_user_id!==userId)continue;
+        if(locationId&&ap.location_id&&ap.location_id!==locationId)continue;
         const st=minutes(ap.time),en=st+Number(ap.duration||30);
         if(s-before<en&&s+dur+after>st){busy=true;reason="Ocupado · "+ap.name;break}
       }
       if(!busy)for(const bl of data.blocks||[]){
-        if(bl.date!==actualDate)continue;const st=minutes(bl.from),en=minutes(bl.to);
+        if(bl.date!==actualDate)continue;
+        if(bl.user_id&&bl.user_id!==userId)continue;
+        if(bl.location_id&&bl.location_id!==locationId)continue;
+        const st=minutes(bl.from),en=minutes(bl.to);
         if(s-before<en&&s+dur+after>st){busy=true;reason="Bloqueado · "+(bl.reason||"Bloqueo");break}
       }
       const startWall=Date.UTC(Number(actualDate.slice(0,4)),Number(actualDate.slice(5,7))-1,
@@ -61,6 +67,7 @@ export default function AgendaDatabaseUnified({tenantOnly=false,embedded=false}=
   const [agendaOpen,setAgendaOpen]=useState(tenantOnly),[view,setView]=useState("Mes");
   const [data,setData]=useState({company:null,users:[],locations:[],types:[],availability:[],blocks:[],appointments:[]});
   const [bookingSettings,setBookingSettings]=useState({slotStep:30,notice:120});
+  const [availabilityUser,setAvailabilityUser]=useState(""),[availabilityLocation,setAvailabilityLocation]=useState("");
   const [loading,setLoading]=useState(false),[error,setError]=useState(""),[date,setDate]=useState(()=>todayInTimezone());
   const [month,setMonth]=useState(()=>{const t=todayInTimezone();return {year:Number(t.slice(0,4)),month:Number(t.slice(5,7))-1}}),[typeId,setTypeId]=useState(""),[form,setForm]=useState(null),[saving,setSaving]=useState(false),[toast,setToast]=useState("");
 
@@ -83,9 +90,9 @@ export default function AgendaDatabaseUnified({tenantOnly=false,embedded=false}=
   const monthDays=useMemo(()=>{const first=new Date(month.year,month.month,1),last=new Date(month.year,month.month+1,0),blanks=(first.getDay()+6)%7,arr=[];for(let i=0;i<blanks;i++)arr.push(null);for(let d=1;d<=last.getDate();d++)arr.push(iso(new Date(month.year,month.month,d)));while(arr.length%7)arr.push(null);return arr},[month]);
   const apptsByDate=useMemo(()=>{const m={};for(const a of data.appointments||[])(m[a.date]||(m[a.date]=[])).push(a);return m},[data.appointments]);
   const selectedAppts=(data.appointments||[]).filter(a=>a.date===date).sort((a,b)=>a.time.localeCompare(b.time));
-  const weekStart=startMonday(date),week=Array.from({length:7},(_,i)=>addDays(weekStart,i)),slots=availabilitySlots(data,date,activeType,bookingSettings);
+  const weekStart=startMonday(date),week=Array.from({length:7},(_,i)=>addDays(weekStart,i)),slots=availabilitySlots(data,date,activeType,bookingSettings,availabilityUser,availabilityLocation);
 
-  const openNew=(preset={})=>{const t=data.types.find(x=>x.id===(preset.appointment_type_id||typeId))||data.types[0],f=emptyForm();const displayedMonth=month.year+"-"+pad(month.month+1);f.date=preset.date||(date.startsWith(displayedMonth)?date:displayedMonth+"-01");f.time=preset.time||"09:00";f.appointment_type_id=t?.id||"";f.type=t?.name||"";f.duration=t?.duration||30;f.modality=t?.modality||"Presencial";f.responsible_user_id=data.users?.[0]?.id||"";f.responsible=data.users?.[0]?.name||"Sin asignar";f.location_id=data.locations?.[0]?.id||"";setForm(f)};
+  const openNew=(preset={})=>{const t=data.types.find(x=>x.id===(preset.appointment_type_id||typeId))||data.types[0],f=emptyForm();const displayedMonth=month.year+"-"+pad(month.month+1);f.date=preset.date||(date.startsWith(displayedMonth)?date:displayedMonth+"-01");f.time=preset.time||"09:00";f.appointment_type_id=t?.id||"";f.type=t?.name||"";f.duration=t?.duration||30;f.modality=t?.modality||"Presencial";f.responsible_user_id=availabilityUser||data.users?.[0]?.id||"";f.responsible=data.users?.find(u=>u.id===f.responsible_user_id)?.name||"Sin asignar";f.location_id=availabilityLocation||data.locations?.[0]?.id||"";setForm(f)};
   const openEdit=a=>setForm({...emptyForm(),...a,tags:Array.isArray(a.tags)?a.tags.join(", "):a.tags||"",modality:a.modality||"Presencial",confirmation_channel:a.confirmation_channel||"WhatsApp",reminder_minutes:a.reminder_minutes??1440});
   const changeType=id=>{const t=data.types.find(x=>x.id===id);setForm(f=>({...f,appointment_type_id:id,type:t?.name||"",duration:t?.duration||30,modality:t?.modality||f.modality}))};
   const save=async()=>{if(!form?.name.trim())return;setSaving(true);try{const r=await fetch("/api/agenda/appointments",{method:form.id?"PATCH":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...form,...(form.id?{status:undefined}:{}),tags:String(form.tags||"").split(",").map(x=>x.trim()).filter(Boolean)})}),j=await r.json();if(!r.ok)throw new Error(j.error||"No se pudo guardar");setForm(null);setToast(form.id?"Cita actualizada":"Cita creada");setTimeout(()=>setToast(""),1800);await load()}catch(e){setToast(e.message||"No se pudo guardar");setTimeout(()=>setToast(""),2600)}finally{setSaving(false)}};
@@ -122,7 +129,7 @@ export default function AgendaDatabaseUnified({tenantOnly=false,embedded=false}=
 
     {!loading&&!error&&view==="Lista"&&<section className="db-card"><div className="db-sectionHead"><div><h2>Lista de citas</h2><p>{data.appointments.length} registros en Neon</p></div></div><div className="db-table"><div className="row head"><span>Fecha</span><span>Hora</span><span>Cliente</span><span>Tipo</span><span>Responsable</span><span>Estado</span></div>{data.appointments.map(a=><button className={"row"+(isCancelled(a)?" db-cancelled":"")} key={a.id} onClick={()=>openEdit(a)}><span>{a.date}</span><span>{a.time}</span><span><b>{a.name}</b><small>{a.email||a.phone}</small></span><span>{a.type}</span><span>{a.responsible}</span><span className={"pill"+(isCancelled(a)?" db-cancelledPill":"")}>{a.status}</span></button>)}</div></section>}
 
-    {!loading&&!error&&view==="Disponibilidad"&&<section className="db-av"><div className="db-avTop"><label><span>Fecha</span><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label><label><span>Tipo de cita</span><select value={typeId} onChange={e=>setTypeId(e.target.value)}>{data.types.filter(t=>t.active).map(t=><option value={t.id} key={t.id}>{t.name}</option>)}</select></label><div className="db-typeMeta"><i style={{background:activeType?.color}}/><b>{activeType?.duration||30} min</b><span>{activeType?.bufferBefore||0} min antes · {activeType?.bufferAfter||0} min después</span></div></div><div className="db-avGrid"><div className="db-slotBox"><h2>Espacios calculados</h2><div className="db-slots">{slots.map(s=><button key={s.date+s.time} disabled={!s.available} className={s.available?"free":"busy"} onClick={()=>openNew({date:s.date,time:s.time,appointment_type_id:activeType?.id})}><strong>{s.time}</strong><small>{s.reason}</small></button>)}</div></div><aside><h3>Citas del día</h3>{selectedAppts.map(a=><button key={a.id} onClick={()=>openEdit(a)}><b>{a.time}</b><span>{a.name}</span><small>{a.type}</small></button>)}</aside></div></section>}
+    {!loading&&!error&&view==="Disponibilidad"&&<section className="db-av"><div className="db-avTop"><label><span>Fecha</span><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label><label><span>Tipo de cita</span><select value={typeId} onChange={e=>setTypeId(e.target.value)}>{data.types.filter(t=>t.active).map(t=><option value={t.id} key={t.id}>{t.name}</option>)}</select></label><label><span>Responsable</span><select value={availabilityUser} onChange={e=>setAvailabilityUser(e.target.value)}><option value="">Todos</option>{data.users.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</select></label><label><span>Sede</span><select value={availabilityLocation} onChange={e=>setAvailabilityLocation(e.target.value)}><option value="">Todas</option>{data.locations.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></label><div className="db-typeMeta"><i style={{background:activeType?.color}}/><b>{activeType?.duration||30} min</b><span>{activeType?.bufferBefore||0} min antes · {activeType?.bufferAfter||0} min después</span></div></div><div className="db-avGrid"><div className="db-slotBox"><h2>Espacios calculados</h2><div className="db-slots">{slots.map(s=><button key={s.date+s.time} disabled={!s.available} className={s.available?"free":"busy"} onClick={()=>openNew({date:s.date,time:s.time,appointment_type_id:activeType?.id})}><strong>{s.time}</strong><small>{s.reason}</small></button>)}</div></div><aside><h3>Citas del día</h3>{selectedAppts.map(a=><button key={a.id} onClick={()=>openEdit(a)}><b>{a.time}</b><span>{a.name}</span><small>{a.type}</small></button>)}</aside></div></section>}
   </div>
   {form&&<div className="db-modalBg" onMouseDown={e=>{if(e.target===e.currentTarget)setForm(null)}}><div className="db-modal"><button className="db-close" onClick={()=>setForm(null)}>×</button><div className="db-modalKicker">{form.id?"EDITAR CITA":"NUEVA CITA"}</div><h2>{form.id?form.name:"Crear cita"}</h2><div className="db-form">
     <label className="wide"><span>Cliente / prospecto</span><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label>
