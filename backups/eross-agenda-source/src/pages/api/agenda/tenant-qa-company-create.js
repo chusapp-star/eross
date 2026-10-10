@@ -5,9 +5,10 @@ import {resolveTenantMembership} from "../../../lib/agenda-tenant";
 // Explicit QA provisioning allowlist. Being a tenant admin alone is insufficient.
 export default async function handler(req,res){
  res.setHeader("Cache-Control","no-store");
- if(req.method!=="POST")return res.status(405).json({error:"Método no permitido"});
+ if(!["POST","GET"].includes(req.method))return res.status(405).json({error:"Método no permitido"});
  if(process.env.EROSS_MULTIEMPRESA_QA_ENABLED!=="true"||process.env.EROSS_EVENT_HUB_QA_ENABLED!=="true")return res.status(404).json({error:"No disponible"});
  const allowed=process.env.EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID;
+ if(req.method==="GET")return res.status(200).json({enabled:false});
  if(!allowed)return res.status(403).json({error:"Alta de empresas aún no habilitada"});
  let origin;
  try{origin=new URL(String(req.headers.origin||"")).host}catch{return res.status(403).json({error:"Origen inválido"})}
