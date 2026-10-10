@@ -8,14 +8,14 @@ export default async function handler(req,res){
  if(!["POST","GET"].includes(req.method))return res.status(405).json({error:"Método no permitido"});
  if(process.env.EROSS_MULTIEMPRESA_QA_ENABLED!=="true"||process.env.EROSS_EVENT_HUB_QA_ENABLED!=="true")return res.status(404).json({error:"No disponible"});
  const allowed=process.env.EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID;
- if(req.method==="GET")return res.status(200).json({enabled:false});
- if(!allowed)return res.status(403).json({error:"Alta de empresas aún no habilitada"});
+ if(req.method==="POST"&&!allowed)return res.status(403).json({error:"Alta de empresas aún no habilitada"});
  let origin;
  try{origin=new URL(String(req.headers.origin||"")).host}catch{return res.status(403).json({error:"Origen inválido"})}
  if(origin!==req.headers.host)return res.status(403).json({error:"Origen no autorizado"});
  const cookie=String(req.headers.cookie||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("eross_identity_qa="));
  const session=verifyIdentitySession(cookie?.slice("eross_identity_qa=".length));
  if(!session)return res.status(401).json({error:"Sesión requerida"});
+ if(req.method==="GET")return res.status(200).json({enabled:Boolean(allowed&&session.sub===allowed&&session.role==="admin")});
  if(session.sub!==allowed||session.role!=="admin")return res.status(403).json({error:"No autorizado para registrar empresas"});
  const name=String(req.body?.name||"").trim().replace(/\s+/g," ");
  const slug=String(req.body?.slug||"").trim().toLowerCase();
