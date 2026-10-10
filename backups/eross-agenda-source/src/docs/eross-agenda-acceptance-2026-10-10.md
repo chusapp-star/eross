@@ -65,3 +65,17 @@ El navegador superó la protección de Vercel y renderizó el formulario integra
 ## Dictamen
 
 Aceptación técnica parcial con evidencia. **No se declara la aplicación terminada ni aprobada para lanzamiento comercial mientras los criterios pendientes no se cumplan.** Los bloques comprobados sirven de continuidad; no deben reiniciarse con otra auditoría general.
+
+## Continuación: acceso visual seguro
+
+Se revisaron las empresas originales y sus membresías en Neon QA. Sol (`eec3c94c-34b0-4c91-b209-67e957a13e01`) y Luna (`eec3c94c-34b0-4c91-b209-67e957a13e02`) están activas. Las identidades heredadas usan `qa-sol@eross.invalid` (admin) y `qa-luna@eross.invalid` (supervisor): son identificadores de acceso, no buzones de correo configurados. No se cambiaron esas credenciales. Ambas empresas carecen de responsables operativos al inicio de este bloque.
+
+Se creó una identidad nueva de aceptación, `ecd0a759-9d86-40bd-9f49-edc97ac2f08f`, con membresías admin explícitas en Sol y Luna. Se prepararon además una identidad supervisor de Sol y una colaborador de Luna. Las tres esperan que el usuario establezca sus contraseñas mediante invitaciones de un solo uso, vigencia de dos horas, almacenadas únicamente como hash SHA-256. Los tokens no se incluyen en archivos ni evidencias. La activación no sobrescribe credenciales existentes; guarda la contraseña con scrypt y entrega una sesión HttpOnly, Secure y SameSite=Strict.
+
+El flujo `/eross-qa-activar` y su API están restringidos por las dos banderas QA y por el hostname exacto del endpoint Neon QA. La página usa las clases existentes del acceso aprobado, sin cambios de CSS. El token se transporta en el fragmento y se retira de la URL al cargar; no se envía en la ruta HTTP ni en el referente.
+
+Se configuró `EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID` únicamente en el proyecto Vercel `eross-agenda-qa`, apuntando a la identidad nueva de aceptación. Se resuelve así el impedimento de configuración, pero el alta global sigue pendiente de prueba funcional; configurar el permiso no equivale a aprobar el flujo.
+
+`docs/qa-activation-evidence-2026-10-10.json` registra **18 comprobaciones locales aprobadas**, incluidos aislamiento de entorno, origen, invitación inválida, empresa ajena, contraseña inválida, concurrencia de activación, reutilización rechazada y login real posterior. Se usó una cuarta identidad desechable para estas pruebas, sin consumir las invitaciones del usuario. La compilación completa también pasó. No se suman estas comprobaciones locales a las 72 remotas anteriores.
+
+Siguiente paso concreto: el usuario establece la contraseña en el navegador compartido, el flujo abre la sesión de Sol o Luna, y se completan navegación, móvil, CSV, administración, provisión y aislamiento. Estos criterios continúan pendientes de aceptación.

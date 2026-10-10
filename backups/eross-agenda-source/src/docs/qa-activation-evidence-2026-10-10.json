@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-10T16:46:05.965Z",
+  "transport": "http://localhost:3100",
+  "scope": "Neon QA only; disposable invitation",
+  "passed": true,
+  "checks": [
+    {
+      "name": "QA only",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    },
+    {
+      "name": "Wrong database",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "Disabled QA",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "Missing database",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "Malformed database",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "GET denied",
+      "actual": 405,
+      "expected": 405,
+      "ok": true
+    },
+    {
+      "name": "Foreign origin denied",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    },
+    {
+      "name": "Invalid token",
+      "actual": 400,
+      "expected": 400,
+      "ok": true
+    },
+    {
+      "name": "Unknown token",
+      "actual": 410,
+      "expected": 410,
+      "ok": true
+    },
+    {
+      "name": "Authorized invitation metadata",
+      "actual": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "name": "Foreign company denied",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    },
+    {
+      "name": "Password mismatch",
+      "actual": 400,
+      "expected": 400,
+      "ok": true
+    },
+    {
+      "name": "Short password",
+      "actual": 400,
+      "expected": 400,
+      "ok": true
+    },
+    {
+      "name": "One activation winner",
+      "actual": 1,
+      "expected": 1,
+      "ok": true
+    },
+    {
+      "name": "Replay denied",
+      "actual": 1,
+      "expected": 1,
+      "ok": true
+    },
+    {
+      "name": "Consumed metadata denied",
+      "actual": 410,
+      "expected": 410,
+      "ok": true
+    },
+    {
+      "name": "Activated credentials can log in",
+      "actual": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "name": "Activation creates authenticated session",
+      "actual": true,
+      "expected": true,
+      "ok": true
+    }
+  ]
+}
