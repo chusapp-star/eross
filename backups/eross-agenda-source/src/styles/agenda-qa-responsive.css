@@ -20,3 +20,7 @@
   .shell .buttons { flex-wrap: wrap; }
   .shell .form input, .shell .form select { min-width: 0; }
 }
+@media (max-width: 700px) {
+  /* Keep the existing narrow sidebar, but make each destination identifiable. */
+  .shell .sidebar nav button { font-size: 8px; flex-direction: column; gap: 4px; padding: 8px 1px; text-align: center; }
+}
