@@ -1,0 +1,181 @@
+{
+  "date": "2026-10-10T15:57:24.329Z",
+  "base": "https://eross-agenda-qa.vercel.app",
+  "fixture": {
+    "companies": [
+      "c24eb877-0dd2-41ce-a154-4c637e0ae7b3",
+      "f0b088a1-fb50-4bf4-a68b-7ba1c42f3ef9"
+    ]
+  },
+  "checks": [
+    {
+      "name": "Login admin",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Wrong-company login admin",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Credenciales o acceso a empresa inválidos"
+    },
+    {
+      "name": "Login supervisor",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Wrong-company login supervisor",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Credenciales o acceso a empresa inválidos"
+    },
+    {
+      "name": "Login collaborator",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Wrong-company login collaborator",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Credenciales o acceso a empresa inválidos"
+    },
+    {
+      "name": "Unauthenticated bootstrap",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Sesión requerida"
+    },
+    {
+      "name": "admin identity-qa-session",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin bootstrap",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin tenant-qa-overview",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin tenant-qa-report",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin tenant-qa-clients",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin booking-settings",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor identity-qa-session",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor bootstrap",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor tenant-qa-overview",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor tenant-qa-report",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor tenant-qa-clients",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor booking-settings",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator identity-qa-session",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator bootstrap",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator tenant-qa-overview",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator tenant-qa-report",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator tenant-qa-clients",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator booking-settings",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Collaborator cannot create",
+      "ok": true,
+      "http": 403,
+      "expected": 403,
+      "error": "Permiso insuficiente"
+    },
+    {
+      "name": "Create appointment",
+      "ok": false,
+      "http": 400,
+      "expected": 200,
+      "error": "Identificador inválido: appointment_type_id"
+    }
+  ],
+  "passed": false
+}

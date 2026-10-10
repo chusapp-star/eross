@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-10T16:07:33.648Z",
+  "transport": "http://localhost:3100",
+  "checks": [
+    {
+      "name": "Reschedule API",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Rescheduled status persisted",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Create selector fixture account",
+      "ok": true,
+      "http": 201,
+      "expected": 201
+    },
+    {
+      "name": "Multiple membership selector returned",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Select authorized second company",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Create reactivation fixture",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Cancel reactivation fixture",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Block cancelled fixture time",
+      "ok": true,
+      "http": 201,
+      "expected": 201
+    },
+    {
+      "name": "Blocked reactivation rejected",
+      "ok": true,
+      "http": 409,
+      "expected": 409,
+      "error": "No se puede reactivar: horario bloqueado"
+    },
+    {
+      "name": "Remove test block",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Free reactivation accepted",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    }
+  ],
+  "passed": true
+}

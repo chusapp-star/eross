@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-10T16:02:47.585Z",
+  "transport": "http://localhost:3100",
+  "checks": [
+    {
+      "name": "Add responsible",
+      "ok": true,
+      "http": 201,
+      "expected": 201
+    },
+    {
+      "name": "Add location",
+      "ok": true,
+      "http": 201,
+      "expected": 201
+    },
+    {
+      "name": "Supervisor cannot add resources",
+      "ok": true,
+      "http": 403,
+      "expected": 403,
+      "error": "Permiso insuficiente"
+    },
+    {
+      "name": "Foreign location update rejected",
+      "ok": true,
+      "http": 404,
+      "expected": 404,
+      "error": "Registro no encontrado"
+    },
+    {
+      "name": "Create overnight block",
+      "ok": true,
+      "http": 201,
+      "expected": 201
+    },
+    {
+      "name": "Overnight block date persisted",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Remove own test block",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Own history",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Foreign history rejected",
+      "ok": true,
+      "http": 404,
+      "expected": 404,
+      "error": "Cita no encontrada"
+    },
+    {
+      "name": "Collaborator history",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Own role protection",
+      "ok": true,
+      "http": 409,
+      "expected": 409,
+      "error": "No se aplicó el cambio. Verificá la cuenta, su estado o la protección de administradores"
+    },
+    {
+      "name": "Create tenant login account",
+      "ok": true,
+      "http": 201,
+      "expected": 201
+    },
+    {
+      "name": "Existing email cannot reset password",
+      "ok": true,
+      "http": 409,
+      "expected": 409,
+      "error": "Este correo ya tiene una cuenta. Su acceso requiere una membresía autorizada, sin cambiar su contraseña."
+    },
+    {
+      "name": "Supervisor cannot create account",
+      "ok": true,
+      "http": 403,
+      "expected": 403,
+      "error": "Permiso insuficiente"
+    },
+    {
+      "name": "Generic login selects sole membership",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Rename own company",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,122 @@
+{
+  "transport": "http://localhost:3100",
+  "date": "2026-10-10T15:59:42.262Z",
+  "base": "https://eross-agenda-qa.vercel.app",
+  "fixture": {
+    "companies": [
+      "c24eb877-0dd2-41ce-a154-4c637e0ae7b3",
+      "f0b088a1-fb50-4bf4-a68b-7ba1c42f3ef9"
+    ]
+  },
+  "checks": [
+    {
+      "name": "Unauthenticated bootstrap",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Sesión requerida"
+    },
+    {
+      "name": "Collaborator cannot create",
+      "ok": true,
+      "http": 403,
+      "expected": 403,
+      "error": "Permiso insuficiente"
+    },
+    {
+      "name": "Create appointment",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Duplicate appointment",
+      "ok": true,
+      "http": 409,
+      "expected": 409,
+      "error": "Ese responsable ya tiene una cita que choca con ese horario"
+    },
+    {
+      "name": "Cross-company edit",
+      "ok": true,
+      "http": 404,
+      "expected": 404,
+      "error": "Cita no encontrada"
+    },
+    {
+      "name": "Cross-company status",
+      "ok": true,
+      "http": 404,
+      "expected": 404,
+      "error": "Cita no encontrada"
+    },
+    {
+      "name": "Status confirmed",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Status attended",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Status no_show",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Status cancelled",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Reuse cancelled slot",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Reactivation occupied slot",
+      "ok": true,
+      "http": 409,
+      "expected": 409,
+      "error": "No se puede reactivar: horario no disponible según la configuración actual"
+    },
+    {
+      "name": "Cancel replacement",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Reactivate free slot",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Edit and reschedule",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Persisted notes and no reminder",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Concurrent booking one winner",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    }
+  ],
+  "passed": true
+}

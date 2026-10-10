@@ -1,3 +1,4 @@
+import {validateWindow} from "./appointments";
 import {authorizeAgendaWrite} from "../../../lib/agenda-write-auth";
 import {statusToDb,statusToUi} from "../../../lib/agenda-db";
 
@@ -22,6 +23,20 @@ export default async function handler(req,res){
     no_show:"appointment.no_show",pending:"appointment.pending"
   }[status];
   try{
+    if(status!=="cancelled"){
+      const current=(await sql`SELECT a.status,a.responsible_user_id::text,a.location_id::text,
+       to_char(a.starts_at AT TIME ZONE c.timezone,'YYYY-MM-DD') date,to_char(a.starts_at AT TIME ZONE c.timezone,'HH24:MI') time,
+       t.duration_min,t.buffer_before_min,t.buffer_after_min,t.active AS type_active,u.active AS user_active,l.active AS location_active
+       FROM agenda_appointments a JOIN agenda_companies c ON c.id=a.company_id
+       JOIN agenda_appointment_types t ON t.id=a.appointment_type_id AND t.company_id=a.company_id
+       JOIN agenda_users u ON u.id=a.responsible_user_id AND u.company_id=a.company_id
+       JOIN agenda_locations l ON l.id=a.location_id AND l.company_id=a.company_id
+       WHERE a.id=${id}::uuid AND a.company_id=${companyId}::uuid`)[0];
+      if(current?.status==="cancelled"){
+        if(!current.type_active||!current.user_active||!current.location_active)return res.status(409).json({error:"No se puede reactivar: servicio, responsable o sede inactivos"});
+        await validateWindow(sql,companyId,current,current,current.responsible_user_id,current.location_id,id);
+      }
+    }
     const result=await sql`
       WITH changed AS (
         UPDATE agenda_appointments SET status=${status},updated_at=now()
@@ -49,6 +64,8 @@ export default async function handler(req,res){
     console.error("agenda status",error);
     // Reopening a cancelled booking can violate the database exclusion constraint.
     // Return a meaningful conflict rather than an opaque server error.
+    if(String(error?.message||"").includes("BLOCKED:"))return res.status(409).json({error:"No se puede reactivar: horario bloqueado"});
+    if(["MIN_NOTICE","OUTSIDE_AVAILABILITY","INVALID_SLOT_INTERVAL","DOUBLE_BOOKING"].includes(error?.message))return res.status(409).json({error:"No se puede reactivar: horario no disponible según la configuración actual"});
     if(error?.code==="23P01"||String(error?.message||"").includes("agenda_qa_no_concurrent_responsible_overlap"))
       return res.status(409).json({error:"No se puede reactivar: el responsable ya tiene otra cita en ese horario"});
     return res.status(500).json({error:"No se pudo actualizar el estado"});

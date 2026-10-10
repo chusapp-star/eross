@@ -14,9 +14,11 @@ export default async function handler(req,res){
   const sql=getSql();
   const membership=await resolveTenantMembership(sql,{identityId:session.sub,companyId:session.tenant});
   if(!membership||membership.membership_id!==session.membership||membership.role!==session.role)return res.status(403).json({error:"Membresía no autorizada"});
-  const company=await sql`SELECT id::text,name FROM agenda_companies WHERE id=${membership.company_id}::uuid AND active=true`;
-  const totals=await sql`SELECT count(*)::int AS appointments FROM agenda_appointments WHERE company_id=${membership.company_id}::uuid`;
-  const signals=await sql`SELECT count(*)::int AS signals FROM agenda_integration_outbox WHERE company_id=${membership.company_id}::uuid`;
-  return res.status(200).json({ok:true,company:company[0],role:membership.role,navigation:navigationForRole(membership.role),counts:{appointments:totals[0]?.appointments||0,signals:signals[0]?.signals||0}});
+  const row=(await sql`SELECT c.id::text,c.name,
+    (SELECT count(*)::int FROM agenda_appointments WHERE company_id=c.id) AS appointments,
+    (SELECT count(*)::int FROM agenda_integration_outbox WHERE company_id=c.id) AS signals
+    FROM agenda_companies c WHERE c.id=${membership.company_id}::uuid AND c.active=true`)[0];
+  if(!row)return res.status(404).json({error:"Empresa no encontrada"});
+  return res.status(200).json({ok:true,company:{id:row.id,name:row.name},role:membership.role,navigation:navigationForRole(membership.role),counts:{appointments:row.appointments,signals:row.signals}});
  }catch(e){console.error("tenant overview qa",e);return res.status(500).json({error:"No se pudo consultar empresa"})}
 }

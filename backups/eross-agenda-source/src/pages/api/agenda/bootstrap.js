@@ -11,13 +11,13 @@ export default async function handler(req,res){
     const sql=getSql();
     const tenantEnabled=process.env.EROSS_MULTIEMPRESA_QA_ENABLED==="true"&&process.env.EROSS_EVENT_HUB_QA_ENABLED==="true";
     const token=String(req.headers.cookie||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("eross_identity_qa="))?.slice("eross_identity_qa=".length);
-    let companyId;
+    let companyId,role="admin";
     if(tenantEnabled&&token){
       const session=verifyIdentitySession(token);
       if(!session)return res.status(401).json({error:"Sesión individual inválida"});
       const membership=await resolveTenantMembership(sql,{identityId:session.sub,companyId:session.tenant});
       if(!membership||membership.membership_id!==session.membership||membership.role!==session.role||!roleCan(membership.role,"appointments.read"))return res.status(403).json({error:"Acceso denegado"});
-      companyId=membership.company_id;
+      companyId=membership.company_id;role=membership.role;
     }else if(sessionValid(req)){
       companyId=getCompanyId();
     }else return res.status(401).json({error:"Sesión requerida"});
@@ -33,6 +33,8 @@ export default async function handler(req,res){
       sql`SELECT a.id::text,
                   to_char(a.starts_at AT TIME ZONE c.timezone,'YYYY-MM-DD') date,
                   to_char(a.starts_at AT TIME ZONE c.timezone,'HH24:MI') time,
+                  to_char(a.reserved_starts_at AT TIME ZONE c.timezone,'YYYY-MM-DD"T"HH24:MI:SS') reserved_start_wall,
+                  to_char(a.reserved_ends_at AT TIME ZONE c.timezone,'YYYY-MM-DD"T"HH24:MI:SS') reserved_end_wall,
                   cl.id::text client_id,COALESCE(cl.name,'') name,COALESCE(cl.phone,'') phone,COALESCE(cl.email,'') email,
                   t.id::text appointment_type_id,COALESCE(t.name,'Cita') type,
                   EXTRACT(EPOCH FROM (a.ends_at-a.starts_at))/60 duration,
@@ -54,7 +56,7 @@ export default async function handler(req,res){
     const company=companyRows[0];
     if(!company) return res.status(404).json({error:"Empresa no encontrada"});
     const appointments=appointmentRows.map(a=>({...a,duration:Number(a.duration||30),status:statusToUi(a.status)}));
-    return res.status(200).json({ok:true,company,users:userRows,locations:locationRows,
+    return res.status(200).json({ok:true,company,role,canWrite:roleCan(role,"appointments.edit"),users:userRows,locations:locationRows,
       types:typeRows.map(t=>({...t,duration:Number(t.duration_min),bufferBefore:Number(t.buffer_before_min),bufferAfter:Number(t.buffer_after_min)})),
       availability:availabilityRows,blocks:blockRows,appointments});
   }catch(error){

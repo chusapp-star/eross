@@ -1,6 +1,7 @@
 import {getSql} from "../../../lib/agenda-db";
 import {verifyIdentitySession} from "../../../lib/agenda-identity-auth";
 import {resolveTenantMembership} from "../../../lib/agenda-tenant";
+import {sameOrigin} from "../../../lib/agenda-auth";
 import {roleCan} from "../../../lib/agenda-role-policy";
 const ROLES=new Set(["admin","supervisor","collaborator"]);
 export default async function handler(req,res){
@@ -8,7 +9,7 @@ export default async function handler(req,res){
  if(req.method!=="POST")return res.status(405).json({error:"Método no permitido"});
  if(process.env.EROSS_MULTIEMPRESA_QA_ENABLED!=="true"||process.env.EROSS_EVENT_HUB_QA_ENABLED!=="true")return res.status(404).json({error:"No disponible"});
  const origin=req.headers.origin,host=req.headers.host;
- if(!origin||!host||new URL(origin).host!==host)return res.status(403).json({error:"Origen no autorizado"});
+ if(!sameOrigin(req))return res.status(403).json({error:"Origen no autorizado"});
  const raw=String(req.headers.cookie||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("eross_identity_qa="));
  const session=verifyIdentitySession(raw?.slice("eross_identity_qa=".length));
  if(!session)return res.status(401).json({error:"Sesión requerida"});

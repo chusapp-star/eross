@@ -1,3 +1,4 @@
+import {sameOrigin} from "../../../lib/agenda-auth";
 import {getSql} from "../../../lib/agenda-db";
 import {verifyIdentitySession} from "../../../lib/agenda-identity-auth";
 import {resolveTenantMembership} from "../../../lib/agenda-tenant";
@@ -14,9 +15,9 @@ export default async function handler(req,res){
   if(!m||m.membership_id!==s.membership||m.role!==s.role) return res.status(403).json({error:"Membresía inválida"});
   if(req.method==="PATCH"){
    const origin=req.headers.origin;
-   if(!origin||!req.headers.host||new URL(origin).host!==req.headers.host)return res.status(403).json({error:"Origen no autorizado"});
+   if(!sameOrigin(req))return res.status(403).json({error:"Origen no autorizado"});
    if(!roleCan(m.role,"companies.manage"))return res.status(403).json({error:"Solo administración puede editar la empresa"});
-   const name=String(req.body?.name||"").trim().replace(/\\s+/g," ");
+   const name=String(req.body?.name||"").trim().replace(/\s+/g," ");
    if(name.length<2||name.length>100)return res.status(400).json({error:"Nombre requerido (2 a 100 caracteres)"});
    const changed=await sql`UPDATE agenda_companies SET name=${name},updated_at=now() WHERE id=${m.company_id}::uuid AND active=true RETURNING id::text,name,slug,timezone,active`;
    if(!changed.length)return res.status(404).json({error:"Empresa no encontrada"});

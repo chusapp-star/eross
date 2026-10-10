@@ -1,4 +1,4 @@
-import {requireAgendaAdmin} from "../../../lib/agenda-auth";
+import {authorizeAgendaWrite} from "../../../lib/agenda-write-auth";
 import {getSql,getCompanyId} from "../../../lib/agenda-db";
 
 const validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||""));
@@ -6,14 +6,15 @@ const validTime=v=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(v||""));
 const validUuid=v=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(v||""));
 
 export default async function handler(req,res){
-  if(!requireAgendaAdmin(req,res))return;
+  const auth=await authorizeAgendaWrite(req,res,{action:"companies.manage"});
+  if(!auth)return;
   res.setHeader("Cache-Control","no-store");
   if(!["GET","POST","DELETE"].includes(req.method)){
     res.setHeader("Allow","GET, POST, DELETE");
     return res.status(405).json({error:"Método no permitido"});
   }
   try{
-    const sql=getSql(),companyId=getCompanyId();
+    const {sql,companyId}=auth;
     if(req.method==="GET"){
       const rows=await sql`SELECT b.id::text,
         to_char(b.starts_at AT TIME ZONE c.timezone,'YYYY-MM-DD') date,
@@ -42,7 +43,7 @@ export default async function handler(req,res){
     const conflicts=await sql`SELECT a.id::text FROM agenda_appointments a
       JOIN agenda_companies c ON c.id=a.company_id
       WHERE a.company_id=${companyId}::uuid AND a.status<>'cancelled'
-      AND tstzrange(a.starts_at,a.ends_at,'[)') &&
+      AND tstzrange(a.reserved_starts_at,a.reserved_ends_at,'[)') &&
         tstzrange((${date}::date+${from}::time) AT TIME ZONE c.timezone,
           (${ending}::date+${to}::time) AT TIME ZONE c.timezone,'[)')
       LIMIT 1`;

@@ -26,7 +26,7 @@ async function resolveContext(sql,companyId,body){
   return {type:typeRows[0],user,location};
 }
 
-async function validateWindow(sql,companyId,body,type,userId,locationId,ignoreId){
+export async function validateWindow(sql,companyId,body,type,userId,locationId,ignoreId){
   const date=clean(body.date),time=clean(body.time);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))throw new Error("DATE_REQUIRED");
   const weekday=(await sql`SELECT EXTRACT(DOW FROM ${date}::date)::int weekday`)[0].weekday;
@@ -98,7 +98,7 @@ export default async function handler(req,res){
       if(!owned.length)return res.status(404).json({error:"Cita no encontrada"});
     }
     // Reject malformed identifiers before PostgreSQL casts; never expose a 500 for bad input.
-    const validUuid=value=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i.test(String(value));
+    const validUuid=value=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value));
     for(const key of ["appointment_type_id","responsible_user_id","location_id","client_id"]){
       if(body[key]!==undefined&&body[key]!==null&&String(body[key]).trim()!==""&&!validUuid(body[key]))
         return res.status(400).json({error:"Identificador inválido: "+key});
@@ -138,7 +138,7 @@ export default async function handler(req,res){
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)-make_interval(mins=>${Number(type.buffer_before_min||0)}),
           ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration+Number(type.buffer_after_min||0)}),
           ${status},${clean(body.modality||body.location)||null},${clean(body.source)||null},${clean(body.comments)||null},
-          ${clean(body.confirmation_channel)||null},${body.reminder_minutes?Number(body.reminder_minutes):null},${tags},${type.color}
+          ${clean(body.confirmation_channel)||null},${body.reminder_minutes===undefined||body.reminder_minutes===null?null:Number(body.reminder_minutes)},${tags},${type.color}
         FROM agenda_companies c WHERE c.id=${companyId}::uuid RETURNING id,company_id,client_id,status
       ), logged AS (INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload)
        SELECT company_id,id,'appointment.created',jsonb_build_object('schema_version',1,'client_id',client_id::text,'status',status,'source',${clean(body.source)}::text) FROM changed
@@ -167,8 +167,8 @@ export default async function handler(req,res){
           ends_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration}),
           reserved_starts_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)-make_interval(mins=>${Number(type.buffer_before_min||0)}),
           reserved_ends_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration+Number(type.buffer_after_min||0)}),
-          status=${status},modality=${clean(body.modality||body.location)||null},source=${clean(body.source)||null},comments=${clean(body.comments)||null},
-          confirmation_channel=${clean(body.confirmation_channel)||null},reminder_minutes=${body.reminder_minutes?Number(body.reminder_minutes):null},
+          status=CASE WHEN a.status<>'cancelled' AND a.starts_at IS DISTINCT FROM ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone) THEN 'rescheduled' ELSE ${status} END,modality=${clean(body.modality||body.location)||null},source=${clean(body.source)||null},comments=${clean(body.comments)||null},
+          confirmation_channel=${clean(body.confirmation_channel)||null},reminder_minutes=${body.reminder_minutes===undefined||body.reminder_minutes===null?null:Number(body.reminder_minutes)},
           tags=${tags},color=${type.color},updated_at=now()
         FROM agenda_companies c WHERE a.id=${body.id}::uuid AND a.company_id=${companyId}::uuid AND c.id=a.company_id RETURNING a.id,a.company_id,a.client_id,a.status,a.starts_at
       ), logged AS (INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload)

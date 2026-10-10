@@ -22,7 +22,7 @@ export default async function handler(req,res){
  if(!sameOrigin(req))return res.status(403).json({error:"Origen no autorizado"});
  if(req.method==="DELETE"){setCookie(res,"",0);return res.status(200).json({ok:true})}
  const email=String(req.body?.email||"").trim().toLowerCase(), password=req.body?.password,companyId=req.body?.company_id;
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||typeof password!=="string"||password.length>256||typeof companyId!=="string")
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||typeof password!=="string"||password.length>256||(companyId!==undefined&&!/^([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i.test(String(companyId))))
   return res.status(400).json({error:"Datos inválidos"});
  const sql=getSql();
  try{
@@ -30,7 +30,12 @@ export default async function handler(req,res){
     FROM eross_identities i JOIN eross_identity_credentials cr ON cr.identity_id=i.id
     WHERE lower(i.email)=${email} AND i.active=true LIMIT 1`;
   const u=rows[0];const good=u&&verifyIdentityPassword(password,u);
-  const m=good?await resolveTenantMembership(sql,{identityId:u.id,companyId}):null;
+  if(good&&companyId===undefined){
+    const companies=await sql`SELECT c.id::text,c.name,m.role FROM eross_company_memberships m JOIN agenda_companies c ON c.id=m.company_id WHERE m.identity_id=${u.id}::uuid AND m.active=true AND c.active=true ORDER BY c.name`;
+    if(companies.length>1)return res.status(200).json({requires_company:true,companies});
+    if(companies.length===1)req.body.company_id=companies[0].id;
+  }
+  const m=good&&req.body.company_id?await resolveTenantMembership(sql,{identityId:u.id,companyId:req.body.company_id}):null;
   const success=Boolean(m);
   await sql`INSERT INTO eross_identity_login_audit(identity_id,email_fingerprint,success,failure_reason)
    VALUES (${u?.id||null}::uuid,${createHash("sha256").update(email).digest("hex")},${success},${success?null:"credentials_or_membership"})`;
