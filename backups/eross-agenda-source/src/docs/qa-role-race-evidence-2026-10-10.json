@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-10T17:10:06.246Z",
+  "transport": "http://localhost:3100",
+  "company": "6f4a2f9e-0b4b-4cb6-8429-9fbe710f1044",
+  "passed": true,
+  "checks": [
+    {
+      "name": "Real admin login",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "Real admin login",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "name": "Invalid UUID rejected",
+      "ok": true
+    },
+    {
+      "name": "Concurrent demotions preserve an admin",
+      "ok": true,
+      "admins": 1,
+      "statuses": [
+        409,
+        200
+      ]
+    },
+    {
+      "name": "Only one role mutation wins",
+      "ok": true
+    },
+    {
+      "name": "Other mutation safely denied",
+      "ok": true
+    },
+    {
+      "name": "Exactly one audited change",
+      "ok": true,
+      "changes": 1
+    }
+  ]
+}

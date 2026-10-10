@@ -1,0 +1,22 @@
+/* Repairs confined to the integrated QA page on small screens.
+   The approved desktop styles remain unchanged. */
+@media (max-width: 820px) {
+  .shell .db-embedded .db-monthWorkspace { grid-template-columns: minmax(0, 1fr); }
+  .shell .db-embedded .db-quickMonths,
+  .shell .db-embedded .db-calendarContent { min-width: 0; }
+  .shell .db-embedded .db-tabs { flex-wrap: wrap; }
+  .shell .db-embedded .db-table { overflow-x: auto; }
+  .shell .db-embedded .db-table .row { min-width: 610px; }
+  .shell .db-embedded .db-monthGrid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .shell .db-embedded .db-monthGrid .day { min-width: 0; padding: 4px; }
+  .shell .db-embedded .db-card { padding: 10px; }
+  .shell .db-embedded .db-monthHead { flex-wrap: wrap; gap: 8px; }
+  .shell .db-embedded .db-monthHead h2 { font-size: 15px; }
+  .shell .db-embedded .db-sectionHead { flex-wrap: wrap; }
+  .shell .db-embedded .db-appt { grid-template-columns: 4px 40px minmax(0,1fr); gap: 6px; }
+  .shell .db-embedded .db-appt em { grid-column: 3; justify-self: start; }
+  .shell .topbar { flex-wrap: wrap; gap: 8px; }
+  .shell .toolbar, .shell .panelHead { flex-wrap: wrap; gap: 8px; }
+  .shell .buttons { flex-wrap: wrap; }
+  .shell .form input, .shell .form select { min-width: 0; }
+}

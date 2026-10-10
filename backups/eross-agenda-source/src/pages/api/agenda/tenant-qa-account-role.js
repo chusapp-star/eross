@@ -14,17 +14,19 @@ export default async function handler(req,res){
  const session=verifyIdentitySession(raw?.slice("eross_identity_qa=".length));
  if(!session)return res.status(401).json({error:"Sesión requerida"});
  const targetId=req.body?.membershipId,role=req.body?.role;
- if(!ROLES.has(role)||!/^[-0-9a-f]{36}$/i.test(String(targetId||"")))return res.status(400).json({error:"Solicitud inválida"});
+ if(!ROLES.has(role)||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(targetId||"")))return res.status(400).json({error:"Solicitud inválida"});
  try{
   const sql=getSql(),actor=await resolveTenantMembership(sql,{identityId:session.sub,companyId:session.tenant});
   if(!actor||actor.membership_id!==session.membership||actor.role!==session.role||!roleCan(actor.role,"users.manage"))return res.status(403).json({error:"Solo un administrador autorizado puede cambiar roles"});
-  // One SQL statement ensures the update and audit record commit together.
-  const result=await sql`
+  // Serialize role changes for the tenant. The second statement reads a fresh
+  // snapshot after the lock, preventing concurrent removal of every admin.
+  const result=await sql.transaction([sql`SELECT pg_advisory_xact_lock(hashtextextended(${actor.company_id},0))`,sql`
    WITH eligible AS (
     SELECT target.id,target.company_id,target.role AS old_role
     FROM eross_company_memberships target
     WHERE target.id=${targetId}::uuid AND target.company_id=${actor.company_id}::uuid
       AND target.active=true AND target.identity_id<>${session.sub}::uuid AND target.role<>${role}
+      AND EXISTS(SELECT 1 FROM eross_company_memberships acting WHERE acting.id=${actor.membership_id}::uuid AND acting.company_id=target.company_id AND acting.active=true AND acting.role='admin')
       AND (target.role<>'admin' OR (SELECT count(*) FROM eross_company_memberships keep WHERE keep.company_id=target.company_id AND keep.active=true AND keep.role='admin')>1)
    ), changed AS (
     UPDATE eross_company_memberships target SET role=${role}
@@ -34,8 +36,8 @@ export default async function handler(req,res){
     INSERT INTO eross_membership_role_audit_qa(company_id,membership_id,actor_identity_id,old_role,new_role)
     SELECT e.company_id,e.id,${session.sub}::uuid,e.old_role,${role} FROM eligible e JOIN changed c ON c.id=e.id
     RETURNING id
-   ) SELECT count(*)::int AS changes FROM audited`;
-  if(!result[0]?.changes)return res.status(409).json({error:"No se aplicó el cambio. Verificá la cuenta, su estado o la protección de administradores"});
+   ) SELECT count(*)::int AS changes FROM audited`]);
+  if(!result[1]?.[0]?.changes)return res.status(409).json({error:"No se aplicó el cambio. Verificá la cuenta, su estado o la protección de administradores"});
   return res.status(200).json({ok:true,role});
  }catch(e){console.error("QA membership role update",e);return res.status(500).json({error:"No se pudo guardar el rol"})}
 }
