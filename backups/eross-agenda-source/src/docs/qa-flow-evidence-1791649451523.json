@@ -1,0 +1,269 @@
+{
+  "transport": null,
+  "date": "2026-10-10T16:25:24.852Z",
+  "base": "https://eross-agenda-qa.vercel.app",
+  "fixture": {
+    "companies": [
+      "19415557-40db-45c5-9dde-6c1c92a65d23",
+      "fc0e2462-b0af-44d7-90af-bd37e285aed1"
+    ]
+  },
+  "checks": [
+    {
+      "name": "Login admin",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Wrong-company login admin",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Credenciales o acceso a empresa inválidos"
+    },
+    {
+      "name": "Login supervisor",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Wrong-company login supervisor",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Credenciales o acceso a empresa inválidos"
+    },
+    {
+      "name": "Login collaborator",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Wrong-company login collaborator",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Credenciales o acceso a empresa inválidos"
+    },
+    {
+      "name": "Unauthenticated bootstrap",
+      "ok": true,
+      "http": 401,
+      "expected": 401,
+      "error": "Sesión requerida"
+    },
+    {
+      "name": "admin identity-qa-session",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin bootstrap",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin tenant-qa-overview",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin tenant-qa-report",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin tenant-qa-clients",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "admin booking-settings",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor identity-qa-session",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor bootstrap",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor tenant-qa-overview",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor tenant-qa-report",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor tenant-qa-clients",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "supervisor booking-settings",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator identity-qa-session",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator bootstrap",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator tenant-qa-overview",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator tenant-qa-report",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator tenant-qa-clients",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "collaborator booking-settings",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Collaborator cannot create",
+      "ok": true,
+      "http": 403,
+      "expected": 403,
+      "error": "Permiso insuficiente"
+    },
+    {
+      "name": "Create appointment",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Duplicate appointment",
+      "ok": true,
+      "http": 409,
+      "expected": 409,
+      "error": "Ese responsable ya tiene una cita que choca con ese horario"
+    },
+    {
+      "name": "Cross-company edit",
+      "ok": true,
+      "http": 404,
+      "expected": 404,
+      "error": "Cita no encontrada"
+    },
+    {
+      "name": "Cross-company status",
+      "ok": true,
+      "http": 404,
+      "expected": 404,
+      "error": "Cita no encontrada"
+    },
+    {
+      "name": "Status confirmed",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Status attended",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Status no_show",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Status cancelled",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Reuse cancelled slot",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Reactivation occupied slot",
+      "ok": true,
+      "http": 409,
+      "expected": 409,
+      "error": "No se puede reactivar: horario no disponible según la configuración actual"
+    },
+    {
+      "name": "Cancel replacement",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Reactivate free slot",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Edit and reschedule",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Persisted notes and no reminder",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Concurrent booking one winner",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    }
+  ],
+  "passed": true
+}

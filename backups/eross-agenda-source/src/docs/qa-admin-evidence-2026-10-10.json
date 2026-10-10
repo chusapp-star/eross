@@ -1,7 +1,82 @@
 {
-  "date": "2026-10-10T16:02:47.585Z",
-  "transport": "http://localhost:3100",
+  "date": "2026-10-10T16:32:42.306Z",
+  "transport": "https://eross-agenda-qa.vercel.app",
+  "environment": "Neon QA / local source",
+  "companies": [
+    "19415557-40db-45c5-9dde-6c1c92a65d23",
+    "fc0e2462-b0af-44d7-90af-bd37e285aed1"
+  ],
   "checks": [
+    {
+      "name": "Read tenant configuration",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Supervisor cannot configure",
+      "ok": true,
+      "http": 403,
+      "expected": 403,
+      "error": "Permiso insuficiente"
+    },
+    {
+      "name": "Invalid timezone rejected",
+      "ok": true,
+      "http": 400,
+      "expected": 400,
+      "error": "Zona horaria inválida"
+    },
+    {
+      "name": "Invalid batch rejected",
+      "ok": true,
+      "http": 400,
+      "expected": 400,
+      "error": "Datos de tipo de cita inválidos"
+    },
+    {
+      "name": "Invalid batch atomicity",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Foreign type rejected",
+      "ok": true,
+      "http": 404,
+      "expected": 404,
+      "error": "Tipo de cita no encontrado en esta empresa"
+    },
+    {
+      "name": "Save extended hours and service",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Settings persisted",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Booking interval save",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Booking interval reread",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Restore booking interval",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
     {
       "name": "Add responsible",
       "ok": true,
@@ -42,6 +117,18 @@
     },
     {
       "name": "Remove own test block",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Reschedule changes displayed status",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Rescheduled status persisted",
       "ok": true,
       "http": 200,
       "expected": 200
@@ -100,6 +187,18 @@
     },
     {
       "name": "Rename own company",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Restore fixture company name",
+      "ok": true,
+      "http": 200,
+      "expected": 200
+    },
+    {
+      "name": "Logout session",
       "ok": true,
       "http": 200,
       "expected": 200

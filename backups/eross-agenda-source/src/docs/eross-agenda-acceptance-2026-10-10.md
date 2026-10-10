@@ -8,6 +8,10 @@ Código existente: `backups/eross-agenda-source/src`. Se conserva `pages/eross-o
 
 Base exclusiva de pruebas: Neon `soft-lake-14045662`, rama `br-red-smoke-b792oaol`, base `eross_agenda`. Los datos creados son empresas, identidades, responsables, sedes, clientes y citas ficticios con prefijo QA Acceptance. No se modificaron Neon principal ni Medical Óptica vouchers. No se realizó despliegue en EROSS producción.
 
+Versión funcional desplegada y probada: `b8a86ebc0954eb4f17208cb5e985cae23a15defb`, despliegue `dpl_7EZWPUYkg16Lptsbj9sYgqRmUTjq`, URL https://eross-agenda-qa.vercel.app/eross-original-integrado-qa. El despliegue EROSS producción permaneció en `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`.
+
+La suite remota pasó 41 comprobaciones de autenticación/reservas y 31 de administración/configuración: **72 comprobaciones HTTP aprobadas contra Vercel QA**, con Neon QA y cuentas ficticias. La versión desplegada coincide con el commit indicado; la compilación local y la de Vercel terminaron correctamente.
+
 Las pruebas HTTP locales ejecutan los handlers reales de Next.js conectados a Neon QA. No sustituyen la prueba del navegador ni la validación funcional del despliegue Vercel. Un estado READY no significa aceptación funcional.
 
 ## Bloques y resultados
@@ -15,10 +19,10 @@ Las pruebas HTTP locales ejecutan los handlers reales de Next.js conectados a Ne
 | Bloque | Resultado comprobado | Estado |
 |---|---|---|
 | 1. Continuidad | Repositorio, rama y commit recuperados; se consultó el informe anterior para no repetir verificaciones SQL ya efectuadas | Completado |
-| 2. Autenticación y permisos | Login real de admin, supervisor y colaborador; ingreso a empresa ajena rechazado; consultas autenticadas; colaborador sin permiso de creación | Probado por HTTP local + Neon QA |
-| 3. Reservas | Creación, duplicados, edición, reprogramación, estados, cancelación, reutilización, reactivación y solicitudes concurrentes | 17 comprobaciones pasaron tras corregir UUID |
-| 4. Configuración | Tipos, márgenes, franjas múltiples, horario hasta 22:00, 24 h, zona horaria, intervalo y anticipación persistidos; lote inválido sin escritura parcial; tipo ajeno rechazado | Probado por HTTP local + Neon QA |
-| 5. Administración de empresa | Alta de responsables, sedes y cuentas; permisos de supervisor; edición de nombre; protección del propio rol; bloqueo nocturno; historial propio y ajeno | Evidencia JSON adjunta |
+| 2. Autenticación y permisos | Login real de admin, supervisor y colaborador; ingreso a empresa ajena rechazado; consultas autenticadas; colaborador sin permiso de creación | Probado por HTTP local y Vercel QA |
+| 3. Reservas | Creación, duplicados, edición, reprogramación, estados, cancelación, reutilización, reactivación y solicitudes concurrentes | 17 comprobaciones locales y suite remota aprobadas tras corregir UUID |
+| 4. Configuración | Tipos, márgenes, franjas múltiples, horario hasta 22:00, 24 h, zona horaria, intervalo y anticipación persistidos; lote inválido sin escritura parcial; tipo ajeno rechazado | Probado por HTTP local y Vercel QA |
+| 5. Administración de empresa | Alta de responsables, sedes y cuentas; permisos de supervisor; edición de nombre; protección del propio rol; bloqueo nocturno; historial propio y ajeno | 31 comprobaciones remotas de configuración y administración aprobadas |
 | 6. Disponibilidad | Mismo responsable entre sedes, márgenes de ambas citas, límites contiguos, bloqueos nocturnos y último espacio de un día de 24 h | 7 aserciones pasaron |
 | 7. Navegador y aceptación comercial | Navegación autenticada, comparación visual, CSV descargado, comportamiento responsive y alta global de empresas | Pendiente; no aprobado para comercializar |
 
@@ -41,7 +45,8 @@ Las pruebas HTTP locales ejecutan los handlers reales de Next.js conectados a Ne
 
 - `docs/qa-flow-evidence-1791647728422.json`: pruebas de autenticación/lectura, con el fallo de creación original documentado. Ese fallo no se acredita como aprobado.
 - `docs/qa-flow-evidence-1791647939311.json`: 17 comprobaciones de reservas posteriores a la corrección, todas aprobadas; transporte local declarado.
-- `docs/qa-admin-evidence-2026-10-10.json`: administración, recursos, historial y cuentas.
+- `docs/qa-flow-evidence-1791649451523.json`: **41 comprobaciones remotas aprobadas** contra Vercel QA, con `transport: null` (sin intermediario local).
+- `docs/qa-admin-evidence-2026-10-10.json`: **31 comprobaciones remotas aprobadas** de administración, recursos, configuración, historial y cuentas; `transport` es la URL HTTPS de QA.
 - `docs/qa-status-evidence-2026-10-10.json`: reprogramación, membresías y reactivación bloqueada.
 - `scripts/qa-availability-check.mjs`: comprobaciones deterministas del cálculo que usa la interfaz.
 - `scripts/qa-start.mjs`: inicia Next.js y la suite en un mismo entorno de red; recibe configuración por stdin sin persistir secretos. `suite` admite reservas, `admin` y `status`; `resume` restringe la ejecución a las empresas ficticias identificadas en la evidencia. Las pruebas generan datos ficticios y no envían mensajes.
@@ -51,8 +56,11 @@ Las pruebas HTTP locales ejecutan los handlers reales de Next.js conectados a Ne
 - Completar navegación autenticada en navegador sobre el nuevo despliegue QA: Mes, Semana, Día, Lista, Disponibilidad, Clientes, Estadísticas, Empresas, Usuarios, Configuración y retorno entre secciones.
 - Comparar la interfaz renderizada con el prototipo aprobado, en escritorio y móvil; comprobar descarga y apertura del CSV, persistencia después de recargar, errores visibles y ausencia de regresiones de CSS.
 - Validar el alta global de empresas con una identidad autorizada para provisión. `EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID` no está configurado en el proyecto QA: un administrador de empresa no se convierte automáticamente en administrador global.
-- Completar el ciclo comercial de cuentas existentes, cambio/recuperación de contraseña y administración de accesos. La creación de cuentas nuevas está implementada; esos flujos todavía requieren implementación y aceptación.
 - Acordar y probar la salida del modo QA en un futuro entorno de lanzamiento, conservando aislamiento, migraciones y configuración. Esta sesión no autoriza cambiar producción antes de aprobación.
+
+## Límite de la validación visual
+
+El navegador superó la protección de Vercel y renderizó el formulario integrado nuevo. La solicitud segura de acceso a la empresa terminó con control manual del usuario; la observación posterior siguió mostrando el formulario de ingreso, sin una sesión empresarial autenticada. No se acreditan navegación interna, CSV descargado ni comparación visual completa. Para cerrar esos puntos se requiere iniciar sesión en QA mediante el navegador compartido, sin enviar contraseñas por chat.
 
 ## Dictamen
 
