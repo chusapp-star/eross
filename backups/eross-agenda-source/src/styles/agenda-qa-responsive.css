@@ -25,6 +25,7 @@
   .shell .welcome { flex-wrap: wrap; gap: 12px; }
   .shell .panel, .shell .settingCard, .shell .companyCard { min-width: 0; overflow-wrap: anywhere; }
   .shell .settingsGrid input, .shell .settingsGrid select { max-width: 100%; }
+  .shell .main select { max-width: 100%; min-width: 0; }
   .shell .filters { grid-template-columns: minmax(0,1fr); }
   .shell .cards.four, .shell .cards.six { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .shell .metric { min-width: 0; overflow-wrap: anywhere; }
