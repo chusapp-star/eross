@@ -19,6 +19,13 @@
   .shell .toolbar, .shell .panelHead { flex-wrap: wrap; gap: 8px; }
   .shell .buttons { flex-wrap: wrap; }
   .shell .form input, .shell .form select { min-width: 0; }
+  .shell .simpleRow { grid-template-columns: minmax(0,1.2fr) minmax(0,.8fr) minmax(0,1fr); }
+  .shell .simpleRow > span { min-width: 0; overflow-wrap: anywhere; }
+  .shell .simpleRow select { width: 100%; min-width: 0; }
+  .shell .welcome { flex-wrap: wrap; gap: 12px; }
+  .shell .panel, .shell .settingCard, .shell .companyCard { min-width: 0; overflow-wrap: anywhere; }
+  .shell .settingsGrid input, .shell .settingsGrid select { max-width: 100%; }
+  .shell .filters { grid-template-columns: minmax(0,1fr); }
 }
 @media (max-width: 700px) {
   /* Keep the existing narrow sidebar, but make each destination identifiable. */
