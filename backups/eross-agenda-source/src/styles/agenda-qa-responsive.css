@@ -29,5 +29,6 @@
 }
 @media (max-width: 700px) {
   /* Keep the existing narrow sidebar, but make each destination identifiable. */
-  .shell .sidebar nav button { font-size: 8px; flex-direction: column; gap: 4px; padding: 8px 1px; text-align: center; }
+  .shell .sidebar .brandCrop.compact { margin: 0 auto; flex-shrink: 0; }
+  .shell .sidebar nav button { font-size: 9px; flex-direction: column; gap: 4px; padding: 8px 1px; text-align: center; overflow-wrap: anywhere; }
 }
