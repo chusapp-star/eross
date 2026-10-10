@@ -26,6 +26,9 @@
   .shell .panel, .shell .settingCard, .shell .companyCard { min-width: 0; overflow-wrap: anywhere; }
   .shell .settingsGrid input, .shell .settingsGrid select { max-width: 100%; }
   .shell .filters { grid-template-columns: minmax(0,1fr); }
+  .shell .cards.four, .shell .cards.six { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .shell .metric { min-width: 0; overflow-wrap: anywhere; }
+  .shell .blueBtn, .shell .plainBtn { max-width: 100%; }
 }
 @media (max-width: 700px) {
   /* Keep the existing narrow sidebar, but make each destination identifiable. */
