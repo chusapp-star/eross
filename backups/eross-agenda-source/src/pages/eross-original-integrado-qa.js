@@ -132,9 +132,17 @@ function TenantCompany(){
  return <><div className="toolbar"><div><h2>Mi empresa</h2><p>Información real de Neon QA. Solo se muestra la empresa de tu sesión.</p></div></div>{loading?<Panel>Cargando empresa...</Panel>:err?<Panel><p role="alert">{err}</p></Panel>:<><div className="companyCards"><div className="companyCard"><div className="companyIcon big">{data.company.name?.[0]}</div><span className="badge green">Activa</span><h3>{data.company.name}</h3><p>Zona horaria: {data.company.timezone}</p><div className="companyData"><b>{data.totals.users}</b> usuarios · <b>{data.totals.locations}</b> sedes · <b>{data.totals.clients}</b> clientes</div></div></div><Panel title="Acceso multiempresa"><p>Tu sesión solo permite ver la empresa autorizada. La administración global de otras empresas requiere un módulo separado con permisos específicos.</p></Panel></>}</>;
 }
 function TenantUsers(){
- const [users,setUsers]=useState([]),[err,setErr]=useState(""),[loading,setLoading]=useState(true);
+ const [users,setUsers]=useState([]),[err,setErr]=useState(""),[loading,setLoading]=useState(true),[selected,setSelected]=useState(null);
  useEffect(()=>{let mounted=true;fetch("/api/agenda/tenant-qa-users",{cache:"no-store"}).then(async r=>{let d=await r.json();if(!r.ok)throw Error(d.error||"Error");if(mounted){setUsers(d.users||[]);setLoading(false)}}).catch(e=>{if(mounted){setErr(e.message);setLoading(false)}});return()=>{mounted=false}},[]);
- return <><div className="toolbar"><div><h2>Usuarios y permisos</h2><p>Usuarios reales asociados a la empresa actual. Solo lectura en QA.</p></div></div><Panel title="Directorio de usuarios">{loading?<p>Cargando usuarios...</p>:err?<p role="alert">{err}</p>:<div className="simpleTable"><div className="simpleRow head"><span>Usuario</span><span>Rol</span><span>Estado</span></div>{users.map(u=><div className="simpleRow" key={u.id}><span><b>{u.name}</b><small>{u.email||""}</small></span><span>{u.role}</span><span>{u.active?"Activo":"Inactivo"}</span></div>)}{!users.length&&<p>No hay usuarios registrados.</p>}</div>}</Panel></>;
+ const rolePermissions={
+  admin:["Consultar agenda","Crear y editar citas","Gestionar clientes","Ver estadísticas","Consultar empresa","Administrar usuarios","Consultar configuración"],
+  supervisor:["Consultar agenda","Crear y editar citas","Consultar clientes","Ver estadísticas","Consultar empresa"],
+  collaborator:["Consultar agenda","Consultar clientes","Ver estadísticas"]
+ };
+ const current=users.find(u=>u.id===selected);
+ return <><div className="toolbar"><div><h2>Usuarios y permisos</h2><p>Directorio real de la empresa actual. Seleccioná un usuario para consultar los permisos del rol.</p></div></div>
+ <Panel title="Directorio de usuarios">{loading?<p>Cargando usuarios...</p>:err?<p role="alert">{err}</p>:<div className="simpleTable"><div className="simpleRow head"><span>Usuario</span><span>Rol</span><span>Estado / Detalle</span></div>{users.map(u=><div className="simpleRow" key={u.id}><span><b>{u.name}</b><small>{u.email||""}</small></span><span>{u.role}</span><span><span>{u.active?"Activo":"Inactivo"}</span> <button type="button" className="link" onClick={()=>setSelected(u.id===selected?null:u.id)}>{u.id===selected?"Cerrar":"Ver permisos"}</button></span></div>)}{!users.length&&<p>No hay usuarios registrados.</p>}</div>}</Panel>
+ {current&&<Panel title={"Permisos actuales · "+current.name}><p>Rol: <b>{current.role}</b>. Permisos predeterminados del rol; no son permisos individuales editables.</p><div className="settingsGrid">{(rolePermissions[current.role]||[]).map(p=><div key={p} className="settingCard"><span>✓ {p}</span></div>)}</div><p>Edición individual pendiente de activar con auditoría y validación del servidor. Esta pantalla no cambia permisos.</p></Panel>}</>;
 }
 function Clients(){
   const [q,setQ]=useState("");
