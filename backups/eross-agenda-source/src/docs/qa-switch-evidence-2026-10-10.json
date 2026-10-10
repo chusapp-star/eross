@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-10T17:06:48.096Z",
+  "transport": "http://localhost:3100",
+  "identity": "b2659dbd-256e-453a-917d-3ce6420a7d06",
+  "scope": "Original fictitious Sol/Luna; new disposable login",
+  "passed": true,
+  "checks": [
+    {
+      "name": "Unauthenticated switch",
+      "actual": 401,
+      "expected": 401,
+      "ok": true
+    },
+    {
+      "name": "Real login",
+      "actual": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "name": "Only authorized memberships",
+      "actual": 2,
+      "expected": 2,
+      "ok": true
+    },
+    {
+      "name": "Invalid identifier",
+      "actual": 400,
+      "expected": 400,
+      "ok": true
+    },
+    {
+      "name": "Cross-origin switch",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    },
+    {
+      "name": "Unowned company denied",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    },
+    {
+      "name": "Denied switch issues no session",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "Failed switch retains Sol",
+      "actual": "eec3c94c-34b0-4c91-b209-67e957a13e01",
+      "expected": "eec3c94c-34b0-4c91-b209-67e957a13e01",
+      "ok": true
+    },
+    {
+      "name": "Switch to authorized Luna",
+      "actual": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "name": "Role resolves from Luna membership",
+      "actual": "collaborator",
+      "expected": "collaborator",
+      "ok": true
+    },
+    {
+      "name": "Collaborator bootstrap read only",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "Collaborator settings denied",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    },
+    {
+      "name": "Collaborator appointment creation denied",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    },
+    {
+      "name": "Collaborator user navigation absent",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "Collaborator configuration navigation absent",
+      "actual": false,
+      "expected": false,
+      "ok": true
+    },
+    {
+      "name": "Return to Sol",
+      "actual": 200,
+      "expected": 200,
+      "ok": true
+    },
+    {
+      "name": "Admin restored from Sol membership",
+      "actual": "admin",
+      "expected": "admin",
+      "ok": true
+    },
+    {
+      "name": "Tenant admin cannot provision company",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    },
+    {
+      "name": "Revoked target membership denied",
+      "actual": 403,
+      "expected": 403,
+      "ok": true
+    }
+  ]
+}

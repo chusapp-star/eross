@@ -10,17 +10,31 @@ const setCookie=(res,token,maxAge)=>res.setHeader("Set-Cookie",COOKIE+"="+token+
 export default async function handler(req,res){
  res.setHeader("Cache-Control","no-store");
  if(!isQA())return res.status(404).json({error:"No disponible"});
- if(!["GET","POST","DELETE"].includes(req.method))return res.status(405).json({error:"Método no permitido"});
+ if(!["GET","POST","PATCH","DELETE"].includes(req.method))return res.status(405).json({error:"Método no permitido"});
  if(req.method==="GET"){
   const s=verifyIdentitySession(getCookie(req));
   if(!s)return res.status(200).json({authenticated:false});
   try{const m=await resolveTenantMembership(getSql(),{identityId:s.sub,companyId:s.tenant});
    if(!m||m.membership_id!==s.membership||m.role!==s.role)return res.status(200).json({authenticated:false});
-   return res.status(200).json({authenticated:true,identity_id:s.sub,company_id:s.tenant,role:s.role});
+   const companies=await getSql()`SELECT c.id::text,c.name,m.role FROM eross_company_memberships m JOIN agenda_companies c ON c.id=m.company_id WHERE m.identity_id=${s.sub}::uuid AND m.active=true AND c.active=true ORDER BY c.name`;
+   return res.status(200).json({authenticated:true,identity_id:s.sub,company_id:s.tenant,role:s.role,companies});
   }catch{return res.status(500).json({error:"Verificación no disponible"})}
  }
  if(!sameOrigin(req))return res.status(403).json({error:"Origen no autorizado"});
  if(req.method==="DELETE"){setCookie(res,"",0);return res.status(200).json({ok:true})}
+ if(req.method==="PATCH"){
+  const s=verifyIdentitySession(getCookie(req)),companyId=req.body?.company_id;
+  if(!s)return res.status(401).json({error:'Sesión requerida'});
+  if(typeof companyId!=='string'||!/^([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i.test(companyId))return res.status(400).json({error:'Empresa inválida'});
+  try{
+   const sql=getSql(),current=await resolveTenantMembership(sql,{identityId:s.sub,companyId:s.tenant});
+   if(!current||current.membership_id!==s.membership||current.role!==s.role)return res.status(403).json({error:'Sesión no autorizada'});
+   const next=await resolveTenantMembership(sql,{identityId:s.sub,companyId});
+   if(!next)return res.status(403).json({error:'Empresa no autorizada'});
+   setCookie(res,signIdentitySession({identityId:s.sub,companyId:next.company_id,membershipId:next.membership_id,role:next.role}),28800);
+   return res.status(200).json({ok:true,company_id:next.company_id,role:next.role});
+  }catch{return res.status(500).json({error:'No se pudo cambiar de empresa'})}
+ }
  const email=String(req.body?.email||"").trim().toLowerCase(), password=req.body?.password,companyId=req.body?.company_id;
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||typeof password!=="string"||password.length>256||(companyId!==undefined&&!/^([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i.test(String(companyId))))
   return res.status(400).json({error:"Datos inválidos"});

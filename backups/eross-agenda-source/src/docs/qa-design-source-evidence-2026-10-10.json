@@ -1,0 +1,20 @@
+[
+  {
+    "file": "styles/globals.css",
+    "equal": true,
+    "sha256": "7d7332cc65bbfdfba2edd839861666c1eed14abf113749224c46d841b2557198",
+    "bytes": 12701
+  },
+  {
+    "file": "styles/logo-fix.css",
+    "equal": true,
+    "sha256": "c9a7002331032668b60a5ccbec7192c52f2c025125d9c654d2155dc66bcc6d79",
+    "bytes": 2094
+  },
+  {
+    "file": "pages/agenda-master-review.js CSS",
+    "equal": true,
+    "bytes": 11805,
+    "sha256": "d968d8f7aff8a37bd95f24ca6924dac2bce1b10f34b15fba63c1734bc38dae79"
+  }
+]

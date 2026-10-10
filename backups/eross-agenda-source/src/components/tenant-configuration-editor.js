@@ -1,11 +1,11 @@
 import {useEffect,useState} from 'react';
 const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-export default function TenantConfigurationEditor(){
+export default function TenantConfigurationEditor({onChanged}){
  const [config,setConfig]=useState(null),[resources,setResources]=useState(null),[blocks,setBlocks]=useState([]),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[name,setName]=useState(''),[kind,setKind]=useState('responsible'),[block,setBlock]=useState({date:'',from:'09:00',to:'10:00',reason:''});
  async function call(path,method='GET',body){const r=await fetch('/api/agenda/'+path,{method,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});const j=await r.json();if(!r.ok)throw Error(j.error||'Error');return j}
  async function load(){const [c,r,b]=await Promise.all([call('config'),call('bootstrap'),call('blocks')]);setConfig({...c,days:days.map((day,weekday)=>c.days.find(x=>x.weekday===weekday&&!x.user_id&&!x.location_id)||{day,weekday,active:false,allDay:false,slots:[]})});setResources(r);setBlocks(b.blocks)}
  useEffect(()=>{load().catch(e=>setMessage(e.message))},[]);
- async function run(action){if(busy)return;setBusy(true);setMessage('');try{await action();await load();setMessage('Cambios guardados')}catch(e){setMessage(e.message)}finally{setBusy(false)}}
+ async function run(action){if(busy)return;setBusy(true);setMessage('');try{await action();await load();setMessage('Cambios guardados');onChanged?.()}catch(e){setMessage(e.message)}finally{setBusy(false)}}
  const updateType=(i,key,value)=>setConfig(c=>({...c,types:c.types.map((t,n)=>n===i?{...t,[key]:value}:t)}));
  const updateDay=(i,key,value)=>setConfig(c=>({...c,days:c.days.map((d,n)=>n===i?{...d,[key]:value}:d)}));
  return <section className="panel"><div className="panelHead"><h3>Administrar configuración</h3></div>{message&&<p role="status">{message}</p>}{config&&<>
