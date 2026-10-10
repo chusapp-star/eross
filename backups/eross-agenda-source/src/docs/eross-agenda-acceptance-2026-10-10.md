@@ -55,7 +55,7 @@ Las pruebas HTTP locales ejecutan los handlers reales de Next.js conectados a Ne
 
 - Completar navegación autenticada en navegador sobre el nuevo despliegue QA: Mes, Semana, Día, Lista, Disponibilidad, Clientes, Estadísticas, Empresas, Usuarios, Configuración y retorno entre secciones.
 - Comparar la interfaz renderizada con el prototipo aprobado, en escritorio y móvil; comprobar descarga y apertura del CSV, persistencia después de recargar, errores visibles y ausencia de regresiones de CSS.
-- Validar el alta global de empresas con una identidad autorizada para provisión. `EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID` no está configurado en el proyecto QA: un administrador de empresa no se convierte automáticamente en administrador global.
+- Validar el alta global de empresas con la nueva identidad QA autorizada para provisión. La configuración del permiso quedó resuelta en la continuación descrita abajo; la prueba funcional sigue pendiente. Un administrador de empresa no se convierte automáticamente en administrador global.
 - Acordar y probar la salida del modo QA en un futuro entorno de lanzamiento, conservando aislamiento, migraciones y configuración. Esta sesión no autoriza cambiar producción antes de aprobación.
 
 ## Límite de la validación visual
@@ -79,3 +79,5 @@ Se configuró `EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID` únicamente en el proye
 `docs/qa-activation-evidence-2026-10-10.json` registra **18 comprobaciones locales aprobadas**, incluidos aislamiento de entorno, origen, invitación inválida, empresa ajena, contraseña inválida, concurrencia de activación, reutilización rechazada y login real posterior. Se usó una cuarta identidad desechable para estas pruebas, sin consumir las invitaciones del usuario. La compilación completa también pasó. No se suman estas comprobaciones locales a las 72 remotas anteriores.
 
 Siguiente paso concreto: el usuario establece la contraseña en el navegador compartido, el flujo abre la sesión de Sol o Luna, y se completan navegación, móvil, CSV, administración, provisión y aislamiento. Estos criterios continúan pendientes de aceptación.
+
+Despliegue de esta continuación: commit `b4e090fdad9a5f4efeff6bd5446856813eab9755`, QA `dpl_EwQkcCK96ZWLQS7U574vNSUYrvmz`. Se verificó en el navegador que la invitación real muestra la identidad nueva, las dos empresas autorizadas y los campos de nueva contraseña, sin consumirla. El alias es `https://eross-agenda-qa.vercel.app`. Se volvió a comprobar que EROSS producción conserva `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`.
