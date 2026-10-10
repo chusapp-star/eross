@@ -187,7 +187,7 @@ export default async function handler(req,res){
     if(m.includes("INVALID_SLOT_INTERVAL")) return res.status(409).json({error:"La hora debe coincidir con el intervalo de reserva configurado"});
     if(m.includes("OUTSIDE_AVAILABILITY")) return res.status(409).json({error:"Ese horario está fuera de la disponibilidad configurada"});
     if(m.includes("BLOCKED:")) return res.status(409).json({error:m.split("BLOCKED:")[1]||"Horario bloqueado"});
-    if(m.includes("DOUBLE_BOOKING")||m.includes("agenda_no_buffer_overlap_responsible")||m.includes("agenda_no_double_booking_responsible")||m.includes("agenda_no_overlapping_active_responsible")) return res.status(409).json({error:"Ese responsable ya tiene una cita que choca con ese horario"});
+    if(error?.code==="23P01"||m.includes("agenda_qa_no_concurrent_responsible_overlap")||m.includes("DOUBLE_BOOKING")||m.includes("agenda_no_buffer_overlap_responsible")||m.includes("agenda_no_double_booking_responsible")||m.includes("agenda_no_overlapping_active_responsible")) return res.status(409).json({error:"Ese responsable ya tiene una cita que choca con ese horario"});
     return res.status(500).json({error:"No se pudo guardar la cita"});
   }
 }
