@@ -10,7 +10,7 @@ export default async function handler(req,res){
  const allowed=process.env.EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID;
  if(req.method==="POST"&&!allowed)return res.status(403).json({error:"Alta de empresas aún no habilitada"});
  let origin;
- try{origin=new URL(String(req.headers.origin||"")).host}catch{return res.status(403).json({error:"Origen inválido"})}
+ try{origin=req.method==="POST"?new URL(String(req.headers.origin||"")).host:null}catch{return res.status(403).json({error:"Origen inválido"})}
  if(req.method==="POST"&&origin!==req.headers.host)return res.status(403).json({error:"Origen no autorizado"});
  const cookie=String(req.headers.cookie||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("eross_identity_qa="));
  const session=verifyIdentitySession(cookie?.slice("eross_identity_qa=".length));
