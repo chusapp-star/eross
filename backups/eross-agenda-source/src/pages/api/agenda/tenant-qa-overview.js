@@ -1,6 +1,7 @@
 import {getSql} from "../../../lib/agenda-db";
 import {verifyIdentitySession} from "../../../lib/agenda-identity-auth";
 import {resolveTenantMembership} from "../../../lib/agenda-tenant";
+import {navigationForRole} from "../../../lib/agenda-role-policy";
 const COOKIE="eross_identity_qa";
 export default async function handler(req,res){
  res.setHeader("Cache-Control","no-store");
@@ -16,6 +17,6 @@ export default async function handler(req,res){
   const company=await sql`SELECT id::text,name FROM agenda_companies WHERE id=${membership.company_id}::uuid AND active=true`;
   const totals=await sql`SELECT count(*)::int AS appointments FROM agenda_appointments WHERE company_id=${membership.company_id}::uuid`;
   const signals=await sql`SELECT count(*)::int AS signals FROM agenda_integration_outbox WHERE company_id=${membership.company_id}::uuid`;
-  return res.status(200).json({ok:true,company:company[0],role:membership.role,counts:{appointments:totals[0]?.appointments||0,signals:signals[0]?.signals||0}});
+  return res.status(200).json({ok:true,company:company[0],role:membership.role,navigation:navigationForRole(membership.role),counts:{appointments:totals[0]?.appointments||0,signals:signals[0]?.signals||0}});
  }catch(e){console.error("tenant overview qa",e);return res.status(500).json({error:"No se pudo consultar empresa"})}
 }
