@@ -97,6 +97,12 @@ export default async function handler(req,res){
       const owned=await sql`SELECT id FROM agenda_appointments WHERE id=${id}::uuid AND company_id=${companyId}::uuid LIMIT 1`;
       if(!owned.length)return res.status(404).json({error:"Cita no encontrada"});
     }
+    // Reject malformed identifiers before PostgreSQL casts; never expose a 500 for bad input.
+    const validUuid=value=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i.test(String(value));
+    for(const key of ["appointment_type_id","responsible_user_id","location_id","client_id"]){
+      if(body[key]!==undefined&&body[key]!==null&&String(body[key]).trim()!==""&&!validUuid(body[key]))
+        return res.status(400).json({error:"Identificador inválido: "+key});
+    }
     const {type,user,location}=await resolveContext(sql,companyId,body);
     // A booking without a concrete responsible cannot be protected by the exclusion constraint.
     if(!user)throw new Error("RESPONSIBLE_REQUIRED");
