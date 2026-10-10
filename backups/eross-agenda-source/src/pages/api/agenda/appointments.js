@@ -26,11 +26,11 @@ async function resolveContext(sql,companyId,body){
   return {type:typeRows[0],user,location};
 }
 
-async function validateWindow(sql,companyId,body,type,userId,ignoreId){
+async function validateWindow(sql,companyId,body,type,userId,locationId,ignoreId){
   const date=clean(body.date),time=clean(body.time);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))throw new Error("DATE_REQUIRED");
   const weekday=(await sql`SELECT EXTRACT(DOW FROM ${date}::date)::int weekday`)[0].weekday;
-  const rule=(await sql`SELECT active,all_day,slots FROM agenda_availability_rules WHERE company_id=${companyId}::uuid AND weekday=${weekday} AND user_id IS NULL AND location_id IS NULL LIMIT 1`)[0];
+  const rule=(await sql`SELECT active,all_day,slots FROM agenda_availability_rules WHERE company_id=${companyId}::uuid AND weekday=${weekday} AND (user_id IS NULL OR user_id=${userId}::uuid) AND (location_id IS NULL OR location_id=${locationId}::uuid) ORDER BY (user_id IS NOT NULL)::int+(location_id IS NOT NULL)::int DESC LIMIT 1`)[0];
   if(!rule||!rule.active) throw new Error("OUTSIDE_AVAILABILITY");
   const mins=Number(time.slice(0,2))*60+Number(time.slice(3,5));
   // No confiar solo en el calendario del navegador: aplicar reglas también en el servidor.
@@ -63,6 +63,8 @@ async function validateWindow(sql,companyId,body,type,userId,ignoreId){
   if(!fits) throw new Error("OUTSIDE_AVAILABILITY");
   const block=await sql`SELECT reason FROM agenda_blocks b JOIN agenda_companies c ON c.id=b.company_id
                          WHERE b.company_id=${companyId}::uuid
+                         AND (b.user_id IS NULL OR b.user_id=${userId}::uuid)
+                         AND (b.location_id IS NULL OR b.location_id=${locationId}::uuid)
                          AND tstzrange(b.starts_at,b.ends_at,'[)') &&
                          tstzrange(((${date}::date+${time}::time) AT TIME ZONE c.timezone)-make_interval(mins=>${before}),
                                    ((${date}::date+${time}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${dur+after}),'[)')
@@ -103,7 +105,7 @@ export default async function handler(req,res){
       if(!existing.length)return res.status(404).json({error:"Cita no encontrada"});
       status=existing[0].status;
     }
-    await validateWindow(sql,companyId,body,type,userId,req.method==="PATCH"?body.id:null);
+    await validateWindow(sql,companyId,body,type,userId,location?.id||null,req.method==="PATCH"?body.id:null);
     if(!clean(body.name))throw new Error("CLIENT_REQUIRED");
     // Appointment duration comes from the company-owned service type, never an untrusted browser override.
     const duration=Number(type.duration_min);
