@@ -8,7 +8,7 @@ Código existente: `backups/eross-agenda-source/src`. Se conserva `pages/eross-o
 
 Base exclusiva de pruebas: Neon `soft-lake-14045662`, rama `br-red-smoke-b792oaol`, base `eross_agenda`. Los datos creados son empresas, identidades, responsables, sedes, clientes y citas ficticios con prefijo QA Acceptance. No se modificaron Neon principal ni Medical Óptica vouchers. No se realizó despliegue en EROSS producción.
 
-Versión funcional desplegada y probada: `b8a86ebc0954eb4f17208cb5e985cae23a15defb`, despliegue `dpl_7EZWPUYkg16Lptsbj9sYgqRmUTjq`, URL https://eross-agenda-qa.vercel.app/eross-original-integrado-qa. El despliegue EROSS producción permaneció en `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`.
+Versión funcional desplegada y probada: `b8a86ebc0954eb4f17208cb5e985cae23a15defb`, despliegue asociado al alias durante las pruebas `dpl_9vjSMdX3cMuARQAnLecLBFE3rvhg`, URL https://eross-agenda-qa.vercel.app/eross-original-integrado-qa. También se completó un despliegue manual del mismo commit (`dpl_7EZWPUYkg16Lptsbj9sYgqRmUTjq`). El despliegue EROSS producción permaneció en `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`.
 
 La suite remota pasó 41 comprobaciones de autenticación/reservas y 31 de administración/configuración: **72 comprobaciones HTTP aprobadas contra Vercel QA**, con Neon QA y cuentas ficticias. La versión desplegada coincide con el commit indicado; la compilación local y la de Vercel terminaron correctamente.
 
