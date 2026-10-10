@@ -14,7 +14,8 @@ export default async function handler(req,res){
   const m=await resolveTenantMembership(sql,{identityId:session.sub,companyId:session.tenant});
   if(!m||m.membership_id!==session.membership||m.role!==session.role||!roleCan(m.role,"appointments.read"))return res.status(403).json({error:"Acceso denegado"});
   const company=(await sql`SELECT name,timezone FROM agenda_companies WHERE id=${m.company_id}::uuid AND active=true`)[0];
-  const from=String(req.query.from||"2026-01-01"),to=String(req.query.to||"2027-01-01");
+  const currentYear=new Date().getUTCFullYear();
+  const from=String(req.query.from||`${currentYear}-01-01`),to=String(req.query.to||`${currentYear+1}-01-01`);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)||from>=to)return res.status(400).json({error:"Rango inválido"});
   const records=await sql`SELECT a.status, to_char(a.starts_at AT TIME ZONE c.timezone ,'YYYY-MM') AS month_key,
    COALESCE(u.name,'Sin asignar') responsible,COALESCE(l.name,'Sin sede') location
