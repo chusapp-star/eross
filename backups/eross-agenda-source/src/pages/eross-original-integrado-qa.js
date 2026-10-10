@@ -55,7 +55,9 @@ export default function Home(){
  {section==="Agenda"&&<AgendaDatabaseUnified tenantOnly embedded/>}
  {section==="Estadísticas"&&<><section className="cards four">{metric("Total",report?.total||0,"Citas 2026")}{metric("Atendidas",report?.statuses?.attended||0,"Finalizadas")}{metric("No asistieron",report?.statuses?.no_show||0,"Ausencias")}{metric("Reprogramadas",report?.statuses?.rescheduled||0,"Cambios")}</section><div className="twoCol"><Panel title="Por responsable">{rows(report?.byResponsible)}</Panel><Panel title="Por sede">{rows(report?.byLocation)}</Panel></div></>}
  {section==="Clientes"&&<TenantClients/>}
- {["Empresas","Usuarios","Configuración"].includes(section)&&<><div role="status" style={{margin:"16px 0",padding:"14px 18px",borderRadius:12,background:"#fff4dc",border:"1px solid #ddb25a",color:"#6d5014",fontWeight:700}}>VISTA ORIGINAL RECUPERADA · DATOS DE DEMOSTRACIÓN. Esta pantalla es únicamente visual y no está conectada a Neon. No ingresés información real aquí.</div>{section==="Empresas"&&<Companies/>}{section==="Usuarios"&&<Users/>}{section==="Configuración"&&<Settings/>}</>}
+ {section==="Empresas"&&<TenantCompany/>}
+ {section==="Usuarios"&&<TenantUsers/>}
+ {section==="Configuración"&&<><div role="status" style={{margin:"16px 0",padding:"14px 18px",borderRadius:12,background:"#fff4dc",border:"1px solid #ddb25a",color:"#6d5014",fontWeight:700}}>VISTA ORIGINAL · CONFIGURACIÓN DEMOSTRATIVA. Los botones no guardan cambios en Neon.</div><Settings/></>}
  </main></div>;
 }
 function Login({onLogin}){
@@ -111,6 +113,16 @@ function TenantClients(){
  const exportClients=()=>downloadCsv("EROSS_clientes_reales_QA.csv",[["Nombre","Correo","Teléfono","Origen","Citas","Última cita"],...filtered.map(x=>[x.name,x.email,x.phone,x.source,x.appointments,x.last_appointment||""])]);
  return <><div className="toolbar"><div><h2>Clientes de tu empresa</h2><p>Registros reales de Neon QA, aislados por empresa. Consulta y exportación.</p></div><button className="plainBtn" disabled={loading||!!error} onClick={exportClients}>↓ Exportar CSV</button></div>
  <Panel>{loading?<p>Cargando clientes de la empresa...</p>:error?<p role="alert">{error}</p>:<><div className="filters"><input aria-label="Buscar clientes" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar por nombre, correo, teléfono u origen..."/></div><div className="clientTable"><div className="clientRow head"><span>Cliente</span><span>Contacto</span><span>Origen</span><span>Citas</span><span>Última cita</span></div>{filtered.map(x=><div className="clientRow" key={x.id}><span><b>{x.name}</b></span><span>{x.phone||"—"}<small>{x.email||""}</small></span><span>{x.source||"—"}</span><span>{x.appointments||0}</span><span>{x.last_appointment?new Date(x.last_appointment).toLocaleDateString("es-CR",{timeZone:"America/Costa_Rica"}):"—"}</span></div>)}{!filtered.length&&<p>No hay clientes para esta búsqueda.</p>}</div></>}</Panel></>;
+}
+function TenantCompany(){
+ const [data,setData]=useState(null),[err,setErr]=useState(""),[loading,setLoading]=useState(true);
+ useEffect(()=>{let mounted=true;fetch("/api/agenda/tenant-qa-company",{cache:"no-store"}).then(async r=>{let d=await r.json();if(!r.ok)throw Error(d.error||"Error");if(mounted){setData(d);setLoading(false)}}).catch(e=>{if(mounted){setErr(e.message);setLoading(false)}});return()=>{mounted=false}},[]);
+ return <><div className="toolbar"><div><h2>Mi empresa</h2><p>Información real de Neon QA. Solo se muestra la empresa de tu sesión.</p></div></div>{loading?<Panel>Cargando empresa...</Panel>:err?<Panel><p role="alert">{err}</p></Panel>:<><div className="companyCards"><div className="companyCard"><div className="companyIcon big">{data.company.name?.[0]}</div><span className="badge green">Activa</span><h3>{data.company.name}</h3><p>Zona horaria: {data.company.timezone}</p><div className="companyData"><b>{data.totals.users}</b> usuarios · <b>{data.totals.locations}</b> sedes · <b>{data.totals.clients}</b> clientes</div></div></div><Panel title="Acceso multiempresa"><p>Tu sesión solo permite ver la empresa autorizada. La administración global de otras empresas requiere un módulo separado con permisos específicos.</p></Panel></>}</>;
+}
+function TenantUsers(){
+ const [users,setUsers]=useState([]),[err,setErr]=useState(""),[loading,setLoading]=useState(true);
+ useEffect(()=>{let mounted=true;fetch("/api/agenda/tenant-qa-users",{cache:"no-store"}).then(async r=>{let d=await r.json();if(!r.ok)throw Error(d.error||"Error");if(mounted){setUsers(d.users||[]);setLoading(false)}}).catch(e=>{if(mounted){setErr(e.message);setLoading(false)}});return()=>{mounted=false}},[]);
+ return <><div className="toolbar"><div><h2>Usuarios y permisos</h2><p>Usuarios reales asociados a la empresa actual. Solo lectura en QA.</p></div></div><Panel title="Directorio de usuarios">{loading?<p>Cargando usuarios...</p>:err?<p role="alert">{err}</p>:<div className="simpleTable"><div className="simpleRow head"><span>Usuario</span><span>Rol</span><span>Estado</span></div>{users.map(u=><div className="simpleRow" key={u.id}><span><b>{u.name}</b><small>{u.email||""}</small></span><span>{u.role}</span><span>{u.active?"Activo":"Inactivo"}</span></div>)}{!users.length&&<p>No hay usuarios registrados.</p>}</div>}</Panel></>;
 }
 function Clients(){
   const [q,setQ]=useState("");
