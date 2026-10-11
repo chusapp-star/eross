@@ -24,7 +24,7 @@ export function layoutAppointments(appointments,start,end){
  for(const group of clusters){const lanes=[];for(const a of group){let lane=lanes.findIndex(t=>t<=a.start);if(lane<0)lane=lanes.length;lanes[lane]=a.end;a.lane=lane}for(const a of group)a.laneCount=lanes.length;}
  return items;
 }
-export function timelineModel({data,days,type,settings,userId='',locationId=''}){
+export function timelineModel({data,days,type,settings,userId='',locationId='',visiblePadding=0}){
  const step=Math.max(1,Math.min(30,Number(settings?.slotStep||30))),ranges=[];
  const columns=days.map(date=>{
   const appointments=(data.appointments||[]).filter(a=>(a.date===date||(a.date===previousDay(date)&&minute(a.time)+Number(a.duration||30)>1440))&&(!userId||a.responsible_user_id===userId)&&(!locationId||a.location_id===locationId)).map(a=>a.date===date?a:{...a,_startMinute:minute(a.time)-1440,continues:true});
@@ -35,7 +35,7 @@ export function timelineModel({data,days,type,settings,userId='',locationId=''})
  });
  const valid=ranges.filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b)&&b>a);
  if(!valid.length)return {columns,start:0,end:0,step,rows:[],height:0};
- const start=Math.max(0,Math.floor(Math.min(...valid.map(([a])=>a))/step)*step),end=Math.min(1440,Math.ceil(Math.max(...valid.map(([,b])=>b))/step)*step);
+ const start=Math.max(0,Math.floor(Math.min(...valid.map(([a])=>a))/step)*step),end=Math.min(1440,Math.ceil((Math.max(...valid.map(([,b])=>b))+Math.max(0,Math.min(1440,Number(visiblePadding)||0)))/step)*step);
  const rows=Array.from({length:Math.ceil((end-start)/step)},(_,i)=>start+i*step);
  return {columns:columns.map(c=>({...c,layout:layoutAppointments(c.appointments,start,end)})),start,end,step,rows,height:rows.length*32};
 }

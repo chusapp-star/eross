@@ -59,6 +59,21 @@
       "name": "Buffers retained around occupied appointments",
       "result": "PASS",
       "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Visual margin reaches 20:00 without authorizing after-hours bookings",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Visual margin follows later company schedule rather than imposing 20:00",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Visual margin never invents a grid for unconfigured dates",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
     }
   ],
   "passed": true,

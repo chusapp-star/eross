@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AgendaDatabaseUnified from "./agenda-master-review";
 import TenantAccountCreate from "../components/tenant-account-create";
 import TenantConfigurationEditor from "../components/tenant-configuration-editor";
@@ -44,6 +44,20 @@ function Brand({large=false,compact=false}){
 
 export default function Home(){
  const [section,setSection]=useState("Dashboard"),[auth,setAuth]=useState("loading"),[overview,setOverview]=useState(null),[report,setReport]=useState(null),[error,setError]=useState(""),[revision,setRevision]=useState(0),[loginEmail,setLoginEmail]=useState(""),[loginPassword,setLoginPassword]=useState(""),[loginCompanies,setLoginCompanies]=useState([]),[loginCompany,setLoginCompany]=useState(""),[loginBusy,setLoginBusy]=useState(false);
+ const [mobileNav,setMobileNav]=useState(false);
+ const menuRef=useRef(null),menuToggleRef=useRef(null);
+ useEffect(()=>{
+  if(!mobileNav)return;
+  const previousOverflow=document.body.style.overflow;
+  document.body.style.overflow='hidden';
+  const focusable=()=>Array.from(menuRef.current?.querySelectorAll('button:not(:disabled),a[href],select')||[]);
+  focusable()[0]?.focus();
+  const key=e=>{if(e.key==='Escape'){setMobileNav(false);return}if(e.key==='Tab'){const items=focusable(),first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}};
+  const media=window.matchMedia('(max-width:820px)');
+  const resize=()=>{if(!media.matches)setMobileNav(false)};
+  document.addEventListener('keydown',key);media.addEventListener('change',resize);
+  return()=>{document.body.style.overflow=previousOverflow;document.removeEventListener('keydown',key);media.removeEventListener('change',resize);menuToggleRef.current?.focus()};
+ },[mobileNav]);
  const refresh=()=>setRevision(v=>v+1);
  const login=async e=>{e.preventDefault();setLoginBusy(true);setError("");try{const r=await fetch("/api/agenda/identity-qa-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:loginEmail,password:loginPassword,...(loginCompany?{company_id:loginCompany}:{})})});const j=await r.json();if(!r.ok)throw Error(j.error||"Acceso no disponible");if(j.requires_company){setLoginCompanies(j.companies);setLoginCompany(j.companies[0]?.id||"")}else{setLoginPassword("");setAuth("loading");refresh()}}catch(e){setError(e.message)}finally{setLoginBusy(false)}};
  const logout=async()=>{const r=await fetch("/api/agenda/identity-qa-session",{method:"DELETE"});if(r.ok){setOverview(null);setReport(null);setAuth("error");setError("Sesión cerrada");setSection("Dashboard");setLoginCompany("");setLoginCompanies([]);refresh()}else setError("No se pudo cerrar sesión")};
@@ -54,8 +68,8 @@ export default function Home(){
  const metric=(label,value,note)=> <Metric label={label} value={value} note={note}/>;
  const rows=(obj)=>Object.entries(obj||{}).sort((a,b)=>b[1]-a[1]).map(([k,v])=><div key={k} className="companyRow"><b>{k}</b><span className="badge amber">{v}</span></div>);
  return <div className="shell">
- <aside className="sidebar"><Brand compact/><div className="erossProductName"><b>EROSS Agenda</b><small>Gestión de citas y clientes</small></div><div className="userCard"><span>{overview?.company?.name?.[0]||"E"}</span><div><b>{overview?.company?.name||"EROSS"}</b><small>{overview?.role||"Usuario"}</small></div></div><nav>{menus.map(item=><button key={item} className={section===item?"active":""} onClick={()=>{if(menus.includes(item))setSection(item);refresh()}}><i></i>{item}</button>)}</nav><div className="sideFoot"><span></span> Plataforma operativa<small>EROSS Agenda · QA integrada</small></div></aside>
- <main className="main"><header className="topbar"><div><small>EROSS OS / {overview?.company?.name}</small><h1>{section}</h1></div><div className="profile">{overview?.role||"Empresa"} <span>Datos reales · Neon QA</span><button className="link" onClick={logout}>Cerrar sesión</button></div></header>
+ <aside id="eross-mobile-navigation" ref={menuRef} className={"sidebar"+(mobileNav?" erossMobileOpen":"")} aria-label="Menú principal"><button className="erossMobileClose" onClick={()=>setMobileNav(false)} aria-label="Cerrar menú">✕</button><Brand compact/><div className="erossProductName"><b>EROSS Agenda</b><small>Gestión de citas y clientes</small></div><div className="userCard"><span>{overview?.company?.name?.[0]||"E"}</span><div><b>{overview?.company?.name||"EROSS"}</b><small>{overview?.role||"Usuario"}</small></div></div><nav>{menus.map(item=><button key={item} className={section===item?"active":""} onClick={()=>{if(menus.includes(item))setSection(item);setMobileNav(false);refresh()}}><i></i>{item}</button>)}</nav><div className="sideFoot"><span></span> Plataforma operativa<small>EROSS Agenda · QA integrada</small></div></aside>
+ {mobileNav&&<button className="erossMobileBackdrop" aria-label="Cerrar menú lateral" onClick={()=>setMobileNav(false)}/>}<main className="main" inert={mobileNav?"":undefined}><header className="topbar"><button ref={menuToggleRef} className="erossMobileToggle" aria-label="Abrir menú" aria-controls="eross-mobile-navigation" aria-expanded={mobileNav} onClick={()=>setMobileNav(true)}>☰</button><div><small>EROSS OS / {overview?.company?.name}</small><h1>{section}</h1></div><div className="profile">{overview?.role||"Empresa"} <span>Datos reales · Neon QA</span><button className="link" onClick={logout}>Cerrar sesión</button></div></header>
  {section==="Dashboard"&&<><section className="welcome"><div><span className="pill gold">{overview?.company?.name?.toUpperCase()}</span><h2>Panel principal EROSS</h2><p>Información operativa de tu empresa, conectada a Neon.</p></div><button className="goldBtn small" onClick={()=>setSection("Agenda")}>Abrir Agenda Premium →</button></section><section className="cards four">{metric("Total de citas",report?.total||0,"Año 2026")}{metric("Confirmadas",report?.statuses?.confirmed||0,"Seguimiento activo")}{metric("Pendientes",report?.statuses?.pending||0,"Por confirmar")}{metric("Canceladas",report?.statuses?.cancelled||0,"Citas canceladas")}</section><div className="twoCol"><Panel title="Citas por mes" action={<button className="link" onClick={()=>setSection("Estadísticas")}>Ver estadísticas →</button>}>{rows(report?.byMonth)}</Panel><Panel title="Accesos rápidos"><button className="blueBtn" onClick={()=>setSection("Agenda")}>Gestionar agenda →</button><p>Entrá al calendario, consultá citas y gestioná sus estados.</p><button className="blueBtn" onClick={()=>setSection("Estadísticas")}>Estadísticas de la empresa →</button></Panel></div></>}
  {section==="Agenda"&&<AgendaDatabaseUnified tenantOnly embedded onChanged={refresh}/>}
  {section==="Estadísticas"&&<TenantStatistics revision={revision}/>}
@@ -187,7 +201,7 @@ function TenantStatistics({revision}){
  useEffect(()=>{let live=true;setBusy(true);setError('');const end=new Date(to+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+1);if(!from||!to||from>to||Number.isNaN(end.getTime())){setError('Seleccioná un rango válido');setBusy(false);return()=>{live=false}}
  const query=new URLSearchParams({from,to:end.toISOString().slice(0,10),responsible:staff,location:site});fetch('/api/agenda/tenant-qa-report?'+query,{cache:'no-store'}).then(async r=>{const j=await r.json();if(!r.ok)throw Error(j.error);if(live)setReport(j)}).catch(e=>{if(live){setError(e.message);setReport(null)}}).finally(()=>{if(live)setBusy(false)});return()=>{live=false}},[from,to,staff,site,revision]);
  const [exportBusy,setExportBusy]=useState(false),[exportError,setExportError]=useState('');
- const excel=async()=>{setExportBusy(true);setExportError('');try{const query=new URLSearchParams({from:report.from,to:report.to,responsible:staff,location:site,format:'xlsx'});const r=await fetch('/api/agenda/tenant-qa-report?'+query,{cache:'no-store'});if(!r.ok){const j=await r.json();throw Error(j.error||'No se pudo exportar Excel')}const url=URL.createObjectURL(await r.blob());const link=document.createElement('a');link.href=url;link.download='EROSS_estadisticas.xlsx';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(e){setExportError(e.message)}finally{setExportBusy(false)}};
+ const excel=()=>{if(!report||busy||error)return;const query=new URLSearchParams({from:report.from,to:report.to,responsible:staff,location:site,format:'xlsx'});const link=document.createElement('a');link.href='/api/agenda/tenant-qa-report?'+query;link.download='EROSS_estadisticas.xlsx';document.body.appendChild(link);link.click();link.remove()};
  const entries=o=>Object.entries(o||{}).sort((a,b)=>b[1]-a[1]);
  const days=Object.entries(report?.byDay||{}).sort(([a],[b])=>a.localeCompare(b));
  const statuses=report?.statuses||{};
@@ -295,4 +309,4 @@ function NewAppointment({onClose,onSave}){
 function Metric({label,value,note}){return <div className="metric"><span>{label}</span><strong>{value}</strong><small>{note}</small></div>}
 function Panel({title,subtitle,action,children}){return <section className="panel"><div className="panelHead"><div>{title&&<h3>{title}</h3>}{subtitle&&<p>{subtitle}</p>}</div>{action}</div>{children}</section>}
 function countBy(rows,key){const o={};rows.forEach(r=>o[r[key]]=(o[r[key]]||0)+1);return Object.entries(o).sort((a,b)=>b[1]-a[1])}
-function downloadCsv(name,rows){const esc=v=>{let text=String(v??"");if(/^[=+@\-\t\r]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"'};const csv=rows.map(r=>r.map(esc).join(",")).join("\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+function downloadCsv(name,rows){const esc=v=>{let text=String(v??"");if(/^[=+@\-\t\r]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"'};const csv=rows.map(r=>r.map(esc).join(",")).join("\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000)}
