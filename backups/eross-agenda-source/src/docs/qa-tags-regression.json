@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "name": "Defaults, legacy tags and Sol-specific catalog retained",
+      "result": "PASS",
+      "transport": "unit handler with mocked company-scoped SQL"
+    },
+    {
+      "name": "Separate company catalog",
+      "result": "PASS",
+      "transport": "unit handler with mocked company-scoped SQL"
+    },
+    {
+      "name": "Collaborator cannot configure tags",
+      "result": "PASS",
+      "transport": "unit handler with mocked company-scoped SQL"
+    },
+    {
+      "name": "Comma-containing label rejected without writes",
+      "result": "PASS",
+      "transport": "unit handler with mocked company-scoped SQL"
+    },
+    {
+      "name": "Custom label normalized and persisted through handler",
+      "result": "PASS",
+      "transport": "unit handler with mocked company-scoped SQL"
+    },
+    {
+      "name": "Unauthenticated read denied",
+      "result": "PASS",
+      "transport": "unit handler with mocked company-scoped SQL"
+    }
+  ],
+  "passed": true,
+  "limitations": "Mocked SQL; live catalog checked separately"
+}

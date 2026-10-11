@@ -1,0 +1,66 @@
+{
+  "checks": [
+    {
+      "name": "Extended hours from configuration, no 17:00 cutoff",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Occupied slot uses existing engine",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Cancellation releases slot and preserves visible record",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Block prevents clickable availability",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Overnight carry-over appears on following day",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "24-hour configuration supports final slot",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Cross-midnight appointment clips tail on following date",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Overlap gets separate lanes; separate cluster has full width",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "No configured hours does not invent schedule",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "All-responsibles overview cannot create ambiguous booking",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Responsible filtering hides other resource blocks",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    },
+    {
+      "name": "Buffers retained around occupied appointments",
+      "result": "PASS",
+      "transport": "unit with existing availability engine"
+    }
+  ],
+  "passed": true,
+  "limitations": "Pure model tests; deployed reservation and SQL checked separately"
+}
