@@ -1,0 +1,19 @@
+"Estado","Cantidad"
+"pending","1"
+"confirmed","0"
+"rescheduled","1"
+"attended","0"
+"no_show","0"
+"cancelled","0"
+
+"Mes","Cantidad"
+"2026-12","1"
+"2026-11","1"
+
+"Responsable","Cantidad"
+"Sin asignar","1"
+"QA Responsable Sol","1"
+
+"Sede","Cantidad"
+"Sin sede","1"
+"QA Sede Sol","1"

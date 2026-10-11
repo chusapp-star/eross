@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-10",
+  "continuedAt": "2026-10-11T03:22:51.662Z",
+  "scope": "Only EROSS Agenda QA; browser observations before Work pause, plus read-only continuity checks after pause",
+  "codeCommit": "78b1fcbc28e7d272f668025ba207cefb78bf948d",
+  "qaDeployment": "dpl_5Zt6mXrYxUz8sif35gMMLBVB2dY8",
+  "productionDeploymentUnchanged": "dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa",
+  "browserOperations": [
+    "Authenticated dashboard QA Empresa Sol",
+    "Navigation between all seven menu sections",
+    "Created fictitious client and appointment through UI",
+    "Same appointment observed in month, week, day and list",
+    "Confirmed and rescheduled 11:30 to 12:00",
+    "History visible",
+    "Availability occupied-disabled; cancelled-free; reactivated-occupied",
+    "Client search and count/last date",
+    "Downloaded Sol client CSV and Sol stats CSV",
+    "Stats totals matched CSV at download time",
+    "Created Sol responsible and site; saved booking parameters",
+    "Own-role change safely rejected",
+    "Created QA Empresa Boreal Visual 1010 through UI",
+    "Switched to Luna; Sol client and appointment absent",
+    "Switched to Boreal; empty initial dashboard",
+    "Configured Boreal service, Monday hours, responsible and site",
+    "Booked same date/time in Boreal independently of Sol",
+    "Sol client absent in Boreal; downloaded Boreal CSV",
+    "Returned session to Sol",
+    "Opened mobile month/week/day/list/availability and appointment form",
+    "Saved mobile note; persisted on reopening, desktop and DB",
+    "Responsive 360, 390 and 768 widths observed"
+  ],
+  "responsiveMeasurements": [
+    {
+      "screen": "month",
+      "harnessWidth": 390,
+      "client": 373,
+      "scroll": 373
+    },
+    {
+      "screen": "users",
+      "harnessWidth": 390,
+      "client": 373,
+      "scroll": 373
+    },
+    {
+      "screen": "configuration",
+      "harnessWidth": 390,
+      "client": 373,
+      "scroll": 373
+    },
+    {
+      "screen": "list",
+      "harnessWidth": 390,
+      "client": 388,
+      "scroll": 388,
+      "innerTable": 610
+    },
+    {
+      "screen": "clients",
+      "harnessWidth": 360,
+      "client": 358,
+      "scroll": 358,
+      "innerTable": 950
+    },
+    {
+      "screen": "dashboard",
+      "harnessWidth": 360,
+      "client": 343,
+      "scroll": 343
+    },
+    {
+      "screen": "stats",
+      "harnessWidth": 360,
+      "client": 343,
+      "scroll": 343
+    },
+    {
+      "screen": "availability",
+      "harnessWidth": 360,
+      "client": 343,
+      "scroll": 343
+    },
+    {
+      "screen": "month",
+      "harnessWidth": 768,
+      "client": 751,
+      "scroll": 751
+    }
+  ],
+  "remainingVisualChecks": [
+    "Companies authorized selector at 360px after max-width repair",
+    "Weekly toolbar at 360px after wrapping repair",
+    "Save final authenticated screenshots"
+  ],
+  "browserOnResume": {
+    "state": "Login form: Sesión individual requerida",
+    "secureSignInRequest": "declined",
+    "finalMobileRetestCompleted": false
+  },
+  "databaseEvidence": [
+    {
+      "id": "9a58b73d-2221-4e4f-88ef-62b160eacb38",
+      "company_id": "3db4e6fd-12c2-4f02-8fb9-de9ae5f116c7",
+      "company": "QA Empresa Boreal Visual 1010",
+      "status": "pending",
+      "local_start": "2026-11-16 12:00",
+      "reminder_minutes": 0,
+      "confirmation_channel": "Ninguno",
+      "client": "QA Visual Boreal 1010",
+      "comments": null
+    },
+    {
+      "id": "f5220188-8bc1-4d1e-b487-51ab11a9c924",
+      "company_id": "eec3c94c-34b0-4c91-b209-67e957a13e01",
+      "company": "QA Empresa Sol",
+      "status": "confirmed",
+      "local_start": "2026-11-16 12:00",
+      "reminder_minutes": 0,
+      "confirmation_channel": "Ninguno",
+      "client": "QA Visual Sol 1010",
+      "comments": "Nota de aceptación visual Sol. Reprogramada desde el navegador. Guardado móvil 390 px."
+    }
+  ],
+  "limitations": [
+    "No physical iOS/Android certification",
+    "No pixel-by-pixel approved screenshot comparison",
+    "No external notification delivery tested",
+    "Effective role-based permissions; individual editable permissions not active"
+  ],
+  "commercialApproved": false
+}

@@ -1,83 +1,121 @@
-# EROSS Agenda Premium Multiempresa — informe de aceptación QA
+# EROSS Agenda Premium Multiempresa — aceptación QA actualizada
 
-Fecha: 10 de octubre de 2026. Base de trabajo: `fe3be055a4776c7547276e0ef021032e59286e4c`, rama `dev/eross-agenda-config-neon-2026-10-08`.
-
-## Entorno y alcance
-
-Código existente: `backups/eross-agenda-source/src`. Se conserva `pages/eross-original-integrado-qa.js` y el motor `pages/agenda-master-review.js`, con sus cinco vistas y el selector rápido de meses. No se creó otro prototipo ni se editaron los estilos aprobados. Los controles añadidos usan las clases de la interfaz existente; su equivalencia visual queda pendiente de revisión autenticada en navegador.
-
-Base exclusiva de pruebas: Neon `soft-lake-14045662`, rama `br-red-smoke-b792oaol`, base `eross_agenda`. Los datos creados son empresas, identidades, responsables, sedes, clientes y citas ficticios con prefijo QA Acceptance. No se modificaron Neon principal ni Medical Óptica vouchers. No se realizó despliegue en EROSS producción.
-
-Versión funcional desplegada y probada: `b8a86ebc0954eb4f17208cb5e985cae23a15defb`, despliegue asociado al alias durante las pruebas `dpl_9vjSMdX3cMuARQAnLecLBFE3rvhg`, URL https://eross-agenda-qa.vercel.app/eross-original-integrado-qa. También se completó un despliegue manual del mismo commit (`dpl_7EZWPUYkg16Lptsbj9sYgqRmUTjq`). El despliegue EROSS producción permaneció en `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`.
-
-La suite remota pasó 41 comprobaciones de autenticación/reservas y 31 de administración/configuración: **72 comprobaciones HTTP aprobadas contra Vercel QA**, con Neon QA y cuentas ficticias. La versión desplegada coincide con el commit indicado; la compilación local y la de Vercel terminaron correctamente.
-
-Las pruebas HTTP locales ejecutan los handlers reales de Next.js conectados a Neon QA. No sustituyen la prueba del navegador ni la validación funcional del despliegue Vercel. Un estado READY no significa aceptación funcional.
-
-## Bloques y resultados
-
-| Bloque | Resultado comprobado | Estado |
-|---|---|---|
-| 1. Continuidad | Repositorio, rama y commit recuperados; se consultó el informe anterior para no repetir verificaciones SQL ya efectuadas | Completado |
-| 2. Autenticación y permisos | Login real de admin, supervisor y colaborador; ingreso a empresa ajena rechazado; consultas autenticadas; colaborador sin permiso de creación | Probado por HTTP local y Vercel QA |
-| 3. Reservas | Creación, duplicados, edición, reprogramación, estados, cancelación, reutilización, reactivación y solicitudes concurrentes | 17 comprobaciones locales y suite remota aprobadas tras corregir UUID |
-| 4. Configuración | Tipos, márgenes, franjas múltiples, horario hasta 22:00, 24 h, zona horaria, intervalo y anticipación persistidos; lote inválido sin escritura parcial; tipo ajeno rechazado | Probado por HTTP local y Vercel QA |
-| 5. Administración de empresa | Alta de responsables, sedes y cuentas; permisos de supervisor; edición de nombre; protección del propio rol; bloqueo nocturno; historial propio y ajeno | 31 comprobaciones remotas de configuración y administración aprobadas |
-| 6. Disponibilidad | Mismo responsable entre sedes, márgenes de ambas citas, límites contiguos, bloqueos nocturnos y último espacio de un día de 24 h | 7 aserciones pasaron |
-| 7. Navegador y aceptación comercial | Navegación autenticada, comparación visual, CSV descargado, comportamiento responsive y alta global de empresas | Pendiente; no aprobado para comercializar |
-
-## Errores corregidos
-
-1. El validador UUID de creación rechazaba identificadores legítimos: impedía reservar aunque login y lectura funcionaran.
-2. Disponibilidad ignoraba citas del mismo responsable en otra sede y no aplicaba correctamente márgenes de citas existentes ni bloqueos que cruzaban medianoche. Usa los rangos reservados persistidos.
-3. Reactivar una cita cancelada verificaba solo la restricción de solapamiento; ahora comprueba horario, anticipación, bloqueos y vigencia de servicio, responsable y sede.
-4. Guardar recordatorio `0` producía NULL; ahora conserva la elección “Sin recordatorio”.
-5. Configuración estaba vinculada al administrador heredado y podía escribir parcialmente antes de detectar errores. Ahora resuelve la empresa de la sesión, valida el lote completo y guarda transaccionalmente.
-6. Alta de responsables requería un UUID explícito porque la tabla no tiene valor predeterminado; el endpoint genera el identificador.
-7. Estadísticas y resumen quedaban desactualizados tras modificar citas; se actualizan al cambiar de sección y guardar operaciones. Se redujeron consultas del resumen.
-8. Se añadió cierre de sesión, historial visible y edición deshabilitada para colaboradores.
-9. El login integrado usa credenciales reales y solicita selección únicamente entre membresías autorizadas; ya no exige ingresar por una pantalla de laboratorio Sol/Luna.
-10. Se añadieron cuentas de acceso, responsables operativos, sedes, servicios, horarios y bloqueos dentro de la interfaz existente. El correo ya registrado no permite sobrescribir credenciales.
-11. Se uniformó validación de origen en endpoints modificados y se protegió la exportación CSV contra valores que puedan interpretarse como fórmulas.
-12. Next.js se actualizó de 14.2.30 a 14.2.35 dentro de la misma línea, según el parche oficial: https://nextjs.org/blog/security-update-2025-12-11.
-
-## Evidencias y reproducción
-
-- `docs/qa-flow-evidence-1791647728422.json`: pruebas de autenticación/lectura, con el fallo de creación original documentado. Ese fallo no se acredita como aprobado.
-- `docs/qa-flow-evidence-1791647939311.json`: 17 comprobaciones de reservas posteriores a la corrección, todas aprobadas; transporte local declarado.
-- `docs/qa-flow-evidence-1791649451523.json`: **41 comprobaciones remotas aprobadas** contra Vercel QA, con `transport: null` (sin intermediario local).
-- `docs/qa-admin-evidence-2026-10-10.json`: **31 comprobaciones remotas aprobadas** de administración, recursos, configuración, historial y cuentas; `transport` es la URL HTTPS de QA.
-- `docs/qa-status-evidence-2026-10-10.json`: reprogramación, membresías y reactivación bloqueada.
-- `scripts/qa-availability-check.mjs`: comprobaciones deterministas del cálculo que usa la interfaz.
-- `scripts/qa-start.mjs`: inicia Next.js y la suite en un mismo entorno de red; recibe configuración por stdin sin persistir secretos. `suite` admite reservas, `admin` y `status`; `resume` restringe la ejecución a las empresas ficticias identificadas en la evidencia. Las pruebas generan datos ficticios y no envían mensajes.
-
-## Criterios que aún impiden aceptación comercial
-
-- Completar navegación autenticada en navegador sobre el nuevo despliegue QA: Mes, Semana, Día, Lista, Disponibilidad, Clientes, Estadísticas, Empresas, Usuarios, Configuración y retorno entre secciones.
-- Comparar la interfaz renderizada con el prototipo aprobado, en escritorio y móvil; comprobar descarga y apertura del CSV, persistencia después de recargar, errores visibles y ausencia de regresiones de CSS.
-- Validar el alta global de empresas con la nueva identidad QA autorizada para provisión. La configuración del permiso quedó resuelta en la continuación descrita abajo; la prueba funcional sigue pendiente. Un administrador de empresa no se convierte automáticamente en administrador global.
-- Acordar y probar la salida del modo QA en un futuro entorno de lanzamiento, conservando aislamiento, migraciones y configuración. Esta sesión no autoriza cambiar producción antes de aprobación.
-
-## Límite de la validación visual
-
-El navegador superó la protección de Vercel y renderizó el formulario integrado nuevo. La solicitud segura de acceso a la empresa terminó con control manual del usuario; la observación posterior siguió mostrando el formulario de ingreso, sin una sesión empresarial autenticada. No se acreditan navegación interna, CSV descargado ni comparación visual completa. Para cerrar esos puntos se requiere iniciar sesión en QA mediante el navegador compartido, sin enviar contraseñas por chat.
+Fecha de trabajo: 10 de octubre de 2026, Costa Rica. Continuación tras la pausa de Work: 11 de octubre UTC. Este informe sustituye las listas antiguas que marcaban toda la navegación autenticada como pendiente.
 
 ## Dictamen
 
-Aceptación técnica parcial con evidencia. **No se declara la aplicación terminada ni aprobada para lanzamiento comercial mientras los criterios pendientes no se cumplan.** Los bloques comprobados sirven de continuidad; no deben reiniciarse con otra auditoría general.
+**Aceptación funcional QA avanzada, aún sin aprobación de lanzamiento comercial.** Hay 79 comprobaciones HTTP remotas aprobadas, pruebas autenticadas reales de navegación, reservas, CSV y administración, y pruebas responsive en 360, 390 y 768 px. Quedan dos comprobaciones visuales concretas del último código: selector multiempresa y barra de navegación semanal en 360 px. La reanudación encontró el formulario de login con “Sesión individual requerida”; la solicitud de acceso seguro fue cancelada. No se acredita como realizada la revisión posterior a esa pausa.
 
-## Continuación: acceso visual seguro
+La identidad visual se conserva a nivel de los estilos base y componentes existentes. Se añadieron reparaciones responsive, descritas abajo. No se certifica equivalencia píxel a píxel con una captura aprobada de referencia ni pruebas en dispositivos iOS/Android físicos. No se tocaron EROSS producción, Neon principal ni Medical Óptica vouchers.
 
-Se revisaron las empresas originales y sus membresías en Neon QA. Sol (`eec3c94c-34b0-4c91-b209-67e957a13e01`) y Luna (`eec3c94c-34b0-4c91-b209-67e957a13e02`) están activas. Las identidades heredadas usan `qa-sol@eross.invalid` (admin) y `qa-luna@eross.invalid` (supervisor): son identificadores de acceso, no buzones de correo configurados. No se cambiaron esas credenciales. Ambas empresas carecen de responsables operativos al inicio de este bloque.
+## Entorno y versión
 
-Se creó una identidad nueva de aceptación, `ecd0a759-9d86-40bd-9f49-edc97ac2f08f`, con membresías admin explícitas en Sol y Luna. Se prepararon además una identidad supervisor de Sol y una colaborador de Luna. Las tres esperan que el usuario establezca sus contraseñas mediante invitaciones de un solo uso, vigencia de dos horas, almacenadas únicamente como hash SHA-256. Los tokens no se incluyen en archivos ni evidencias. La activación no sobrescribe credenciales existentes; guarda la contraseña con scrypt y entrega una sesión HttpOnly, Secure y SameSite=Strict.
+- Repositorio: `chusapp-star/eross`.
+- Rama: `dev/eross-agenda-config-neon-2026-10-08`.
+- Directorio: `backups/eross-agenda-source/src`.
+- Base conservada: `fe3be055a4776c7547276e0ef021032e59286e4c`.
+- Código funcional actual: `78b1fcbc28e7d272f668025ba207cefb78bf948d`.
+- QA: https://eross-agenda-qa.vercel.app/eross-original-integrado-qa
+- Despliegue de ese código: `dpl_5Zt6mXrYxUz8sif35gMMLBVB2dY8`, alias QA comprobado. READY acredita compilación y despliegue; los resultados funcionales se acreditan por separado.
+- Neon exclusivo: proyecto `soft-lake-14045662`, rama `br-red-smoke-b792oaol`, base `eross_agenda`.
+- EROSS producción sigue en `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`, comprobado nuevamente al reanudar.
 
-El flujo `/eross-qa-activar` y su API están restringidos por las dos banderas QA y por el hostname exacto del endpoint Neon QA. La página usa las clases existentes del acceso aprobado, sin cambios de CSS. El token se transporta en el fragmento y se retira de la URL al cargar; no se envía en la ruta HTTP ni en el referente.
+Vercel etiqueta el destino del proyecto **eross-agenda-qa** como `production`. Esa etiqueta pertenece al proyecto QA y no significa un despliegue en el proyecto EROSS producción.
 
-Se configuró `EROSS_QA_COMPANY_PROVISIONER_IDENTITY_ID` únicamente en el proyecto Vercel `eross-agenda-qa`, apuntando a la identidad nueva de aceptación. Se resuelve así el impedimento de configuración, pero el alta global sigue pendiente de prueba funcional; configurar el permiso no equivale a aprobar el flujo.
+## Bloques completados y evidencia
 
-`docs/qa-activation-evidence-2026-10-10.json` registra **18 comprobaciones locales aprobadas**, incluidos aislamiento de entorno, origen, invitación inválida, empresa ajena, contraseña inválida, concurrencia de activación, reutilización rechazada y login real posterior. Se usó una cuarta identidad desechable para estas pruebas, sin consumir las invitaciones del usuario. La compilación completa también pasó. No se suman estas comprobaciones locales a las 72 remotas anteriores.
+| Bloque | Resultado comprobado | Evidencia |
+|---|---|---|
+| Acceso | Usuario estableció personalmente su contraseña QA; login empresarial y selección autorizada de Sol/Luna. Credenciales heredadas sin cambios | Activación local: 18 aserciones; sesión real observada en navegador |
+| Navegación | Dashboard, Agenda Premium, Clientes, Estadísticas, Empresas, Usuarios y Configuración; retorno entre secciones sin perder la sesión | Pruebas del navegador compartido antes de la pausa |
+| Agenda | Mes, Semana, Día, Lista y Disponibilidad muestran la misma cita de Sol; selector rápido de meses operativo | Cita `f5220188-8bc1-4d1e-b487-51ab11a9c924` |
+| Gestión de citas | Crear, confirmar, reprogramar de 11:30 a 12:00, editar notas desde móvil, cancelar, reactivar y consultar historial | UI + registros Neon QA, seis eventos persistidos |
+| Disponibilidad | 12:00 ocupado y deshabilitado; tras cancelar queda disponible; al reactivar vuelve a ocupado | Resultado visible, más suite HTTP de reservas |
+| Clientes | Búsqueda real, conteo de citas y fecha de última cita; cliente ficticio de Sol ausente en Luna y Boreal | UI y CSV descargados |
+| CSV | Descarga real de clientes Sol, estadísticas Sol y clientes Boreal; apertura y análisis CSV UTF-8 válidos | Tres archivos `qa-browser-*.csv` |
+| Configuración | Alta de responsables/sedes en Sol y Boreal, parámetros guardados en Sol; servicio nuevo y horario de lunes 08:00–20:00 en Boreal, con resumen actualizado | UI + suite HTTP de 31 controles de administración |
+| Usuarios y roles | Directorio, roles y consulta de permisos visibles. Cambio del propio rol rechazado. Admin/supervisor/colaborador y accesos ajenos probados por HTTP | Suite remota + prueba local de cambio de empresa (19 aserciones) |
+| Concurrencia de roles | Dos administradores se intentan degradar simultáneamente: un cambio aplicado, el otro denegado; queda un administrador y una auditoría | 7 aserciones remotas y 7 locales |
+| Multiempresa | Crear Boreal desde UI, cambiar a ella, configurar servicio/responsable/sede y reservar; volver a Sol. Boreal comienza sin datos ajenos | Empresa `3db4e6fd-12c2-4f02-8fb9-de9ae5f116c7` |
+| Aislamiento de reservas | Sol y Boreal pueden reservar el mismo 16/11/2026 a las 12:00 con sus propios recursos. Sus clientes, servicios y citas siguen separados | Dos citas persistidas con distintos `company_id`; CSV independientes |
 
-Siguiente paso concreto: el usuario establece la contraseña en el navegador compartido, el flujo abre la sesión de Sol o Luna, y se completan navegación, móvil, CSV, administración, provisión y aislamiento. Estos criterios continúan pendientes de aceptación.
+## Conteos verificables de suites
 
-Despliegue de esta continuación: commit `b4e090fdad9a5f4efeff6bd5446856813eab9755`, QA `dpl_EwQkcCK96ZWLQS7U574vNSUYrvmz`. Se verificó en el navegador que la invitación real muestra la identidad nueva, las dos empresas autorizadas y los campos de nueva contraseña, sin consumirla. El alias es `https://eross-agenda-qa.vercel.app`. Se volvió a comprobar que EROSS producción conserva `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`.
+| Suite | Transporte | Aserciones aprobadas |
+|---|---|---:|
+| Autenticación y reservas | HTTPS Vercel QA | 41 |
+| Administración, recursos y configuración | HTTPS Vercel QA | 31 |
+| Concurrencia de administradores | HTTPS Vercel QA | 7 |
+| **Total remoto** | | **79** |
+| Activación segura | Next.js local con Neon QA | 18 |
+| Cambio autorizado de empresa | Next.js local con Neon QA | 19 |
+| Concurrencia de administradores | Next.js local con Neon QA | 7 |
+
+Los resultados locales no se suman al total remoto. Los recorridos del navegador se describen por operación, sin inventar un conteo de aserciones automatizadas. Las suites de 41 y 31 validaron el commit `b8a86ebc0954eb4f17208cb5e985cae23a15defb`; la concurrencia remota validó `01bdfe00b6ea0f1ec5ea2a0765b93d17582f9bba`. Las modificaciones posteriores son reparaciones CSS y evidencia; no se atribuye una repetición completa de las suites al último commit.
+
+## CSV descargados
+
+- `qa-browser-clientes-sol.csv`: 170 bytes, seis columnas, un cliente ficticio de Sol y una cita.
+- `qa-browser-estadisticas-sol.csv`: 279 bytes. En el momento de la descarga: dos citas, una pendiente y una reprogramada; totales por mes, responsable y sede coinciden con la UI. Después se canceló y reactivó la cita visual, que quedó confirmada; el archivo conserva correctamente el estado del momento de exportación.
+- `qa-browser-clientes-boreal.csv`: 176 bytes, un cliente ficticio de Boreal y una cita; no contiene el cliente de Sol.
+
+## Responsive y conservación visual
+
+Se conservaron sin cambios frente a `fe3be055`:
+
+- `styles/globals.css`: 12.701 bytes, SHA-256 `7d7332cc65bbfdfba2edd839861666c1eed14abf113749224c46d841b2557198`.
+- `styles/logo-fix.css`: 2.094 bytes, SHA-256 `c9a7002331032668b60a5ccbec7192c52f2c025125d9c654d2155dc66bcc6d79`.
+- CSS global del motor: 11.805 bytes, SHA-256 `d968d8f7aff8a37bd95f24ca6924dac2bce1b10f34b15fba63c1734bc38dae79`.
+
+Se añadió `styles/agenda-qa-responsive.css`, limitado a pantallas de hasta 820/700 px y a la interfaz integrada. Corrige el mínimo automático del grid de meses, evita que tablas y correos ensanchen la página, permite acomodar controles y tarjetas, limita selectores y hace legibles los nombres del menú móvil. No reemplaza el prototipo, el motor ni los estilos de escritorio.
+
+El comprobador `/eross-qa-responsive?width=360|390|768` carga mediante iframe la página aprobada real. No contiene otra implementación de la agenda. Su ruta está restringida al entorno QA.
+
+Resultados observados antes de la pausa:
+
+| Pantalla | Ancho del contenido / scrollWidth | Resultado |
+|---|---|---|
+| Mes 390 px | 373 / 373 | Desbordamiento inicial de 1.216 px corregido; calendario contenido |
+| Usuarios 390 px | 373 / 373 | Correos largos y selectores contenidos; menú legible |
+| Configuración 390 px | 373 / 373 | Controles accesibles sin desbordamiento global |
+| Lista 390 px | 388 / 388 | Tabla de 610 px se desplaza dentro de su panel |
+| Clientes 360 px | 358 / 358 | Tabla de 950 px contenida en su propio panel |
+| Dashboard 360 px | 343 / 343 | Tarjetas y bienvenida contenidas |
+| Estadísticas 360 px | 343 / 343 | Tarjetas contenidas tras corregir sus mínimos |
+| Disponibilidad 360 px | 343 / 343 | Sin desbordamiento global |
+| Mes 768 px | 751 / 751 | Calendario contenido |
+
+También se abrieron Semana y Día en móvil, se consultó el formulario y el historial, y se guardó una nota desde 390 px; la nota reaparece en escritorio y Neon QA. La tabla semanal mantiene desplazamiento interior para sus siete columnas.
+
+**Dos ajustes requieren comprobación visual posterior al último despliegue:** el selector “Empresa autorizada”, que antes excedía 360 px, y la barra de controles semanales, que excedía el ancho de su tarjeta. Sus reparaciones están desplegadas, pero la pausa ocurrió antes de cerrar esa revisión. No se declaran aprobados basándose únicamente en el CSS o en READY.
+
+## Seguridad y errores corregidos
+
+Además de los arreglos anteriores de UUID, márgenes, rangos reservados, bloqueo nocturno, reactivación, recordatorio cero, configuración transaccional y CSV seguro, este bloque añadió:
+
+1. Activación de identidades QA sin sobrescribir contraseñas existentes: invitación hash de un solo uso, vencimiento, contraseña scrypt y sesión HttpOnly/Secure/SameSite=Strict. El usuario completó su propia activación.
+2. Cambio de empresa autenticado, únicamente entre membresías vigentes; el servidor vuelve a resolver el rol y renueva la sesión. Al cambiar, la interfaz se recarga para descartar datos de la empresa anterior.
+3. Resumen de configuración actualizado después de guardar recursos, servicios y horarios.
+4. Mutaciones de rol serializadas por empresa con bloqueo transaccional y revalidación del administrador dentro de la operación. La carrera remota devolvió 200/403, dejó un administrador y registró una sola auditoría.
+5. Validación estricta de UUID en cambios de rol: identificador de guiones rechazado con 400.
+6. Reparaciones responsive descritas arriba.
+
+Las empresas originales no tenían buzones de correo configurados. `qa-sol@eross.invalid` y `qa-luna@eross.invalid` son identificadores de acceso heredados, no correos receptores. No se cambiaron sus contraseñas. La identidad de aceptación es `ecd0a759-9d86-40bd-9f49-edc97ac2f08f`; su permiso de provisión se configuró únicamente en el proyecto Vercel QA. Los accesos temporales creados para pruebas HTTP se revocaron al terminar; no se desactivó la protección de despliegues.
+
+## Evidencias y continuidad
+
+- `qa-flow-evidence-1791649451523.json`: 41 controles remotos.
+- `qa-admin-evidence-2026-10-10.json`: 31 controles remotos.
+- `qa-role-race-remote-evidence-2026-10-10.json`: 7 controles remotos.
+- `qa-activation-evidence-2026-10-10.json`: 18 controles locales.
+- `qa-switch-evidence-2026-10-10.json`: 19 controles locales.
+- `qa-role-race-evidence-2026-10-10.json`: 7 controles locales.
+- `qa-design-source-evidence-2026-10-10.json`: comparación de estilos base.
+- `qa-browser-evidence-2026-10-10.json`: operaciones de navegador y verificaciones de continuidad.
+- Tres CSV reales de navegador indicados arriba.
+
+Compilación completa local de Next.js 14.2.35 aprobada para la primera reparación responsive y permisos. Las compilaciones Vercel posteriores también finalizaron. Los errores locales ENOTEMPTY de `.next/export` se resolvieron compilando una copia temporal limpia; no se alteró la aplicación para ocultarlos.
+
+Para retomar: renovar la sesión QA por el formulario seguro con la cuenta activada; comprobar Empresas y Semana a 360 px; conservar capturas finales; cerrar el dictamen visual. No repetir las 79 verificaciones ni volver a crear usuarios o empresas para esos dos puntos. No se certificó entrega externa de WhatsApp/SMS/correos: las citas visuales usan “Ninguno” y recordatorio cero. Los permisos individuales editables siguen fuera del módulo activo; los permisos efectivos probados son por rol.
+
+**No se declara el proyecto terminado para comercializar ni se autoriza promoción a producción con esos criterios sin cerrar.**
