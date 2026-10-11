@@ -18,16 +18,20 @@ export default async function handler(req,res){
   const from=String(req.query.from||`${currentYear}-01-01`),to=String(req.query.to||`${currentYear+1}-01-01`);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)||from>=to)return res.status(400).json({error:"Rango inválido"});
   const records=await sql`SELECT a.status, to_char(a.starts_at AT TIME ZONE c.timezone ,'YYYY-MM') AS month_key,
-   COALESCE(u.name,'Sin asignar') responsible,COALESCE(l.name,'Sin sede') location
+   COALESCE(u.name,'Sin asignar') responsible,COALESCE(l.name,'Sin sede') location, to_char(a.starts_at AT TIME ZONE c.timezone,'YYYY-MM-DD') day_key, COALESCE(NULLIF(a.source,''),'Sin origen') source, COALESCE(t.name,'Sin tipo') type, EXISTS(SELECT 1 FROM agenda_appointment_events e WHERE e.company_id=a.company_id AND e.appointment_id=a.id AND e.event_type='appointment.rescheduled') rescheduled
    FROM agenda_appointments a JOIN agenda_companies c ON c.id=a.company_id
    LEFT JOIN agenda_users u ON u.id=a.responsible_user_id AND u.company_id=a.company_id
+   LEFT JOIN agenda_appointment_types t ON t.id=a.appointment_type_id AND t.company_id=a.company_id
    LEFT JOIN agenda_locations l ON l.id=a.location_id AND l.company_id=a.company_id
    WHERE a.company_id=${m.company_id}::uuid
    AND (a.starts_at AT TIME ZONE c.timezone)::date>=${from}::date
    AND (a.starts_at AT TIME ZONE c.timezone)::date<${to}::date`;
   const statuses={pending:0,confirmed:0,rescheduled:0,attended:0,no_show:0,cancelled:0};
-  const byMonth={},byResponsible={},byLocation={};
-  for(const r of records){statuses[r.status]=(statuses[r.status]||0)+1;byMonth[r.month_key]=(byMonth[r.month_key]||0)+1;byResponsible[r.responsible]=(byResponsible[r.responsible]||0)+1;byLocation[r.location]=(byLocation[r.location]||0)+1;}
-  res.status(200).json({ok:true,company:company?.name||"Empresa",role:m.role,from,to,total:records.length,statuses,byMonth,byResponsible,byLocation});
+  const byMonth={},byResponsible={},byLocation={},byDay={},bySource={},byType={};
+  const filterOptions={responsibles:[...new Set(records.map(r=>r.responsible))].sort(),locations:[...new Set(records.map(r=>r.location))].sort()};
+  const filtered=records.filter(r=>(!req.query.responsible||r.responsible===req.query.responsible)&&(!req.query.location||r.location===req.query.location));
+  let rescheduledCount=0;
+  for(const r of filtered){statuses[r.status]=(statuses[r.status]||0)+1;byMonth[r.month_key]=(byMonth[r.month_key]||0)+1;byResponsible[r.responsible]=(byResponsible[r.responsible]||0)+1;byLocation[r.location]=(byLocation[r.location]||0)+1;byDay[r.day_key]=(byDay[r.day_key]||0)+1;bySource[r.source]=(bySource[r.source]||0)+1;byType[r.type]=(byType[r.type]||0)+1;if(r.rescheduled||r.status==="rescheduled")rescheduledCount++;}
+  res.status(200).json({ok:true,company:company?.name||"Empresa",role:m.role,from,to,total:filtered.length,statuses,byMonth,byResponsible,byLocation,byDay,bySource,byType,rescheduledCount,filterOptions});
  }catch(e){console.error("tenant management report",e);res.status(500).json({error:"No se pudo generar el reporte"})}
 }

@@ -37,9 +37,9 @@ const users = [
 const nav = ["Dashboard","Agenda","Clientes","Estadísticas","Empresas","Usuarios","Configuración"];
 
 function Brand({large=false,compact=false}){
-  return <div className={"brandCrop "+(large?"large ":"")+(compact?"compact":"")}>
+  return <><div className={"brandCrop "+(large?"large ":"")+(compact?"compact":"")}>
     <img src="/eross-logo.webp" alt="EROSS Consulting"/>
-  </div>;
+  </div><div className={"erossBrandLine"+(compact?" compact":"")}>ESTRATEGIA · MARKETING · CAPACITACIONES · CRECIMIENTO</div></>;
 }
 
 export default function Home(){
@@ -49,7 +49,7 @@ export default function Home(){
  const logout=async()=>{const r=await fetch("/api/agenda/identity-qa-session",{method:"DELETE"});if(r.ok){setOverview(null);setReport(null);setAuth("error");setError("Sesión cerrada");setSection("Dashboard");setLoginCompany("");setLoginCompanies([]);refresh()}else setError("No se pudo cerrar sesión")};
  useEffect(()=>{let live=true;Promise.all([fetch("/api/agenda/tenant-qa-overview",{cache:"no-store"}),fetch("/api/agenda/tenant-qa-report",{cache:"no-store"})]).then(async ([a,b])=>{const [j,r]=await Promise.all([a.json(),b.json()]);if(!a.ok)throw Error(j.error||"Acceso requerido");if(live){setOverview(j);setReport(b.ok?r:null);setAuth("ok")}}).catch(e=>{if(live){setError(e.message);setAuth("error")}});return()=>{live=false}},[revision]);
  if(auth==="loading")return <div className="loginPage"><section className="loginVisual"><Brand large/><h1>Bienvenido a<br/><span>EROSS Agenda</span></h1><p>Comprobando acceso a tu empresa...</p></section></div>;
- if(auth==="error")return <div className="loginPage"><section className="loginVisual"><Brand large/><div className="tagline">ESTRATEGIA · MARKETING · CRECIMIENTO</div><h1>Bienvenido a<br/><span>EROSS Agenda</span></h1><p>Tu sistema de gestión de citas, clientes y crecimiento empresarial.</p></section><form className="loginCard" onSubmit={login}><div className="secure">ACCESO SEGURO · QA</div><h2>Ingresá a tu empresa</h2>{error&&<p role="alert">{error}</p>}<label>Correo electrónico<input type="email" autoComplete="username" required value={loginEmail} onChange={e=>{setLoginEmail(e.target.value);setLoginCompanies([]);setLoginCompany("")}}/></label><label>Contraseña<input type="password" autoComplete="current-password" required value={loginPassword} onChange={e=>setLoginPassword(e.target.value)}/></label>{loginCompanies.length>0&&<label>Empresa<select value={loginCompany} onChange={e=>setLoginCompany(e.target.value)}>{loginCompanies.map(c=><option value={c.id} key={c.id}>{c.name}</option>)}</select></label>}<button className="goldBtn" disabled={loginBusy}>{loginBusy?"Validando...":"Iniciar sesión →"}</button></form></div>;
+ if(auth==="error")return <div className="loginPage"><section className="loginVisual"><Brand large/><h1>Bienvenido a<br/><span>EROSS Agenda</span></h1><p>Tu sistema de gestión de citas, clientes y crecimiento empresarial.</p></section><form className="loginCard" onSubmit={login}><div className="secure">ACCESO SEGURO · QA</div><h2>Ingresá a tu empresa</h2>{error&&<p role="alert">{error}</p>}<label>Correo electrónico<input type="email" autoComplete="username" required value={loginEmail} onChange={e=>{setLoginEmail(e.target.value);setLoginCompanies([]);setLoginCompany("")}}/></label><label>Contraseña<input type="password" autoComplete="current-password" required value={loginPassword} onChange={e=>setLoginPassword(e.target.value)}/></label>{loginCompanies.length>0&&<label>Empresa<select value={loginCompany} onChange={e=>setLoginCompany(e.target.value)}>{loginCompanies.map(c=><option value={c.id} key={c.id}>{c.name}</option>)}</select></label>}<button className="goldBtn" disabled={loginBusy}>{loginBusy?"Validando...":"Iniciar sesión →"}</button></form></div>;
  const menus=Array.isArray(overview?.navigation)?overview.navigation:[];
  const metric=(label,value,note)=> <Metric label={label} value={value} note={note}/>;
  const rows=(obj)=>Object.entries(obj||{}).sort((a,b)=>b[1]-a[1]).map(([k,v])=><div key={k} className="companyRow"><b>{k}</b><span className="badge amber">{v}</span></div>);
@@ -58,7 +58,7 @@ export default function Home(){
  <main className="main"><header className="topbar"><div><small>EROSS OS / {overview?.company?.name}</small><h1>{section}</h1></div><div className="profile">{overview?.role||"Empresa"} <span>Datos reales · Neon QA</span><button className="link" onClick={logout}>Cerrar sesión</button></div></header>
  {section==="Dashboard"&&<><section className="welcome"><div><span className="pill gold">{overview?.company?.name?.toUpperCase()}</span><h2>Panel principal EROSS</h2><p>Información operativa de tu empresa, conectada a Neon.</p></div><button className="goldBtn small" onClick={()=>setSection("Agenda")}>Abrir Agenda Premium →</button></section><section className="cards four">{metric("Total de citas",report?.total||0,"Año 2026")}{metric("Confirmadas",report?.statuses?.confirmed||0,"Seguimiento activo")}{metric("Pendientes",report?.statuses?.pending||0,"Por confirmar")}{metric("Canceladas",report?.statuses?.cancelled||0,"Citas canceladas")}</section><div className="twoCol"><Panel title="Citas por mes" action={<button className="link" onClick={()=>setSection("Estadísticas")}>Ver estadísticas →</button>}>{rows(report?.byMonth)}</Panel><Panel title="Accesos rápidos"><button className="blueBtn" onClick={()=>setSection("Agenda")}>Gestionar agenda →</button><p>Entrá al calendario, consultá citas y gestioná sus estados.</p><button className="blueBtn" onClick={()=>setSection("Estadísticas")}>Estadísticas de la empresa →</button></Panel></div></>}
  {section==="Agenda"&&<AgendaDatabaseUnified tenantOnly embedded onChanged={refresh}/>}
- {section==="Estadísticas"&&<><button className="blueBtn" disabled={!report} onClick={()=>{if(report)downloadCsv("EROSS_reporte.csv",[["Estado","Cantidad"],...Object.entries(report.statuses||{}),[],["Mes","Cantidad"],...Object.entries(report.byMonth||{}),[],["Responsable","Cantidad"],...Object.entries(report.byResponsible||{}),[],["Sede","Cantidad"],...Object.entries(report.byLocation||{})])}}>Exportar reporte CSV</button><section className="cards four">{metric("Total",report?.total||0,"Citas del año actual")}{metric("Atendidas",report?.statuses?.attended||0,"Finalizadas")}{metric("No asistieron",report?.statuses?.no_show||0,"Ausencias")}{metric("Reprogramadas",report?.statuses?.rescheduled||0,"Cambios")}</section><div className="twoCol"><Panel title="Por responsable">{rows(report?.byResponsible)}</Panel><Panel title="Por sede">{rows(report?.byLocation)}</Panel></div></>}
+ {section==="Estadísticas"&&<TenantStatistics revision={revision}/>}
  {section==="Clientes"&&<TenantClients/>}
  {section==="Empresas"&&<TenantCompany/>}
  {section==="Usuarios"&&<TenantUsers/>}
@@ -182,6 +182,24 @@ function Clients(){
   </>
 }
 
+function TenantStatistics({revision}){
+ const year=new Date().getFullYear(),[from,setFrom]=useState(year+'-01-01'),[to,setTo]=useState(year+'-12-31'),[staff,setStaff]=useState(''),[site,setSite]=useState(''),[report,setReport]=useState(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ useEffect(()=>{let live=true;setBusy(true);setError('');const end=new Date(to+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+1);if(!from||!to||from>to||Number.isNaN(end.getTime())){setError('Seleccioná un rango válido');setBusy(false);return()=>{live=false}}
+ const query=new URLSearchParams({from,to:end.toISOString().slice(0,10),responsible:staff,location:site});fetch('/api/agenda/tenant-qa-report?'+query,{cache:'no-store'}).then(async r=>{const j=await r.json();if(!r.ok)throw Error(j.error);if(live)setReport(j)}).catch(e=>{if(live){setError(e.message);setReport(null)}}).finally(()=>{if(live)setBusy(false)});return()=>{live=false}},[from,to,staff,site,revision]);
+ const entries=o=>Object.entries(o||{}).sort((a,b)=>b[1]-a[1]);
+ const days=Object.entries(report?.byDay||{}).sort(([a],[b])=>a.localeCompare(b));
+ const statuses=report?.statuses||{};
+ const csv=()=>downloadCsv('EROSS_reporte.csv',[["Estado","Cantidad"],...entries(statuses),[],["Mes","Cantidad"],...entries(report.byMonth),[],["Responsable","Cantidad"],...entries(report.byResponsible),[],["Sede","Cantidad"],...entries(report.byLocation),[],["Día","Cantidad"],...days,[],["Origen","Cantidad"],...entries(report.bySource),[],["Tipo de cita","Cantidad"],...entries(report.byType)]);
+ return <><div className="toolbar"><div><h2>Estadísticas</h2><p>Datos reales de {report?.company||'tu empresa'} · periodo seleccionado</p></div><button className="blueBtn" disabled={!report||busy||!!error} onClick={csv}>Exportar reporte CSV</button></div>
+ <section className="panel filterPanel"><div className="dateFilters"><label>Desde<input type="date" value={from} onChange={e=>setFrom(e.target.value)}/></label><label>Hasta<input type="date" value={to} onChange={e=>setTo(e.target.value)}/></label><label>Responsable<select value={staff} onChange={e=>setStaff(e.target.value)}><option value="">Todos</option>{report?.filterOptions?.responsibles?.map(v=><option key={v}>{v}</option>)}</select></label><label>Sede<select value={site} onChange={e=>setSite(e.target.value)}><option value="">Todas</option>{report?.filterOptions?.locations?.map(v=><option key={v}>{v}</option>)}</select></label></div></section>
+ {error&&<p role="alert">{error}</p>}{busy&&<p role="status">Actualizando estadísticas…</p>}
+ {report&&!error&&<><section className="cards four"><Metric label="Total" value={report.total} note="Periodo seleccionado"/><Metric label="Atendidas" value={statuses.attended||0} note="Finalizadas"/><Metric label="No asistieron" value={statuses.no_show||0} note="Ausencias"/><Metric label="Reprogramadas" value={report.rescheduledCount||0} note="Distintivo de historial"/></section>
+ <div className="analyticsTop"><Panel title="Tendencia de citas" subtitle="Movimiento diario del periodo">{days.length?<><LineChart values={days.map(([,v])=>v)}/><div className="chartLegend"><span>{days[0][0]}</span><span>{days.at(-1)[0]}</span></div><details><summary>Ver datos de la tendencia</summary>{days.map(([d,v])=><p key={d}>{d}: {v}</p>)}</details></>:<p>Sin citas en el periodo.</p>}</Panel><Panel title="Estado de las citas" subtitle="Distribución actual"><Donut total={report.total} attended={statuses.attended||0} confirmed={statuses.confirmed||0} noShow={statuses.no_show||0}/><p>Pendientes: {statuses.pending||0} · Canceladas: {statuses.cancelled||0} · Estado reprogramada heredado: {statuses.rescheduled||0}</p></Panel></div>
+ <Panel title="Seguimiento de citas" subtitle="Confirmación y asistencia"><Funnel values={[report.total,(statuses.confirmed||0)+(statuses.attended||0),statuses.attended||0,statuses.cancelled||0]} labels={["Citas","Confirmadas o atendidas","Atendidas","Canceladas"]}/></Panel>
+ <div className="analyticsGrid"><RankPanel title="Origen que genera citas" data={entries(report.bySource)}/><RankPanel title="Por responsable" data={entries(report.byResponsible)}/><RankPanel title="Por sede" data={entries(report.byLocation)}/><RankPanel title="Tipos de cita" data={entries(report.byType)}/></div></>}
+ </>;
+}
+
 function Statistics({appointments}){
   const [from,setFrom]=useState("2026-10-01");
   const [to,setTo]=useState("2026-10-05");
@@ -235,9 +253,9 @@ function Statistics({appointments}){
 
 function LineChart({values}){
   const max=Math.max(1,...values), w=620,h=190,p=24;
-  const pts=values.map((v,i)=>({x:p+i*((w-p*2)/(values.length-1)),y:h-p-(v/max)*(h-p*2)}));
+  const pts=values.map((v,i)=>({x:p+i*((w-p*2)/Math.max(1,values.length-1)),y:h-p-(v/max)*(h-p*2)}));
   const d=pts.map((q,i)=>(i?"L":"M")+q.x+" "+q.y).join(" ");
-  return <svg className="lineChart" viewBox={"0 0 "+w+" "+h} preserveAspectRatio="none">
+  return <svg role="img" aria-label="Tendencia de citas por día" className="lineChart" viewBox={"0 0 "+w+" "+h} preserveAspectRatio="none">
     <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0a7cff" stopOpacity=".28"/><stop offset="100%" stopColor="#0a7cff" stopOpacity="0"/></linearGradient></defs>
     {[0,1,2,3].map(i=><line key={i} x1="24" x2="596" y1={30+i*42} y2={30+i*42} className="gridLine"/>)}
     <path d={d+" L "+pts[pts.length-1].x+" 170 L "+pts[0].x+" 170 Z"} fill="url(#area)"/>
@@ -251,8 +269,8 @@ function Donut({total,attended,confirmed,noShow}){
   return <div className="donutWrap"><div className="donut" style={{background:"conic-gradient(#0a7cff 0 "+a+"%, #19caa0 "+a+"% "+(a+c)+"%, #f0b43d "+(a+c)+"% "+(a+c+n)+"%, #e8eef3 "+(a+c+n)+"% 100%)"}}><div><strong>{total}</strong><span>citas</span></div></div><div className="donutLegend"><span><i className="b"></i>Atendidas {attended}</span><span><i className="g"></i>Confirmadas {confirmed}</span><span><i className="y"></i>No asistieron {noShow}</span></div></div>
 }
 
-function Funnel({values}){
-  const labels=["Citas","Confirmadas","Atendidas","Con compra"], max=Math.max(1,values[0]);
+function Funnel({values,labels=["Citas","Confirmadas","Atendidas","Con compra"]}){
+  const max=Math.max(1,values[0]);
   return <div className="funnel">{values.map((v,i)=><div key={labels[i]} style={{width:(54+46*(v/max))+"%"}}><span>{labels[i]}</span><b>{v}</b></div>)}</div>
 }
 

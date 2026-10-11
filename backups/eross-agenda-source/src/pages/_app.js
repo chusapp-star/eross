@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import "../styles/logo-fix.css";
 import "../styles/agenda-qa-responsive.css";
+import "../styles/agenda-qa-final.css";
 import {useEffect,useState} from "react";
 import {useRouter} from "next/router";
 

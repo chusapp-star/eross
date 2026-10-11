@@ -1,0 +1,46 @@
+{
+  "checks": [
+    {
+      "name": "Admin configuration and appointments permissions preserved",
+      "result": "PASS",
+      "transport": "unit handler with mocked SQL/auth"
+    },
+    {
+      "name": "Collaborator stays read-only",
+      "result": "PASS",
+      "transport": "unit handler with mocked SQL/auth"
+    },
+    {
+      "name": "Unknown roles denied",
+      "result": "PASS",
+      "transport": "unit handler with mocked SQL/auth"
+    },
+    {
+      "name": "Missing login denied",
+      "result": "PASS",
+      "transport": "unit handler"
+    },
+    {
+      "name": "Stale membership role denied",
+      "result": "PASS",
+      "transport": "unit handler"
+    },
+    {
+      "name": "Report indicators/aggregation and tenant-bound SQL",
+      "result": "PASS",
+      "transport": "unit handler with mocked SQL"
+    },
+    {
+      "name": "Responsible filter and options",
+      "result": "PASS",
+      "transport": "unit handler"
+    },
+    {
+      "name": "Invalid date range rejected",
+      "result": "PASS",
+      "transport": "unit handler"
+    }
+  ],
+  "passed": true,
+  "limitations": "Unit checks do not certify deployed SQL or browser flows"
+}
