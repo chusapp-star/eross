@@ -1,3 +1,4 @@
+import {verifyIdentitySession} from "../../../lib/agenda-identity-auth";
 import {authorizeAgendaWrite} from "../../../lib/agenda-write-auth";
 import {statusToDb,statusToUi} from "../../../lib/agenda-db";
 const clean=v=>String(v??"").trim();
@@ -88,6 +89,8 @@ export default async function handler(req,res){
   try{authorization=await authorizeAgendaWrite(req,res,{action:req.method==="POST"?"appointments.create":"appointments.edit"})}catch(error){console.error("agenda authorization",error);return res.status(500).json({error:"No se pudo verificar el acceso"})}
   if(!authorization)return;
   const {sql,companyId}=authorization,body=req.body||{};
+  const sessionToken=String(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('eross_identity_qa='))?.slice(18);
+  const actorId=authorization.mode==='tenant'?verifyIdentitySession(sessionToken)?.sub||null:null;
   try{
     // Reject cross-tenant edits before touching client records or appointment context.
     if(req.method==="PATCH"){
@@ -160,23 +163,23 @@ export default async function handler(req,res){
       inserted_client AS (INSERT INTO agenda_clients(company_id,name,phone,email,source)
        SELECT ${companyId}::uuid,${clean(body.name)},${clean(body.phone)||null},${clean(body.email)||null},${clean(body.source)||null}
        WHERE NOT EXISTS(SELECT 1 FROM updated_client) RETURNING id),
-      resolved_client AS (SELECT id FROM updated_client UNION ALL SELECT id FROM inserted_client), previous AS (SELECT id,status,starts_at FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid), changed AS (UPDATE agenda_appointments a SET
+      resolved_client AS (SELECT id FROM updated_client UNION ALL SELECT id FROM inserted_client), previous AS (SELECT id,status,starts_at,ends_at FROM agenda_appointments WHERE id=${body.id}::uuid AND company_id=${companyId}::uuid), changed AS (UPDATE agenda_appointments a SET
           client_id=(SELECT id FROM resolved_client),appointment_type_id=${type.id}::uuid,responsible_user_id=${userId}::uuid,location_id=${location?.id||null}::uuid,
           external_crm_lead_id=${clean(body.external_crm_lead_id)||null},
           starts_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone),
           ends_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration}),
           reserved_starts_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)-make_interval(mins=>${Number(type.buffer_before_min||0)}),
           reserved_ends_at=((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone)+make_interval(mins=>${duration+Number(type.buffer_after_min||0)}),
-          status=CASE WHEN a.status<>'cancelled' AND a.starts_at IS DISTINCT FROM ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone) THEN 'rescheduled' ELSE ${status} END,modality=${clean(body.modality||body.location)||null},source=${clean(body.source)||null},comments=${clean(body.comments)||null},
+          status=CASE WHEN ${authorization.mode!=='tenant'} AND a.status<>'cancelled' AND a.starts_at IS DISTINCT FROM ((${clean(body.date)}::date+${clean(body.time)}::time) AT TIME ZONE c.timezone) THEN 'rescheduled' ELSE ${status} END,modality=${clean(body.modality||body.location)||null},source=${clean(body.source)||null},comments=${clean(body.comments)||null},
           confirmation_channel=${clean(body.confirmation_channel)||null},reminder_minutes=${body.reminder_minutes===undefined||body.reminder_minutes===null?null:Number(body.reminder_minutes)},
           tags=${tags},color=${type.color},updated_at=now()
-        FROM agenda_companies c WHERE a.id=${body.id}::uuid AND a.company_id=${companyId}::uuid AND c.id=a.company_id RETURNING a.id,a.company_id,a.client_id,a.status,a.starts_at
+        FROM agenda_companies c WHERE a.id=${body.id}::uuid AND a.company_id=${companyId}::uuid AND c.id=a.company_id RETURNING a.id,a.company_id,a.client_id,a.status,a.starts_at,a.ends_at
       ), logged AS (INSERT INTO agenda_appointment_events(company_id,appointment_id,event_type,payload)
        SELECT c.company_id,c.id,
-       CASE WHEN p.starts_at IS DISTINCT FROM c.starts_at THEN 'appointment.rescheduled'
+       CASE WHEN p.starts_at IS DISTINCT FROM c.starts_at OR p.ends_at IS DISTINCT FROM c.ends_at THEN 'appointment.rescheduled'
             WHEN p.status IS DISTINCT FROM c.status THEN 'appointment.'||c.status ELSE 'appointment.updated' END,
        jsonb_build_object('schema_version',1,'client_id',c.client_id::text,'previous_status',p.status,'status',c.status,
-         'previous_starts_at',p.starts_at,'starts_at',c.starts_at,'source','eross_agenda')
+         'previous_starts_at',p.starts_at,'starts_at',c.starts_at,'previous_ends_at',p.ends_at,'ends_at',c.ends_at,'actor_id',${actorId}::text,'actor_role',${authorization.role}::text,'source','eross_agenda')
        FROM changed c JOIN previous p ON p.id=c.id RETURNING id,company_id,appointment_id,event_type,payload
       ), queued AS (INSERT INTO agenda_integration_outbox(company_id,appointment_id,event_type,destination,payload)
        SELECT company_id,appointment_id,event_type,'eross_crm',payload||jsonb_build_object('event_id',id::text,'occurred_at',now())

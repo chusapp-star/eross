@@ -1,3 +1,4 @@
+import TenantTagSettings from "./tenant-tag-settings";
 import {useEffect,useState} from 'react';
 const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 export default function TenantConfigurationEditor({onChanged}){
@@ -8,7 +9,7 @@ export default function TenantConfigurationEditor({onChanged}){
  async function run(action){if(busy)return;setBusy(true);setMessage('');try{await action();await load();setMessage('Cambios guardados');onChanged?.()}catch(e){setMessage(e.message)}finally{setBusy(false)}}
  const updateType=(i,key,value)=>setConfig(c=>({...c,types:c.types.map((t,n)=>n===i?{...t,[key]:value}:t)}));
  const updateDay=(i,key,value)=>setConfig(c=>({...c,days:c.days.map((d,n)=>n===i?{...d,[key]:value}:d)}));
- return <section className="panel"><div className="panelHead"><h3>Administrar configuración</h3></div>{message&&<p role="status">{message}</p>}{config&&<>
+ return <><TenantTagSettings/><section className="panel"><div className="panelHead"><h3>Administrar configuración</h3></div>{message&&<p role="status">{message}</p>}{config&&<>
  <label>Zona horaria <input aria-label="Zona horaria" value={config.timezone} onChange={e=>setConfig({...config,timezone:e.target.value})}/></label>
  <h4>Servicios, duración y márgenes</h4>{config.types.map((t,i)=><div key={t.id||i} className="settingsGrid">
  <label>Nombre<input aria-label={'Servicio '+(i+1)} value={t.name} onChange={e=>updateType(i,'name',e.target.value)}/></label>
@@ -22,5 +23,5 @@ export default function TenantConfigurationEditor({onChanged}){
  {resources&&[['responsible',resources.users],['location',resources.locations]].map(([k,items])=>items.map(x=><div className="companyRow" key={x.id}><b>{x.name}</b><button className="link" disabled={busy} onClick={()=>run(()=>call('resources','PATCH',{kind:k,id:x.id,name:x.name,email:x.email,active:false}))}>Desactivar</button></div>))}
  <h4>Bloqueos de disponibilidad</h4><div className="settingsGrid">{[['Fecha','date','date'],['Desde','from','time'],['Hasta','to','time'],['Motivo','reason','text']].map(([label,key,type])=><label key={key}>{label}<input type={type} value={block[key]} onChange={e=>setBlock({...block,[key]:e.target.value})}/></label>)}</div><button className="blueBtn" disabled={busy||!block.date||!block.reason.trim()} onClick={()=>run(()=>call('blocks','POST',block))}>Crear bloqueo</button>
  {blocks.map(b=><div className="companyRow" key={b.id}><span>{b.date} {b.from}–{b.to} · {b.reason}</span><button className="link" disabled={busy} onClick={()=>run(()=>call('blocks','DELETE',{id:b.id}))}>Quitar bloqueo</button></div>)}
- </>}</section>
+ </>}</section></>
 }

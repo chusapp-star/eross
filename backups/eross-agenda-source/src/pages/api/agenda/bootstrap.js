@@ -43,7 +43,8 @@ export default async function handler(req,res){
                   a.status,a.modality,COALESCE(a.source,'') source,COALESCE(a.comments,'') comments,
                   COALESCE(a.confirmation_channel,'') confirmation_channel,a.reminder_minutes,
                   COALESCE(a.tags,ARRAY[]::text[]) tags,COALESCE(a.color,t.color,'#C89B3C') color,
-                  COALESCE(a.external_crm_lead_id,'') external_crm_lead_id
+                  COALESCE(a.external_crm_lead_id,'') external_crm_lead_id,
+                  EXISTS(SELECT 1 FROM agenda_appointment_events e WHERE e.company_id=a.company_id AND e.appointment_id=a.id AND e.event_type='appointment.rescheduled') rescheduled
            FROM agenda_appointments a
            JOIN agenda_companies c ON c.id=a.company_id
            LEFT JOIN agenda_clients cl ON cl.id=a.client_id

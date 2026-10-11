@@ -37,9 +37,9 @@ const users = [
 const nav = ["Dashboard","Agenda","Clientes","Estadísticas","Empresas","Usuarios","Configuración"];
 
 function Brand({large=false,compact=false}){
-  return <><div className={"brandCrop "+(large?"large ":"")+(compact?"compact":"")}>
+  return <div className="erossBrandLockup"><div className={"brandCrop "+(large?"large ":"")+(compact?"compact":"")}>
     <img src="/eross-logo.webp" alt="EROSS Consulting"/>
-  </div><div className={"erossBrandLine"+(compact?" compact":"")}>ESTRATEGIA · MARKETING · CAPACITACIONES · CRECIMIENTO</div></>;
+  </div><div className={"erossBrandLine"+(compact?" compact":"")}>ESTRATEGIA · MARKETING · CAPACITACIONES · CRECIMIENTO</div></div>;
 }
 
 export default function Home(){
