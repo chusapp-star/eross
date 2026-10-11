@@ -32,6 +32,14 @@ export default async function handler(req,res){
   const filtered=records.filter(r=>(!req.query.responsible||r.responsible===req.query.responsible)&&(!req.query.location||r.location===req.query.location));
   let rescheduledCount=0;
   for(const r of filtered){statuses[r.status]=(statuses[r.status]||0)+1;byMonth[r.month_key]=(byMonth[r.month_key]||0)+1;byResponsible[r.responsible]=(byResponsible[r.responsible]||0)+1;byLocation[r.location]=(byLocation[r.location]||0)+1;byDay[r.day_key]=(byDay[r.day_key]||0)+1;bySource[r.source]=(bySource[r.source]||0)+1;byType[r.type]=(byType[r.type]||0)+1;if(r.rescheduled||r.status==="rescheduled")rescheduledCount++;}
-  res.status(200).json({ok:true,company:company?.name||"Empresa",role:m.role,from,to,total:filtered.length,statuses,byMonth,byResponsible,byLocation,byDay,bySource,byType,rescheduledCount,filterOptions});
+  const report={ok:true,company:company?.name||"Empresa",role:m.role,from,to,total:filtered.length,statuses,byMonth,byResponsible,byLocation,byDay,bySource,byType,rescheduledCount,filterOptions};
+  if(req.query.format==="xlsx"){
+   const {reportExcel}=await import("../../../lib/agenda-report-excel");
+   const buffer=await reportExcel(report,{responsible:String(req.query.responsible||""),location:String(req.query.location||"")});
+   res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+   res.setHeader("Content-Disposition",'attachment; filename="EROSS_estadisticas.xlsx"');
+   return res.status(200).send(buffer);
+  }
+  res.status(200).json(report);
  }catch(e){console.error("tenant management report",e);res.status(500).json({error:"No se pudo generar el reporte"})}
 }
