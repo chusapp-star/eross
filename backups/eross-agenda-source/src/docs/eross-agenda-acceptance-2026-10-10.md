@@ -4,7 +4,7 @@ Fecha de trabajo: 10 de octubre de 2026, Costa Rica. Continuación tras la pausa
 
 ## Dictamen
 
-**Aceptación funcional QA avanzada, aún sin aprobación de lanzamiento comercial.** Hay 79 comprobaciones HTTP remotas aprobadas, pruebas autenticadas reales de navegación, reservas, CSV y administración, y pruebas responsive en 360, 390 y 768 px. Quedan dos comprobaciones visuales concretas del último código: selector multiempresa y barra de navegación semanal en 360 px. La reanudación encontró el formulario de login con “Sesión individual requerida”; la solicitud de acceso seguro fue cancelada. No se acredita como realizada la revisión posterior a esa pausa.
+**Las dos verificaciones móviles pendientes están aprobadas. QA queda entregada para la revisión visual y aprobación final del usuario; el lanzamiento comercial sigue sin autorización.** Se conservan las 79 comprobaciones HTTP remotas previamente aprobadas, sin repetirlas. El cierre autenticado verifica exclusivamente el selector y cambio de empresa, y los controles y navegación semanal a 360 px. La sesión fue iniciada personalmente por el usuario y quedó activa en QA Empresa Sol al terminar.
 
 La identidad visual se conserva a nivel de los estilos base y componentes existentes. Se añadieron reparaciones responsive, descritas abajo. No se certifica equivalencia píxel a píxel con una captura aprobada de referencia ni pruebas en dispositivos iOS/Android físicos. No se tocaron EROSS producción, Neon principal ni Medical Óptica vouchers.
 
@@ -14,9 +14,11 @@ La identidad visual se conserva a nivel de los estilos base y componentes existe
 - Rama: `dev/eross-agenda-config-neon-2026-10-08`.
 - Directorio: `backups/eross-agenda-source/src`.
 - Base conservada: `fe3be055a4776c7547276e0ef021032e59286e4c`.
-- Código funcional actual: `78b1fcbc28e7d272f668025ba207cefb78bf948d`.
+- Código funcional conservado: `78b1fcbc28e7d272f668025ba207cefb78bf948d`.
 - QA: https://eross-agenda-qa.vercel.app/eross-original-integrado-qa
-- Despliegue de ese código: `dpl_5Zt6mXrYxUz8sif35gMMLBVB2dY8`, alias QA comprobado. READY acredita compilación y despliegue; los resultados funcionales se acreditan por separado.
+- Punto de recuperación y versión probada en este cierre: `f7e7bf9782d9391ac4b605833a8a8530e8868661`.
+- Despliegue autenticado probado: `dpl_HyutyPyLFT4QVbQ6aHCwfy81xnR3`; metadatos GitHub y alias QA comprobados. READY acredita compilación y despliegue; las dos verificaciones se acreditan por interacción real y capturas.
+- La entrega de este cierre añade solamente documentación y evidencia visual sobre ese punto de recuperación; no modifica código, estilos, base de datos ni permisos. El commit de entrega y su despliegue se comunican en el cierre de la conversación.
 - Neon exclusivo: proyecto `soft-lake-14045662`, rama `br-red-smoke-b792oaol`, base `eross_agenda`.
 - EROSS producción sigue en `dpl_25BA3fHiUhi9PM7HfhjcpTqKaRYa`, comprobado nuevamente al reanudar.
 
@@ -87,7 +89,22 @@ Resultados observados antes de la pausa:
 
 También se abrieron Semana y Día en móvil, se consultó el formulario y el historial, y se guardó una nota desde 390 px; la nota reaparece en escritorio y Neon QA. La tabla semanal mantiene desplazamiento interior para sus siete columnas.
 
-**Dos ajustes requieren comprobación visual posterior al último despliegue:** el selector “Empresa autorizada”, que antes excedía 360 px, y la barra de controles semanales, que excedía el ancho de su tarjeta. Sus reparaciones están desplegadas, pero la pausa ocurrió antes de cerrar esa revisión. No se declaran aprobados basándose únicamente en el CSS o en READY.
+### Cierre autenticado de los dos pendientes móviles
+
+| Verificación | Acciones y resultado | Medidas a 360 px |
+|---|---|---|
+| Selector y cambio seguro de empresa | Selector limitado a las tres membresías autorizadas: Boreal, Luna y Sol. Elegir Luna deja Sol activa hasta pulsar “Cambiar de empresa”. El cambio abre el dashboard de Luna con tres citas (una confirmada, una pendiente, una cancelada). El retorno abre Sol con dos citas (una confirmada, una pendiente, ninguna cancelada), conservando la sesión | Página 343 / 343 px; selector 197 px, límites horizontales 107–306 px |
+| Controles y navegación semanal | “Semana siguiente” cambia 05–11/10 a 12–18/10; “Semana anterior” restaura 05–11/10. El campo de fecha operado con teclado nativo abre 16–22/11 y muestra la cita de Sol a las 12:00. Ambos botones caben en la tarjeta. El desplazamiento horizontal interno alcanza sábado/domingo y vuelve al inicio | Página 343 / 343 px; barra 191 / 191 px, límites 111–302 px; columnas 191 / 1.028 px, desplazamiento interno 0 → 837 → 0 |
+
+No fueron necesarias nuevas correcciones: las reparaciones existentes funcionan. No se repitieron las 79 pruebas. Esta comprobación responsive utiliza la página aprobada real dentro del iframe QA, sin sustitución de interfaz; no constituye certificación de hardware iOS/Android.
+
+Capturas autenticadas del cierre:
+
+- [Selector de empresa, Luna elegida y Sol todavía activa](qa-mobile-company-360-20261011.jpg).
+- [Dashboard de Luna después del cambio autorizado](qa-mobile-company-luna-360-20261011.jpg).
+- [Semana y controles contenidos, cita de Sol](qa-mobile-week-360-20261011.jpg).
+- [Desplazamiento interior hasta sábado y domingo](qa-mobile-week-scroll-360-20261011.jpg).
+- [Registro estructurado del cierre y huellas de las capturas](qa-mobile-final-evidence-2026-10-11.json).
 
 ## Seguridad y errores corregidos
 
@@ -116,6 +133,10 @@ Las empresas originales no tenían buzones de correo configurados. `qa-sol@eross
 
 Compilación completa local de Next.js 14.2.35 aprobada para la primera reparación responsive y permisos. Las compilaciones Vercel posteriores también finalizaron. Los errores locales ENOTEMPTY de `.next/export` se resolvieron compilando una copia temporal limpia; no se alteró la aplicación para ocultarlos.
 
-Para retomar: renovar la sesión QA por el formulario seguro con la cuenta activada; comprobar Empresas y Semana a 360 px; conservar capturas finales; cerrar el dictamen visual. No repetir las 79 verificaciones ni volver a crear usuarios o empresas para esos dos puntos. No se certificó entrega externa de WhatsApp/SMS/correos: las citas visuales usan “Ninguno” y recordatorio cero. Los permisos individuales editables siguen fuera del módulo activo; los permisos efectivos probados son por rol.
+## Entrega para aprobación del usuario
 
-**No se declara el proyecto terminado para comercializar ni se autoriza promoción a producción con esos criterios sin cerrar.**
+Las dos comprobaciones pendientes quedan cerradas. La página QA aprobada queda abierta con sesión de QA Empresa Sol, lista para la revisión visual final del usuario. Para revisar móvil, el comprobador QA está en https://eross-agenda-qa.vercel.app/eross-qa-responsive?width=360 y carga la misma aplicación.
+
+Persisten los límites previamente documentados: no se certificó entrega externa de WhatsApp/SMS/correos (las citas visuales usan “Ninguno” y recordatorio cero); los permisos individuales editables están fuera del módulo activo, y los permisos efectivos probados son por rol. Tampoco se declara equivalencia píxel a píxel sin una captura aprobada de referencia ni pruebas en dispositivos físicos.
+
+**Aceptación de las dos verificaciones móviles: aprobada. Entrega QA: lista para revisión visual final. Aprobación comercial y promoción a producción: pendientes de la decisión del usuario; no realizadas.**

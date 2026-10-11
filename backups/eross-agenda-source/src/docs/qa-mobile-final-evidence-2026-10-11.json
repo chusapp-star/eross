@@ -1,0 +1,93 @@
+{
+  "closureDateUTC": "2026-10-11",
+  "scope": "Only two pending authenticated mobile checks; no repetition of the 79 passing HTTP checks",
+  "testedCommit": "f7e7bf9782d9391ac4b605833a8a8530e8868661",
+  "functionalCommitUnchanged": "78b1fcbc28e7d272f668025ba207cefb78bf948d",
+  "testedQADeployment": "dpl_HyutyPyLFT4QVbQ6aHCwfy81xnR3",
+  "qaURL": "https://eross-agenda-qa.vercel.app/eross-original-integrado-qa",
+  "mobileURL": "https://eross-agenda-qa.vercel.app/eross-qa-responsive?width=360",
+  "authenticatedBy": "User personally signed in through shared browser",
+  "harnessWidth": 360,
+  "checks": [
+    {
+      "name": "Company selector and authorized switch",
+      "result": "PASS",
+      "actions": [
+        "Sol active, Luna chosen, no switch before confirmation",
+        "Changed to Luna: dashboard 3 total, 1 confirmed, 1 pending, 1 cancelled",
+        "Returned to Sol: dashboard 2 total, 1 confirmed, 1 pending, 0 cancelled"
+      ],
+      "authorizedOptions": [
+        "QA Empresa Boreal Visual 1010 · admin",
+        "QA Empresa Luna · admin",
+        "QA Empresa Sol · admin"
+      ],
+      "pageClientWidth": 343,
+      "pageScrollWidth": 343,
+      "selectorWidth": 197,
+      "selectorLeft": 107,
+      "selectorRight": 306
+    },
+    {
+      "name": "Weekly controls and navigation",
+      "result": "PASS",
+      "ranges": [
+        "2026-10-05 → 2026-10-11",
+        "2026-10-12 → 2026-10-18",
+        "2026-10-05 → 2026-10-11",
+        "2026-11-16 → 2026-11-22"
+      ],
+      "appointment": "12:00 QA Visual Sol 1010 Reunión QA",
+      "dateControl": "Native keyboard interaction after fill updates React week; final date 2026-11-17",
+      "pageClientWidth": 343,
+      "pageScrollWidth": 343,
+      "toolbarClientWidth": 191,
+      "toolbarScrollWidth": 191,
+      "toolbarLeft": 111,
+      "toolbarRight": 302,
+      "columnsClientWidth": 191,
+      "columnsScrollWidth": 1028,
+      "columnsScrollLeftObserved": [
+        0,
+        837,
+        0
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "qa-mobile-company-360-20261011.jpg",
+      "bytes": 70161,
+      "sha256": "16f757033f766dcec67c9c651ce799ce823f03fcbca612f7f101ae3905261f47"
+    },
+    {
+      "file": "qa-mobile-company-luna-360-20261011.jpg",
+      "bytes": 57444,
+      "sha256": "88b9eaa060327a870bb5e178d5a58a8fcc46a845263422f9fb001120de8e5164"
+    },
+    {
+      "file": "qa-mobile-week-360-20261011.jpg",
+      "bytes": 53139,
+      "sha256": "4e066f7654b51c81572b3ea45f550a0fd6042ac4363786b192627ee7eb88e57d"
+    },
+    {
+      "file": "qa-mobile-week-scroll-360-20261011.jpg",
+      "bytes": 51685,
+      "sha256": "fac9ddb5bdfd4c06287c909ee20f4990d81869bcd8e03febc32f0b09a11e82ce"
+    }
+  ],
+  "remainingMobileChecks": [],
+  "priorHTTPChecks": 79,
+  "priorHTTPChecksRerun": false,
+  "applicationChanged": false,
+  "databaseOrPermissionsChanged": false,
+  "productionModified": false,
+  "finalCompany": "QA Empresa Sol",
+  "commercialApproved": false,
+  "status": "Ready for user visual review and final approval",
+  "limitations": [
+    "Responsive iframe, not physical iOS/Android device certification",
+    "No pixel-by-pixel approved reference screenshot comparison",
+    "Previously documented external notifications and individual editable permissions limits remain"
+  ]
+}

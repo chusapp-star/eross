@@ -87,15 +87,12 @@
       "scroll": 751
     }
   ],
-  "remainingVisualChecks": [
-    "Companies authorized selector at 360px after max-width repair",
-    "Weekly toolbar at 360px after wrapping repair",
-    "Save final authenticated screenshots"
-  ],
+  "remainingVisualChecks": [],
   "browserOnResume": {
     "state": "Login form: Sesión individual requerida",
     "secureSignInRequest": "declined",
-    "finalMobileRetestCompleted": false
+    "finalMobileRetestCompleted": true,
+    "historicalPauseAttempt": true
   },
   "databaseEvidence": [
     {
@@ -127,5 +124,13 @@
     "No external notification delivery tested",
     "Effective role-based permissions; individual editable permissions not active"
   ],
-  "commercialApproved": false
+  "commercialApproved": false,
+  "mobileClosure": {
+    "dateUTC": "2026-10-11",
+    "result": "Two pending mobile checks passed after user authentication",
+    "evidence": "qa-mobile-final-evidence-2026-10-11.json",
+    "testedCommit": "f7e7bf9782d9391ac4b605833a8a8530e8868661",
+    "testedQADeployment": "dpl_HyutyPyLFT4QVbQ6aHCwfy81xnR3",
+    "finalCompany": "QA Empresa Sol"
+  }
 }
