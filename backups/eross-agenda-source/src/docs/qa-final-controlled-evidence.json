@@ -1,0 +1,53 @@
+{
+  "baselineCommit": "355ef2f11b94583eecbb65281d58fc9397d0d072",
+  "deliveryBranch": "dev/eross-agenda-final-controlled-2026-10-11-validated",
+  "functionalCommit": "d3cb8d030eaf83aa148777f7160b6281718d2a3d",
+  "functionalDeployment": "dpl_2jpTVAi4wDk1DuCWtdtsGaCY4333",
+  "preservation": {
+    "originalRowsChecked": 248,
+    "tables": [
+      "agenda_appointments",
+      "agenda_clients",
+      "agenda_companies",
+      "agenda_users",
+      "agenda_locations",
+      "agenda_appointment_types",
+      "agenda_availability_rules",
+      "agenda_blocks",
+      "eross_company_memberships",
+      "agenda_booking_settings"
+    ],
+    "missingOrChanged": [],
+    "currentAdditionalRows": 4
+  },
+  "fixtures": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"id\": \"12d6406a-51d8-4cca-a597-93de031a9ede\",\n    \"company_id\": \"eec3c94c-34b0-4c91-b209-67e957a13e01\",\n    \"status\": \"cancelled\",\n    \"starts_at\": \"2026-11-23T16:00:00.000Z\",\n    \"ends_at\": \"2026-11-23T16:30:00.000Z\",\n    \"source\": \"TikTok\",\n    \"tags\": [\n      \"VIP\",\n      \"QA Controlado 1011\"\n    ],\n    \"name\": \"QA Controlado Final 1011\"\n  },\n  {\n    \"id\": \"6c73edcb-19d2-4d30-98eb-a166b0bd75e5\",\n    \"company_id\": \"eec3c94c-34b0-4c91-b209-67e957a13e01\",\n    \"status\": \"cancelled\",\n    \"starts_at\": \"2026-11-17T15:00:00.000Z\",\n    \"ends_at\": \"2026-11-17T15:30:00.000Z\",\n    \"source\": \"Manual / Otro\",\n    \"tags\": [],\n    \"name\": \"QA Cuadrícula Final 1011\"\n  }\n]"
+      }
+    ],
+    "isError": false
+  },
+  "integrity": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[\n  {\n    \"rejected_duplicate_clients\": \"0\",\n    \"own_fixtures\": \"2\",\n    \"custom_tag_catalog_rows\": \"1\"\n  }\n]"
+      }
+    ],
+    "isError": false
+  },
+  "unitAssertions": 33,
+  "liveTesting": "Authenticated existing administrator session; no password or role mutations",
+  "mobile": {
+    "width": 360,
+    "dailyClientWidth": 174,
+    "dailyScrollWidth": 174,
+    "weeklyClientWidth": 174,
+    "weeklyScrollWidth": 1172,
+    "sundayScrollLeft": 998,
+    "globalStatsOverflow": false
+  },
+  "productionApproved": false
+}

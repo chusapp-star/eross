@@ -1,0 +1,42 @@
+[
+  {
+    "path": "public/eross-logo.webp",
+    "unchanged": true,
+    "sha256": "67aeb75615373a46bb94ea6f255a41e19a1ddf87cfe5144c868baaaaf0c2be4d"
+  },
+  {
+    "path": "public/eross-approved-brand.webp",
+    "unchanged": true,
+    "sha256": "68073181e1fc1806afea3dda014a5d05c6ce1c5e9f18882e6a6095acc5650199"
+  },
+  {
+    "path": "lib/agenda-auth.js",
+    "unchanged": true,
+    "sha256": "6cfc84b704c2b35420825b01631e769d1f0cf8aa0dc3403725091b211f1235ea"
+  },
+  {
+    "path": "lib/agenda-write-auth.js",
+    "unchanged": true,
+    "sha256": "f18148dcc38584e22ea6c791cfe90d5bd169cf929bde70de1de543bda9dfefea"
+  },
+  {
+    "path": "lib/agenda-role-policy.js",
+    "unchanged": true,
+    "sha256": "bb640a3da3ebd2cd69583a8779648c8ce71e866a5f9143415287e652d2fd0928"
+  },
+  {
+    "path": "lib/agenda-identity-auth.js",
+    "unchanged": true,
+    "sha256": "b06694c5c05484c810b3bc7aca29843463b1d56d1b7166d42ae3845e99d1e05b"
+  },
+  {
+    "path": "lib/agenda-tenant.js",
+    "unchanged": true,
+    "sha256": "35cd31aea23ac55016e45e9ae90976b4b531b79704797bff7f411dc95adff2cb"
+  },
+  {
+    "path": "lib/agenda-availability.js",
+    "unchanged": true,
+    "sha256": "c7232a0e72dd8612ae4a45d3be6f06db45a6531ea7831f61c6186ae18a04436f"
+  }
+]

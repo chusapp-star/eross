@@ -1,0 +1,35 @@
+"Estado","Cantidad"
+"cancelled","3"
+"pending","1"
+"confirmed","1"
+"rescheduled","0"
+"attended","0"
+"no_show","0"
+
+"Mes","Cantidad"
+"2026-11","3"
+"2026-12","2"
+
+"Responsable","Cantidad"
+"QA Responsable Sol","4"
+"Sin asignar","1"
+
+"Sede","Cantidad"
+"QA Sede Sol","4"
+"Sin sede","1"
+
+"Día","Cantidad"
+"2026-11-16","1"
+"2026-11-17","1"
+"2026-11-23","1"
+"2026-12-01","1"
+"2026-12-07","1"
+
+"Origen","Cantidad"
+"Manual / Otro","3"
+"qa-multiempresa","1"
+"TikTok","1"
+
+"Tipo de cita","Cantidad"
+"Reunión QA","4"
+"Sin tipo","1"
