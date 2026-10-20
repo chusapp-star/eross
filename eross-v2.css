@@ -1835,3 +1835,14 @@ button,a{-webkit-tap-highlight-color:transparent}
 .agenda-visual-caption{display:block;margin-top:13px;color:#dfc17e;font-size:11px;line-height:1.45}
 @media(max-width:960px){.agenda-product-visual{min-height:0;width:min(100%,650px);margin:8px auto 0}}
 @media(max-width:680px){.agenda-product-visual{min-height:0;width:100%;margin:8px auto 0}.agenda-visual-card{width:100%;padding:22px;border-radius:19px}.agenda-visual-card>strong{font-size:23px}.agenda-visual-list>div{font-size:11px}}
+
+
+/* Hero capture widened to show the real EROSS Demo navigation and calendar together. */
+.agenda-visual-card{width:min(100%,520px);padding:clamp(18px,2vw,25px)}
+.agenda-visual-card>strong{margin:9px 0 13px;font-size:clamp(20px,1.9vw,24px)}
+.agenda-visual-shot{margin:0;overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:#f5f7f9;box-shadow:0 10px 28px rgba(0,0,0,.32)}
+.agenda-visual-shot img{display:block;width:100%;height:auto;aspect-ratio:2048/1090;object-fit:contain}
+.agenda-visual-list{margin-top:10px}
+.agenda-visual-list>div{padding:5px 0}
+.agenda-visual-caption{margin-top:10px}
+@media(max-width:680px){.agenda-visual-card{padding:19px}.agenda-visual-card>strong{font-size:21px}}
