@@ -1696,3 +1696,126 @@ button,a{-webkit-tap-highlight-color:transparent}
   .hero-brand-slogan strong{font-size:15px}
   .hero-brand-slogan .slogan-line{width:30px}
 }
+
+
+/* EROSS Agenda commercial integration */
+.agenda-feature{background:radial-gradient(ellipse at 80% 48%,rgba(0,110,170,.1),transparent 38%),linear-gradient(180deg,#080808,#090a0c);border-top:1px solid rgba(255,255,255,.045);border-bottom:1px solid rgba(255,255,255,.045)}
+.agenda-feature-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.78fr);gap:clamp(36px,7vw,110px);align-items:center}
+.agenda-feature h2{font:800 clamp(42px,5vw,68px)/1.05 "Manrope",sans-serif;letter-spacing:-.055em;margin:22px 0 10px;color:var(--text)}
+.agenda-feature-tagline{font:600 clamp(18px,2vw,24px)/1.4 "Manrope",sans-serif;color:var(--gold-2);margin:0 0 16px}
+.agenda-feature-lead{max-width:620px;color:#aaa49b;font-size:15px;line-height:1.8;margin:0}
+.agenda-feature-actions,.agenda-product-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.agenda-feature-panel{position:relative;padding:34px;border:1px solid var(--line-gold);border-radius:24px;background:linear-gradient(145deg,rgba(212,163,83,.08),rgba(12,13,15,.96) 50%);box-shadow:0 24px 80px rgba(0,0,0,.26)}
+.agenda-panel-kicker,.agenda-visual-kicker{font-size:9px;letter-spacing:.2em;color:var(--gold-2)}
+.agenda-feature-panel h3{font:700 24px/1.25 "Manrope",sans-serif;margin:18px 0 10px;color:#f3efe8}
+.agenda-feature-panel>p{font-size:13px;line-height:1.75;color:#a7a198;margin:0}
+.agenda-feature-points{display:grid;gap:0;margin-top:24px;border-top:1px solid var(--line)}
+.agenda-feature-points>div{display:grid;grid-template-columns:32px 1fr;column-gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.agenda-feature-points>div>span{grid-row:span 2;color:var(--gold);font-size:9px;letter-spacing:.12em;padding-top:3px}
+.agenda-feature-points strong{font-size:12px;color:#eee8df}
+.agenda-feature-points small{font-size:11px;color:#807b74;margin-top:4px}
+.agenda-product-page{background:#070707}
+.agenda-product-hero{position:relative;min-height:680px;padding:calc(var(--header-h) + 90px) clamp(22px,5vw,84px) 100px;display:grid;grid-template-columns:minmax(0,1.04fr) minmax(340px,.96fr);align-items:center;gap:clamp(32px,6vw,100px);overflow:hidden}
+.agenda-product-glow{position:absolute;right:-10%;top:6%;width:65vw;height:65vw;max-width:860px;max-height:860px;border-radius:50%;background:radial-gradient(circle,rgba(0,111,184,.16),rgba(212,163,83,.06) 34%,transparent 68%);pointer-events:none}
+.agenda-product-copy,.agenda-product-visual{position:relative;z-index:1}
+.agenda-product-hero h1{font:800 clamp(54px,7vw,88px)/1 "Manrope",sans-serif;letter-spacing:-.065em;margin:24px 0 12px;color:#f3efe8}
+.agenda-product-tagline{font:600 clamp(21px,2.6vw,32px)/1.3 "Manrope",sans-serif;color:var(--gold-2);margin:0 0 20px;max-width:660px}
+.agenda-product-lead{max-width:640px;color:#aaa49b;font-size:16px;line-height:1.8;margin:0}
+.agenda-product-note{color:#79746d;font-size:11px;margin-top:20px}
+.agenda-product-visual{min-height:420px;display:grid;place-items:center}
+.agenda-visual-orbit{position:absolute;width:min(34vw,410px);aspect-ratio:1;border:1px solid rgba(0,167,255,.22);border-radius:50%;box-shadow:0 0 100px rgba(0,130,200,.1),inset 0 0 90px rgba(212,163,83,.035)}
+.agenda-visual-card{width:min(100%,390px);padding:34px;border:1px solid rgba(212,163,83,.3);border-radius:24px;background:linear-gradient(150deg,rgba(24,20,14,.98),rgba(12,13,15,.98) 55%);box-shadow:0 26px 90px rgba(0,0,0,.4)}
+.agenda-visual-card>strong{display:block;font:700 28px/1.2 "Manrope",sans-serif;color:#f3efe8;margin:18px 0 26px}
+.agenda-visual-list{display:grid;gap:15px}
+.agenda-visual-list>div{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--line);font-size:12px;color:#c8c1b6}
+.agenda-visual-list i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(212,163,83,.12);color:var(--gold-2);font-size:11px;font-style:normal}
+.agenda-visual-caption{display:block;color:#8a8379;font-size:10px;line-height:1.5;margin-top:18px}
+.agenda-visual-node{position:absolute;padding:10px 14px;border:1px solid var(--line);border-radius:99px;background:#101114;color:#ddd5c9;font-size:8px;letter-spacing:.17em}
+.agenda-visual-node-a{top:12%;right:2%}.agenda-visual-node-b{bottom:12%;left:4%;color:#7bd8ff;border-color:rgba(0,167,255,.2)}
+.agenda-product-section{background:#0a0a0b}
+.agenda-benefit-grid{max-width:1280px;margin:55px auto 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.agenda-benefit-card{position:relative;min-height:270px;padding:26px;border:1px solid var(--line);border-radius:19px;background:linear-gradient(155deg,#121214,#0d0d0e);transition:.3s var(--ease)}
+.agenda-benefit-card:hover{transform:translateY(-5px);border-color:var(--line-gold)}
+.agenda-benefit-number{position:absolute;right:22px;top:22px;color:#5e5a54;font-size:8px;letter-spacing:.14em}
+.agenda-benefit-icon{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line-gold);border-radius:13px;background:rgba(212,163,83,.06);color:var(--gold-2);font:700 12px "Manrope";margin-bottom:30px}
+.agenda-benefit-card h3{font:650 17px/1.3 "Manrope",sans-serif;color:#eee9e0;margin:0 0 11px}
+.agenda-benefit-card p{font-size:12px;line-height:1.75;color:#a29c93;margin:0}
+.agenda-multitenant{background:linear-gradient(180deg,#0a0a0b,#08090b)}
+.agenda-multitenant-panel{max-width:1280px;margin:0 auto;padding:clamp(28px,5vw,68px);display:grid;grid-template-columns:1.15fr .85fr;align-items:center;gap:clamp(30px,6vw,90px);border:1px solid rgba(0,167,255,.16);border-radius:28px;background:radial-gradient(ellipse at 90% 0%,rgba(0,126,190,.12),transparent 48%),linear-gradient(145deg,#101113,#0b0b0c)}
+.agenda-multitenant-copy h2,.agenda-audience-copy h2,.agenda-product-contact h2{font:750 clamp(32px,4.2vw,54px)/1.12 "Manrope",sans-serif;color:#f1ece4;letter-spacing:-.045em;margin:24px 0 18px}
+.agenda-multitenant-copy p,.agenda-audience-copy>p{font-size:14px;line-height:1.8;color:#a7a198;max-width:650px}
+.agenda-multitenant-copy .text-link{display:inline-flex;margin-top:14px}
+.agenda-tenant-visual{display:grid;gap:10px;max-width:460px;width:100%;margin:0 auto}
+.agenda-tenant-card{display:grid;grid-template-columns:85px 1fr;gap:4px 14px;padding:18px 20px;border:1px solid var(--line-gold);border-radius:16px;background:rgba(212,163,83,.045)}
+.agenda-tenant-card>span{grid-row:span 2;color:var(--gold-2);font-size:8px;letter-spacing:.15em;padding-top:4px}
+.agenda-tenant-card strong{font:650 14px "Manrope";color:#f1ece4}
+.agenda-tenant-card small{font-size:10px;color:#979188}
+.tenant-card-blue{border-color:rgba(0,167,255,.2);background:rgba(0,95,155,.06)}
+.tenant-card-blue>span{color:#75cefb}
+.agenda-tenant-divider{height:15px;display:flex;align-items:center;justify-content:center}
+.agenda-tenant-divider:before{content:"";height:1px;width:56%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent)}
+.agenda-tenant-divider i{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+.agenda-tenant-visual>p{text-align:center;color:#817b73;font-size:10px;margin:10px 0 0}
+.agenda-audience{display:grid;grid-template-columns:1fr .8fr;align-items:center;gap:clamp(40px,8vw,130px);background:#080808}
+.agenda-audience-list{border-top:1px solid var(--line)}
+.agenda-audience-list>div{display:grid;grid-template-columns:34px 1fr;gap:3px 12px;padding:17px 0;border-bottom:1px solid var(--line)}
+.agenda-audience-list>div>span{grid-row:span 2;color:var(--gold);font-size:9px;padding-top:3px}
+.agenda-audience-list strong{font-size:13px;color:#e9e4db}.agenda-audience-list small{font-size:11px;color:#89837a}
+.agenda-product-contact{background:radial-gradient(ellipse at 50% 100%,rgba(0,112,182,.11),transparent 55%),#090909}
+.agenda-product-contact-inner{max-width:850px;margin:0 auto;text-align:center}
+.agenda-product-contact h2{max-width:780px;margin-left:auto;margin-right:auto}
+.agenda-product-contact-inner>p{color:#a49d93;font-size:14px;line-height:1.7}
+.centered-actions{justify-content:center}
+.agenda-page-login{white-space:nowrap}
+.agenda-page-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:28px clamp(22px,5vw,84px);border-top:1px solid var(--line);background:#070707}
+.agenda-footer-brand{color:#d4a353;font:800 17px "Manrope";letter-spacing:.16em;text-decoration:none}
+.agenda-footer-brand span{display:block;font-size:7px;letter-spacing:.25em;color:#9c968d;margin-top:5px}
+.agenda-page-footer>div{display:flex;gap:22px}.agenda-page-footer>div a{color:#aaa49b;text-decoration:none;font-size:11px}
+.agenda-page-footer>div a:hover{color:var(--gold-2)}.agenda-page-footer>small{color:#69655f;font-size:10px}
+@media (min-width:961px) and (max-width:1200px){
+  .site-header{gap:16px;padding-left:24px;padding-right:24px}
+  .site-header .brand-svg-logo{width:260px;height:auto}
+  .site-header.scrolled .brand-svg-logo{width:250px;height:auto}
+  .main-nav{gap:clamp(14px,1.45vw,18px)}
+  .main-nav a{font-size:11px}
+  .header-cta{padding:10px 13px;font-size:11px}
+}
+@media (max-width:1100px){
+  .agenda-benefit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .agenda-product-hero{grid-template-columns:1fr 1fr}
+}
+@media (max-width:960px){
+  .agenda-feature-inner,.agenda-multitenant-panel,.agenda-audience{grid-template-columns:1fr}
+  .agenda-product-hero{grid-template-columns:1fr;padding-top:125px}
+  .agenda-product-copy{max-width:760px}
+  .agenda-product-visual{min-height:360px;width:min(100%,650px);margin:0 auto}
+  .agenda-visual-orbit{width:min(65vw,390px)}
+  .agenda-page-login{display:none}
+}
+@media (max-width:680px){
+  .agenda-feature{padding-top:88px;padding-bottom:88px}
+  .agenda-feature-panel{padding:25px 21px}
+  .agenda-feature h2{font-size:42px}
+  .agenda-feature-lead{font-size:14px}
+  .agenda-feature-actions,.agenda-product-actions{display:grid;grid-template-columns:1fr}
+  .agenda-product-hero{padding:118px 20px 65px;gap:12px;min-height:auto}
+  .agenda-product-hero h1{font-size:clamp(48px,13vw,70px)}
+  .agenda-product-tagline{font-size:22px}
+  .agenda-product-lead{font-size:14px}
+  .agenda-product-visual{min-height:320px}
+  .agenda-visual-card{padding:25px;width:100%}
+  .agenda-visual-card>strong{font-size:23px}
+  .agenda-visual-node-a{right:0;top:5%}.agenda-visual-node-b{left:0;bottom:5%}
+  .agenda-product-section.section-pad,.agenda-multitenant.section-pad,.agenda-audience.section-pad,.agenda-product-contact.section-pad{padding-top:82px;padding-bottom:82px}
+  .agenda-benefit-grid{grid-template-columns:1fr;margin-top:35px}
+  .agenda-benefit-card{min-height:0;padding:23px}
+  .agenda-multitenant-panel{padding:25px 20px}
+  .agenda-tenant-card{grid-template-columns:65px 1fr;padding:16px 14px}
+  .agenda-audience{gap:28px}
+  .agenda-page-footer{align-items:flex-start;flex-direction:column}
+  .agenda-page-footer>div{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+  .agenda-benefit-card{transition:none}
+  .agenda-benefit-card:hover{transform:none}
+}
