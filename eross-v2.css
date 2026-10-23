@@ -1846,3 +1846,14 @@ button,a{-webkit-tap-highlight-color:transparent}
 .agenda-visual-list>div{padding:5px 0}
 .agenda-visual-caption{margin-top:10px}
 @media(max-width:680px){.agenda-visual-card{padding:19px}.agenda-visual-card>strong{font-size:21px}}
+
+
+/* EROSS Vouchers product-page sample card */
+.vouchers-sample-card{padding:24px;border:1px solid rgba(212,163,83,.34);border-radius:18px;background:linear-gradient(145deg,#17130d,#0c0d0f 74%);box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.vouchers-sample-head{display:flex;justify-content:space-between;align-items:center;color:var(--gold-2);font-size:9px;font-weight:700;letter-spacing:.16em}
+.vouchers-sample-badge{padding:6px 9px;border:1px solid rgba(212,163,83,.3);border-radius:99px;color:#d8c79e;font-size:8px;letter-spacing:.08em}
+.vouchers-sample-card h3{font:750 25px/1.2 "Manrope",sans-serif;color:#f3efe8;margin:28px 0 6px}
+.vouchers-sample-card p{font-size:11px;line-height:1.65;color:#aaa49b;margin:0}
+.vouchers-sample-code{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-top:18px;margin-top:20px;border-top:1px dashed rgba(212,163,83,.28);font-size:9px;letter-spacing:.1em;color:#c8c1b6}
+.vouchers-sample-code strong{color:#a9ddb8;font-size:8px;letter-spacing:.08em}
+.vouchers-demo-disclaimer{display:block;margin-top:10px;color:#79746d;font-size:9px;text-align:center}
