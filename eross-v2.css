@@ -1868,3 +1868,21 @@ button,a{-webkit-tap-highlight-color:transparent}
 .site-footer .footer-social-link:hover{
   color:#fff0c2;border-color:var(--gold);background:rgba(210,174,104,.08)
 }
+
+/* Social links at the top of the site */
+.main-nav a.social-nav-link{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 11px;
+  border:1px solid rgba(210,174,104,.42);border-radius:999px;color:#e4cf9d;
+  font-size:11px;white-space:nowrap;transition:color .2s ease,border-color .2s ease,background .2s ease
+}
+.main-nav a.social-nav-link:after{display:none}
+.main-nav a.social-nav-link:hover{
+  color:#fff0c2;border-color:var(--gold);background:rgba(210,174,104,.09)
+}
+.main-nav a.social-nav-link svg{width:15px;height:15px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7}
+.main-nav a.social-nav-link:first-of-type svg{fill:currentColor;stroke:none}
+.main-nav a.social-nav-link .social-icon-dot{fill:currentColor;stroke:none}
+@media(max-width:960px){
+  .main-nav a.social-nav-link{font-size:16px;padding:11px 16px}
+  .main-nav a.social-nav-link svg{width:18px;height:18px}
+}
