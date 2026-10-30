@@ -1857,3 +1857,14 @@ button,a{-webkit-tap-highlight-color:transparent}
 .vouchers-sample-code{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-top:18px;margin-top:20px;border-top:1px dashed rgba(212,163,83,.28);font-size:9px;letter-spacing:.1em;color:#c8c1b6}
 .vouchers-sample-code strong{color:#a9ddb8;font-size:8px;letter-spacing:.08em}
 .vouchers-demo-disclaimer{display:block;margin-top:10px;color:#79746d;font-size:9px;text-align:center}
+
+/* Social links to the official EROSS profiles */
+.site-footer .footer-social-link{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 12px;
+  border:1px solid rgba(210,174,104,.35);border-radius:999px;color:#d7c18f;
+  transition:color .2s ease,border-color .2s ease,background .2s ease
+}
+.site-footer .footer-social-link span{font-size:12px}
+.site-footer .footer-social-link:hover{
+  color:#fff0c2;border-color:var(--gold);background:rgba(210,174,104,.08)
+}
