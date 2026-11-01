@@ -65,7 +65,7 @@ button,a{-webkit-tap-highlight-color:transparent}
 }
 .main-nav{margin-left:auto;display:flex;gap:clamp(22px,2.8vw,46px)}
 .main-nav a{
-  text-decoration:none;font-size:12px;color:#aaa69f;transition:.25s;
+  text-decoration:none;font-size:12px;font-weight:500;color:#e0dbd4;transition:.25s;
   position:relative;padding:10px 0
 }
 .main-nav a:after{
