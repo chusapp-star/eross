@@ -623,9 +623,87 @@
     <div class="footer-bottom">
       <span>© 2026 EROSS · Costa Rica</span>
       <span>Empezá pequeño. Crecé con estrategia.</span>
+      <button type="button" id="measurement-settings" aria-controls="measurement-options" aria-expanded="false"
+        style="font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline">Preferencias de medición</button>
     </div>
   </footer>
 
+  <aside id="measurement-options" aria-label="Medición opcional" hidden
+    style="position:fixed;right:1rem;bottom:1rem;z-index:1000;width:min(25rem,calc(100% - 2rem));padding:1rem;background:#171310;color:#fff;border:1px solid #b99b64;border-radius:.75rem">
+    <p style="margin:0 0 .75rem">Si aceptás, usamos el píxel de Meta para medir vistas de esta página y clics a WhatsApp. Podés cambiar tu decisión en el pie de página.</p>
+    <button type="button" value="no" style="padding:.4rem .65rem;cursor:pointer">Rechazar</button>
+    <button type="button" value="yes" style="padding:.4rem .65rem;cursor:pointer">Aceptar</button>
+  </aside>
+
   <script src="eross-v2.js"></script>
+  <script>
+    (() => {
+      const preferenceKey = 'eross-meta-measurement';
+      const settings = document.querySelector('#measurement-settings');
+      const panel = document.querySelector('#measurement-options');
+      const choices = panel.querySelectorAll('button');
+      let enabled = false;
+      let initialized = false;
+
+      function setMeasurement(allowed) {
+        enabled = allowed;
+        if (initialized) {
+          window.fbq('consent', allowed ? 'grant' : 'revoke');
+          return;
+        }
+        if (!allowed) return;
+
+        const pixel = window.fbq = function () {
+          if (pixel.callMethod) pixel.callMethod.apply(pixel, arguments);
+          else pixel.queue.push(arguments);
+        };
+        window._fbq = pixel;
+        pixel.push = pixel;
+        pixel.loaded = true;
+        pixel.version = '2.0';
+        pixel.queue = [];
+        pixel('set', 'autoConfig', false, '1783825812733087');
+        pixel('init', '1783825812733087');
+        pixel('track', 'PageView');
+        initialized = true;
+
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        document.head.append(script);
+      }
+
+      function showOptions(show) {
+        panel.hidden = !show;
+        settings.setAttribute('aria-expanded', String(show));
+      }
+
+      let preference;
+      try { preference = localStorage.getItem(preferenceKey); } catch {}
+      if (preference === 'yes') setMeasurement(true);
+      showOptions(preference !== 'yes' && preference !== 'no');
+
+      settings.addEventListener('click', () => {
+        showOptions(panel.hidden);
+        if (!panel.hidden) choices[0].focus();
+      });
+
+      for (const choice of choices) {
+        choice.addEventListener('click', () => {
+          const preference = choice.value;
+          try { localStorage.setItem(preferenceKey, preference); } catch {}
+          setMeasurement(preference === 'yes');
+          showOptions(false);
+          settings.focus({ preventScroll: true });
+        });
+      }
+
+      for (const link of document.querySelectorAll('a[href^="https://wa.me/"]')) {
+        link.addEventListener('click', () => {
+          if (enabled) window.fbq('trackCustom', 'WhatsAppClick');
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
