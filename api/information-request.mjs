@@ -12,9 +12,15 @@ export default async function handler(req, res) {
   try {
     const body = JSON.stringify(req.body);
     if (!body || Buffer.byteLength(body) > 4096) return res.status(413).end();
+    const oidc = process.env.VERCEL_OIDC_TOKEN || req.headers["x-vercel-oidc-token"];
+    if (typeof oidc !== "string" || !oidc) return res.status(503).end();
     const result = await fetch(url, {
       method: "POST",
-      headers: { authorization: "Bearer " + token, "content-type": "application/json" },
+      headers: {
+        authorization: "Bearer " + token,
+        "content-type": "application/json",
+        "x-vercel-trusted-oidc-idp-token": oidc,
+      },
       body,
       redirect: "error",
       signal: AbortSignal.timeout(8000),
