@@ -522,6 +522,45 @@
         <h2>Tu negocio ya existe.<br><span class="gold-text">Ahora construyamos el sistema que lo haga crecer.</span></h2>
         <p class="contact-lead">Contanos dónde estás hoy. EROSS te ayuda a definir cuál debería ser el siguiente paso.</p>
 
+        <style>
+          .info-preview { max-width: 42rem; margin: 2rem auto; padding: clamp(1rem, 4vw, 2rem); text-align: left; border: 1px solid #a58855; border-radius: 1.25rem; background: #171310; color: #f8f1e5; }
+          .info-preview h3 { margin: 0 0 .5rem; color: #ecd39b; }
+          .info-preview p { margin: 0 0 1rem; }
+          .info-preview fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; padding: 0; border: 0; }
+          .info-preview label { display: grid; gap: .35rem; }
+          .info-preview .wide { grid-column: 1 / -1; }
+          .info-preview :is(input, select, textarea) { width: 100%; min-height: 44px; padding: .65rem; border: 1px solid #8c7754; border-radius: .5rem; background: #231e19; color: inherit; font: inherit; }
+          .info-preview small { display: block; margin-top: .75rem; }
+          @media (max-width: 580px) { .info-preview fieldset { grid-template-columns: minmax(0, 1fr); } }
+        </style>
+        <section class="info-preview" aria-labelledby="info-preview-title">
+          <h3 id="info-preview-title">¿En qué te podemos ayudar?</h3>
+          <p>Contanos qué querés lograr. Si estás empezando, te ayudamos a dar el primer paso. Te respondemos por WhatsApp.</p>
+          <form aria-describedby="info-preview-status">
+            <fieldset disabled>
+              <label>Tu nombre <input name="name" autocomplete="name" required></label>
+              <label>Tu WhatsApp <input name="phone" type="tel" autocomplete="tel" placeholder="+506" required></label>
+              <label class="wide">Nombre de tu negocio o proyecto (opcional) <input name="business" autocomplete="organization"></label>
+              <label class="wide">¿Sobre qué querés información?
+                <select name="topic" required>
+                  <option value="">Elegí una opción</option>
+                  <option>Estoy empezando y quiero avanzar en marketing digital</option>
+                  <option>Quiero aumentar mis ventas con marketing digital</option>
+                  <option>Quiero atraer más clientes con publicidad y redes</option>
+                  <option>Requiero información</option>
+                  <option>Quiero conocer EROSS CRM</option>
+                  <option>Quiero conocer EROSS Agenda</option>
+                  <option>Quiero conocer EROSS Vouchers</option>
+                  <option>Quiero ver una demo</option>
+                  <option>Todavía no sé por dónde empezar</option>
+                </select>
+              </label>
+              <label class="wide">¿Querés contarnos algo más? (opcional) <textarea name="details" rows="3"></textarea></label>
+              <button class="btn btn-primary wide" type="submit">Quiero información</button>
+            </fieldset>
+            <small id="info-preview-status">Vista previa del formulario. El envío se habilitará al conectar el CRM.</small>
+          </form>
+        </section>
         <div class="contact-profile">
           <div class="profile-mark" aria-hidden="true">JP</div>
           <div class="profile-copy">
