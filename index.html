@@ -561,9 +561,9 @@
                 </select>
               </label>
               <label class="wide">¿Querés contarnos algo más? (opcional) <textarea name="details" maxlength="75" rows="3"></textarea></label>
-              <button class="btn btn-primary wide" type="submit" disabled>Quiero información</button>
+              <button class="btn btn-primary wide" type="submit">Quiero información</button>
             </fieldset>
-            <small id="info-preview-status" role="status">Vista previa del formulario. El envío se habilitará al conectar el CRM.</small>
+            <small id="info-preview-status" role="status">Ambiente de prueba. Usá únicamente datos ficticios.</small>
           </form>
         </section>
         <div class="contact-profile">
@@ -711,9 +711,6 @@
       form.reset();
       pending = undefined;
       status.textContent = '¡Gracias! Recibimos tu solicitud. Te contactaremos por WhatsApp.';
-      try {
-        if (localStorage.getItem('eross-meta-measurement') === 'yes') window.fbq?.('track', 'Lead');
-      } catch {}
     } catch {
       status.textContent = 'No pudimos confirmar tu solicitud. Podés intentar de nuevo.';
     } finally {
