@@ -539,11 +539,11 @@
           <p><strong>EROSS CRM</strong> te ayuda a organizar tus prospectos, darles seguimiento y ver en qué etapa va cada oportunidad de venta.</p>
           <p>También podés consultar por <strong>publicidad y redes sociales</strong>, <strong>EROSS Agenda</strong> y <strong>EROSS Vouchers</strong>, o solicitar una <strong>demo</strong>.</p>
           <p>También damos <strong>capacitaciones en marketing digital</strong> para empresas, pymes, emprendedores, estudiantes y asociaciones.</p>
-          <form aria-describedby="info-preview-status" onsubmit="return false;">
+          <form id="information-request" aria-describedby="info-preview-status" onsubmit="return false;">
             <fieldset>
-              <label>Tu nombre <input name="name" autocomplete="name" required></label>
+              <label>Tu nombre <input name="name" maxlength="120" autocomplete="name" required></label>
               <label>Tu WhatsApp <input name="phone" type="tel" autocomplete="tel" placeholder="+506" required></label>
-              <label class="wide">Nombre de tu negocio o proyecto (opcional) <input name="business" autocomplete="organization"></label>
+              <label class="wide">Nombre de tu negocio o proyecto (opcional) <input name="business" maxlength="45" autocomplete="organization"></label>
               <label class="wide">¿Sobre qué querés información?
                 <select name="topic" required>
                   <option value="">Elegí una opción</option>
@@ -559,10 +559,10 @@
                   <option>Todavía no sé por dónde empezar</option>
                 </select>
               </label>
-              <label class="wide">¿Querés contarnos algo más? (opcional) <textarea name="details" rows="3"></textarea></label>
-              <button class="btn btn-primary wide" type="button" disabled>Quiero información</button>
+              <label class="wide">¿Querés contarnos algo más? (opcional) <textarea name="details" maxlength="75" rows="3"></textarea></label>
+              <button class="btn btn-primary wide" type="submit" disabled>Quiero información</button>
             </fieldset>
-            <small id="info-preview-status">Vista previa del formulario. El envío se habilitará al conectar el CRM.</small>
+            <small id="info-preview-status" role="status">Vista previa del formulario. El envío se habilitará al conectar el CRM.</small>
           </form>
         </section>
         <div class="contact-profile">
@@ -678,6 +678,49 @@
     <button type="button" value="yes" style="padding:.4rem .65rem;cursor:pointer">Aceptar</button>
   </aside>
 
+  <script>
+(() => {
+  const form = document.querySelector('#information-request');
+  const button = form.querySelector('button[type="submit"]');
+  const status = document.querySelector('#info-preview-status');
+  let pending;
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (button.disabled) return;
+    const fields = Object.fromEntries(new FormData(form));
+    const phone = fields.phone.trim();
+    const digits = phone.replace(/\D/g, '');
+    fields.phone = !phone.startsWith('+') && digits.length === 8 ? '+506' + digits : '+' + digits;
+    if (!/^\+[1-9]\d{7,14}$/.test(fields.phone)) {
+      status.textContent = 'Revisá tu número de WhatsApp e incluí el código de país si es internacional.';
+      return;
+    }
+    fields.campaign = (new URLSearchParams(location.search).get('utm_campaign') || '').trim().slice(0, 40);
+    const payload = JSON.stringify(fields);
+    if (pending?.payload !== payload) pending = { payload, id: crypto.randomUUID() };
+    button.disabled = true;
+    status.textContent = 'Enviando tu solicitud…';
+    try {
+      const response = await fetch('/api/information-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...fields, requestId: pending.id }),
+      });
+      if (!response.ok || !(await response.json()).received) throw new Error('Submission failed');
+      form.reset();
+      pending = undefined;
+      status.textContent = '¡Gracias! Recibimos tu solicitud. Te contactaremos por WhatsApp.';
+      try {
+        if (localStorage.getItem('eross-meta-measurement') === 'yes') window.fbq?.('track', 'Lead');
+      } catch {}
+    } catch {
+      status.textContent = 'No pudimos confirmar tu solicitud. Podés intentar de nuevo.';
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+  </script>
   <script src="eross-v2.js"></script>
   <script>
     (() => {
