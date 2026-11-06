@@ -708,15 +708,6 @@
         body: JSON.stringify({ ...fields, requestId: pending.id }),
       });
       if (!response.ok || !(await response.json()).received) throw new Error('Submission failed');
-      if (fields.email === 'eross-retry-qa@example.com' && new URLSearchParams(location.search).get('qa') === 'retry') {
-        const replay = await fetch('/api/information-request', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...fields, requestId: pending.id }),
-        });
-        if (!replay.ok || !(await replay.json()).received) throw new Error('Replay failed');
-        form.dataset.qaReplay = 'confirmed';
-      }
       form.reset();
       pending = undefined;
       status.textContent = '¡Gracias! Recibimos tu solicitud. Te contactaremos por WhatsApp.';
