@@ -1888,3 +1888,113 @@ button,a{-webkit-tap-highlight-color:transparent}
   .main-nav a.social-nav-link{font-size:16px;padding:11px 16px}
   .main-nav a.social-nav-link svg{width:18px;height:18px}
 }
+
+
+/* Home footer */
+.site-footer.home-footer {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 32px clamp(28px, 4vw, 72px);
+  padding-block: 36px 24px;
+}
+
+.home-footer .footer-brand {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.home-footer .footer-brand .brand-svg-logo {
+  display: block;
+  width: min(245px, 100%);
+  height: auto;
+}
+
+.home-footer .footer-brand-message {
+  margin: 14px 0 0;
+}
+
+.home-footer .footer-slogan {
+  font-size: 17px;
+}
+
+.home-footer .footer-service-line,
+.home-footer .footer-person {
+  color: #c9c1b5;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.home-footer .footer-service-line {
+  letter-spacing: normal;
+  text-transform: none;
+  text-shadow: none;
+}
+
+.home-footer .footer-group {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.home-footer .footer-group h2 {
+  margin: 0 0 4px;
+  color: #efd398;
+  font-size: 17px;
+}
+
+.home-footer .footer-group a {
+  color: #eae4db;
+  font-size: 16px;
+  line-height: 1.45;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.home-footer .footer-group a:hover {
+  color: #efd398;
+  text-decoration: underline;
+}
+
+.home-footer .footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.home-footer .footer-group .footer-social-link {
+  color: #efd398;
+  font-size: 14px;
+}
+
+.home-footer .footer-bottom {
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  color: #c9c1b5;
+  font-size: 14px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.home-footer :is(a, button):focus-visible {
+  outline: 2px solid #efd398;
+  outline-offset: 4px;
+}
+
+@media (max-width: 900px) {
+  .site-footer.home-footer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-footer .footer-identity {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 540px) {
+  .site-footer.home-footer {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}
