@@ -686,7 +686,7 @@
 
   <aside id="measurement-options" aria-label="Medición opcional" hidden
     style="position:fixed;right:1rem;bottom:1rem;z-index:1000;width:min(25rem,calc(100% - 2rem));padding:1rem;background:#171310;color:#fff;border:1px solid #b99b64;border-radius:.75rem">
-    <p style="margin:0 0 .75rem">Si aceptás, usamos el píxel de Meta para medir vistas de esta página y clics a WhatsApp. Podés cambiar tu decisión en el pie de página.</p>
+    <p style="margin:0 0 .75rem">Si aceptás, usamos el píxel de Meta para medir vistas de esta página, clics a WhatsApp y solicitudes enviadas. Podés cambiar tu decisión en el pie de página.</p>
     <button type="button" value="no" style="padding:.4rem .65rem;cursor:pointer">Rechazar</button>
     <button type="button" value="yes" style="padding:.4rem .65rem;cursor:pointer">Aceptar</button>
   </aside>
@@ -720,6 +720,7 @@
         body: JSON.stringify({ ...fields, requestId: pending.id }),
       });
       if (!response.ok || !(await response.json()).received) throw new Error('Submission failed');
+      document.dispatchEvent(new CustomEvent('eross:inquiry-saved', { detail: pending.id }));
       form.reset();
       pending = undefined;
       status.textContent = '¡Gracias! Recibimos tu solicitud. Te contactaremos por WhatsApp.';
@@ -793,6 +794,10 @@
           settings.focus({ preventScroll: true });
         });
       }
+
+      document.addEventListener('eross:inquiry-saved', (event) => {
+        if (enabled) window.fbq('track', 'Lead', {}, { eventID: event.detail });
+      });
 
       for (const link of document.querySelectorAll('a[href^="https://wa.me/"]')) {
         link.addEventListener('click', () => {
