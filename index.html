@@ -536,8 +536,8 @@
         <section class="info-preview" aria-labelledby="info-preview-title">
           <h3 id="info-preview-title">¿En qué te podemos ayudar?</h3>
           <p>Contanos qué querés lograr. Si estás empezando, te ayudamos a dar el primer paso. Te respondemos por WhatsApp.</p>
-          <form aria-describedby="info-preview-status">
-            <fieldset disabled>
+          <form aria-describedby="info-preview-status" onsubmit="return false;">
+            <fieldset>
               <label>Tu nombre <input name="name" autocomplete="name" required></label>
               <label>Tu WhatsApp <input name="phone" type="tel" autocomplete="tel" placeholder="+506" required></label>
               <label class="wide">Nombre de tu negocio o proyecto (opcional) <input name="business" autocomplete="organization"></label>
@@ -556,7 +556,7 @@
                 </select>
               </label>
               <label class="wide">¿Querés contarnos algo más? (opcional) <textarea name="details" rows="3"></textarea></label>
-              <button class="btn btn-primary wide" type="submit">Quiero información</button>
+              <button class="btn btn-primary wide" type="button" disabled>Quiero información</button>
             </fieldset>
             <small id="info-preview-status">Vista previa del formulario. El envío se habilitará al conectar el CRM.</small>
           </form>
