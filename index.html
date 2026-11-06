@@ -522,6 +522,62 @@
         <h2>Tu negocio ya existe.<br><span class="gold-text">Ahora construyamos el sistema que lo haga crecer.</span></h2>
         <p class="contact-lead">Contanos dónde estás hoy. EROSS te ayuda a definir cuál debería ser el siguiente paso.</p>
 
+        <style>
+          .info-preview { max-width: 42rem; margin: 2rem auto; padding: clamp(1rem, 4vw, 2rem); text-align: left; border: 1px solid #a58855; border-radius: 1.25rem; background: #171310; color: #f8f1e5; }
+          .info-preview h3 { margin: 0 0 .5rem; color: #ecd39b; }
+          .info-preview p { margin: 0 0 1rem; }
+          .info-preview fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; padding: 0; border: 0; }
+          .info-preview label { display: grid; gap: .35rem; }
+          .info-preview .wide { grid-column: 1 / -1; }
+          .info-preview :is(input, select, textarea) { width: 100%; min-height: 44px; padding: .65rem; border: 1px solid #8c7754; border-radius: .5rem; background: #231e19; color: inherit; font: inherit; }
+          .info-preview small { display: block; margin-top: .75rem; }
+          @media (max-width: 580px) { .info-preview fieldset { grid-template-columns: minmax(0, 1fr); } }
+        </style>
+        <section class="info-preview" aria-labelledby="info-preview-title">
+          <h3 id="info-preview-title">¿En qué te podemos ayudar?</h3>
+          <p>Contanos qué querés lograr. Si estás empezando, te ayudamos a dar el primer paso. Te respondemos por WhatsApp.</p>
+          <p><strong>EROSS CRM</strong> te ayuda a organizar tus prospectos, darles seguimiento y ver en qué etapa va cada oportunidad de venta.</p>
+          <p>También podés consultar por <strong>publicidad y redes sociales</strong>, <strong>EROSS Agenda</strong> y <strong>EROSS Vouchers</strong>, o solicitar una <strong>demo</strong>.</p>
+          <p>También damos <strong>capacitaciones en marketing digital</strong> para empresas, pymes, emprendedores, estudiantes y asociaciones.</p>
+          <form id="information-request" aria-describedby="info-preview-status" onsubmit="return false;">
+            <fieldset>
+              <label>Tu nombre <input name="name" maxlength="120" autocomplete="name" required></label>
+              <label>Tu WhatsApp <input name="phone" type="tel" autocomplete="tel" placeholder="+506" required></label>
+              <label class="wide">Tu correo electrónico (opcional) <input name="email" type="email" autocomplete="email" maxlength="254"></label>
+              <label class="wide">Nombre de tu negocio o proyecto (opcional) <input name="business" maxlength="45" autocomplete="organization"></label>
+              <label class="wide">¿Sobre qué querés información?
+                <select name="topic" required>
+                  <option value="">Elegí una opción</option>
+                  <option>Estoy empezando y quiero avanzar en marketing digital</option>
+                  <option>Quiero aumentar mis ventas con marketing digital</option>
+                  <option>Quiero atraer más clientes con publicidad y redes</option>
+                  <option>Requiero información</option>
+                  <option>Quiero información sobre capacitaciones</option>
+                  <option>Quiero conocer EROSS CRM</option>
+                  <option>Quiero conocer EROSS Agenda</option>
+                  <option>Quiero conocer EROSS Vouchers</option>
+                  <option>Quiero ver una demo</option>
+                  <option>Todavía no sé por dónde empezar</option>
+                </select>
+              </label>
+              <label class="wide">¿Querés contarnos algo más? (opcional) <textarea name="details" maxlength="75" rows="3"></textarea></label>
+              <details class="wide">
+                <summary>Aviso de privacidad del formulario</summary>
+                <p>Jesús Antonio Prado Portuguez, titular de EROSS Consulting y responsable de los datos, recibe la información de este formulario para responder a tu solicitud y darle seguimiento por WhatsApp o por correo, si lo indicás. El equipo autorizado de EROSS puede consultar la solicitud en EROSS CRM.</p>
+                <p><strong>Dirección del responsable</strong> · Río Jesús, distrito Santiago, cantón San Ramón, provincia de Alajuela, Costa Rica.</p>
+                <p>El nombre, el WhatsApp y el tema son necesarios para enviar el formulario. El correo, el nombre del negocio y el mensaje son opcionales. Si preferís no completar el formulario, podés escribirnos directamente por WhatsApp.</p>
+                <p>Para consultar, corregir o solicitar la eliminación de tus datos, o retirar tu consentimiento, escribinos a <a href="mailto:hola@erosscr.com">hola@erosscr.com</a>.</p>
+              </details>
+              <label class="wide" style="display:flex;align-items:center;gap:.65rem">
+                <input type="checkbox" id="information-consent" name="consent" value="eross-web-2026-11-05" required style="width:1.25rem;min-height:1.25rem;flex:none">
+                Autorizo a EROSS a usar mis datos para responder a esta solicitud.
+              </label>
+              <label hidden style="display:none">Dejá este campo vacío <input name="website" tabindex="-1" autocomplete="off"></label>
+              <button class="btn btn-primary wide" type="submit">Quiero información</button>
+            </fieldset>
+            <small id="info-preview-status" role="status"></small>
+          </form>
+        </section>
         <div class="contact-profile">
           <div class="profile-mark" aria-hidden="true">JP</div>
           <div class="profile-copy">
@@ -635,6 +691,46 @@
     <button type="button" value="yes" style="padding:.4rem .65rem;cursor:pointer">Aceptar</button>
   </aside>
 
+  <script>
+(() => {
+  const form = document.querySelector('#information-request');
+  const button = form.querySelector('button[type="submit"]');
+  const status = document.querySelector('#info-preview-status');
+  let pending;
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (button.disabled) return;
+    const fields = Object.fromEntries(new FormData(form));
+    const phone = fields.phone.trim();
+    const digits = phone.replace(/\D/g, '');
+    fields.phone = !phone.startsWith('+') && digits.length === 8 ? '+506' + digits : '+' + digits;
+    if (!/^\+[1-9]\d{7,14}$/.test(fields.phone)) {
+      status.textContent = 'Revisá tu número de WhatsApp e incluí el código de país si es internacional.';
+      return;
+    }
+    fields.campaign = (new URLSearchParams(location.search).get('utm_campaign') || '').trim().slice(0, 40);
+    const payload = JSON.stringify(fields);
+    if (pending?.payload !== payload) pending = { payload, id: crypto.randomUUID() };
+    button.disabled = true;
+    status.textContent = 'Enviando tu solicitud…';
+    try {
+      const response = await fetch('/api/information-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...fields, requestId: pending.id }),
+      });
+      if (!response.ok || !(await response.json()).received) throw new Error('Submission failed');
+      form.reset();
+      pending = undefined;
+      status.textContent = '¡Gracias! Recibimos tu solicitud. Te contactaremos por WhatsApp.';
+    } catch {
+      status.textContent = 'No pudimos confirmar tu solicitud. Podés intentar de nuevo.';
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+  </script>
   <script src="eross-v2.js"></script>
   <script>
     (() => {
