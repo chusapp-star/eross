@@ -645,16 +645,22 @@ button,a{-webkit-tap-highlight-color:transparent}
 @media(max-width:960px){
   :root{--header-h:72px}
   .site-header{padding:0 22px}
+}
+@media(max-width:1260px){
   .main-nav{
-    position:fixed;inset:var(--header-h) 0 0;background:rgba(7,7,7,.97);backdrop-filter:blur(20px);
-    flex-direction:column;align-items:center;justify-content:center;gap:26px;opacity:0;pointer-events:none;
+    position:fixed;inset:max(var(--header-h),92px) 0 0;background:rgba(7,7,7,.97);backdrop-filter:blur(20px);
+    flex-direction:column;align-items:center;justify-content:safe center;gap:clamp(4px,2vh,20px);padding:16px 0;overflow-y:auto;
+    opacity:0;visibility:hidden;pointer-events:none;
     transform:translateY(-12px);transition:.3s var(--ease)
   }
-  body.menu-open .main-nav{opacity:1;pointer-events:auto;transform:none}
+  body.menu-open .main-nav{opacity:1;visibility:visible;pointer-events:auto;transform:none}
   .main-nav a{font-size:17px}
   .menu-toggle{display:block;margin-left:auto}
   body.menu-open .menu-toggle span:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
   body.menu-open .menu-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(-45deg)}
+}
+@media(max-width:960px){
+  .main-nav{top:var(--header-h)}
   .header-cta{display:none}
   .hero{
     grid-template-columns:1fr;min-height:auto;padding-top:130px;padding-bottom:90px;
@@ -1774,7 +1780,7 @@ button,a{-webkit-tap-highlight-color:transparent}
 .agenda-footer-brand span{display:block;font-size:7px;letter-spacing:.25em;color:#9c968d;margin-top:5px}
 .agenda-page-footer>div{display:flex;gap:22px}.agenda-page-footer>div a{color:#aaa49b;text-decoration:none;font-size:11px}
 .agenda-page-footer>div a:hover{color:var(--gold-2)}.agenda-page-footer>small{color:#69655f;font-size:10px}
-@media (min-width:961px) and (max-width:1200px){
+@media (min-width:961px) and (max-width:1700px){
   .site-header{gap:16px;padding-left:24px;padding-right:24px}
   .site-header .brand-svg-logo{width:260px;height:auto}
   .site-header.scrolled .brand-svg-logo{width:250px;height:auto}
@@ -1884,7 +1890,7 @@ button,a{-webkit-tap-highlight-color:transparent}
 .main-nav a.social-nav-link svg{width:15px;height:15px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7}
 .main-nav a.social-nav-link:first-of-type svg{fill:currentColor;stroke:none}
 .main-nav a.social-nav-link .social-icon-dot{fill:currentColor;stroke:none}
-@media(max-width:960px){
+@media(max-width:1260px){
   .main-nav a.social-nav-link{font-size:16px;padding:11px 16px}
   .main-nav a.social-nav-link svg{width:18px;height:18px}
 }
