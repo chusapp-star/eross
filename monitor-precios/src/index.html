@@ -7,17 +7,21 @@
 .search-panel{padding:16px;margin:12px 0;border:1px solid #56472e;border-radius:14px;background:#201d17}.search-panel h2{margin:0 0 9px;font-size:1.2rem}.search-panel fieldset{margin:0 0 12px;padding:0;border:0;display:flex;gap:14px;flex-wrap:wrap}.search-panel fieldset label{display:flex;gap:6px;align-items:center}.search-panel input[type=radio]{accent-color:var(--gold)}.national-form{display:flex;align-items:end;flex-wrap:wrap;gap:10px}.national-form>label{display:grid;gap:5px;flex:1;min-width:180px;font-size:.87rem}.scope{margin:10px 0 0;color:var(--sub);font-size:.87rem}.coverage-button{padding:5px 9px;font-size:.82rem;margin-top:8px}.search-hit{color:#f0cd85}.summary article{min-width:0}@media print{.search-panel{display:none}}
 .supplier-toggle{white-space:nowrap;color:var(--gold)}.supplier-toggle[aria-expanded=true]{border-color:#967846}.supplier-details>td{background:var(--panel);padding:15px 18px}.supplier-heading{display:block;font-size:1rem;margin:0}.supplier-details .supplier-products td{white-space:normal}.supplier-details .supplier-products td:nth-child(2){white-space:nowrap}.supplier-products td:last-child{min-width:90px}
 .global-search{margin:22px 0 16px}.global-search h2{font-size:1.3rem;margin:0 0 12px}.global-search form{display:flex;gap:9px;flex-wrap:wrap}.global-search input{flex:1;min-width:180px}.live-group{margin-top:15px}.live-group h3{margin:0 0 5px;font-size:1rem}.live-group ul{list-style:none;margin:0;padding:0}.live-group li{border-top:1px solid var(--line);padding:8px 0}.live-group li strong{display:inline-block;margin-left:8px;font-variant-numeric:tabular-nums}.live-group small{display:block;color:var(--sub)}#markets{flex-wrap:wrap}@media print{.global-search{display:none}}
- .result-chart{margin-top:18px;padding:18px;border:1px solid #56472e;border-radius:14px;background:#1c1b17}.result-chart h3{margin:0 0 4px;font-size:1.12rem}.result-chart .track{height:9px}.result-chart .chart-row:first-child .track span{background:#edc679}.result-chart .chart-row:not(:first-child) .track span{background:#ab8851}.result-chart .chart-caption>span{overflow-wrap:anywhere}.result-chart .chart-caption strong{flex-shrink:0}.result-chart .scope{margin-top:8px}.chart-caption>span{font-weight:650}@media(max-width:520px){.chart-caption{flex-wrap:wrap;gap:4px}}
+ .result-chart,#compare{scroll-margin-top:24px}.chart-jump{display:inline-block;margin-top:10px;color:var(--gold);font-weight:700}.result-chart{margin-top:18px;padding:18px;border:1px solid #56472e;border-radius:14px;background:#1c1b17}.result-chart h3{margin:0 0 4px;font-size:1.12rem}.result-chart .track{height:9px}.result-chart .chart-row:first-child .track span{background:#edc679}.result-chart .chart-row:not(:first-child) .track span{background:#ab8851}.result-chart .chart-caption>span{overflow-wrap:anywhere}.result-chart .chart-caption strong{flex-shrink:0}.result-chart .scope{margin-top:8px}.chart-caption>span{font-weight:650}@media(max-width:520px){.chart-caption{flex-wrap:wrap;gap:4px}}
 </style></head>
 <body><header><span class="brand"><b>E</b>EROSS</span><a href="https://erosscr.com/" target="_blank" rel="noopener">EROSS Consulting ↗</a></header>
 <main><section class="hero"><div><h1>Monitor Scraping de Precios</h1><p>Precios publicados por comercios de Costa Rica.</p></div><button class="primary" id="refresh">↻ Actualizar precios</button></section>
 <section class="search-panel global-search"><h2><label for="global-query">¿Qué producto querés comparar?</label></h2>
 <form id="global-form"><input id="global-query" type="search" required minlength="3" maxlength="100" placeholder="Ej. iPhone 16 128 GB o WA17CG6441BWAP"><button class="primary" id="global-submit">Buscar precios</button></form>
-<div id="global-results" aria-live="polite"></div></section>
+<div id="global-results" aria-live="polite"></div><a class="chart-jump" href="#compare" id="open-chart">Ver gráfica del catálogo ↓</a></section>
 <nav aria-label="Mercados" id="markets"><button id="optica" aria-pressed="false">Ópticas</button><button id="ortopedia" aria-pressed="true">Terapia física y ortopedia</button><button id="tecnologia" aria-pressed="false">Tecnología</button><button id="linea" aria-pressed="false">Línea blanca</button></nav>
 <p class="status" id="status" role="status">Cargando catálogo…</p><section class="summary" id="summary" aria-label="Fuentes consultadas"></section>
 <nav aria-label="Vistas"><button id="catalog-tab" aria-pressed="true">Catálogo</button><button id="history-tab" aria-pressed="false">Historial</button><button id="directory-tab" aria-pressed="false">Proveedores por provincia</button></nav>
 <section id="catalog">
+<section class="compare" id="compare" tabindex="-1" aria-labelledby="compare-title">
+<div class="compare-head"><div><h2 id="compare-title">Comparativo de precios</h2><p>Compará precios publicados para un tipo de producto y revisá el modelo de cada opción.</p></div></div>
+<div id="chart" class="chart"></div><p id="chart-note" role="status"></p>
+</section>
 <section class="search-panel" aria-labelledby="national-title">
 <h2 id="national-title">Búsqueda nacional</h2>
 <fieldset aria-label="Forma de búsqueda"><label><input type="radio" name="lookup" id="mode-category" checked> Por tipo de producto</label><label><input type="radio" name="lookup" id="mode-specific"> Producto específico</label></fieldset>
@@ -42,10 +46,7 @@
 </div><div class="tools"><span id="count"></span><div><button id="csv">Exportar CSV</button><button id="pdf">Imprimir / PDF</button></div></div>
 <div class="table"><table><thead><tr><th scope="col">Producto</th><th scope="col">Tienda</th><th scope="col">Precio anunciado</th><th scope="col">Último cambio</th><th scope="col">Fuente</th></tr></thead><tbody id="rows"></tbody></table></div>
 <div class="pager"><button id="prev">Anterior</button><span id="page"></span><button id="next">Siguiente</button></div>
-<section class="compare" id="compare" aria-labelledby="compare-title">
-<div class="compare-head"><div><h2 id="compare-title">Comparativo de precios</h2><p>Compará precios publicados para un tipo de producto y revisá el modelo de cada opción.</p></div></div>
-<div id="chart" class="chart"></div><p id="chart-note" role="status"></p>
-</section>
+
 </section>
 <section class="history" id="history" hidden></section>
 <section class="directory" id="directory" hidden>
@@ -129,6 +130,7 @@ function runLookup(event){
  $('more').hidden=demoMode||!specific;$('more-results').hidden=true;
  $('search').value='';$('type').value='';$('shop').value='';$('changes').checked=false;
  $('sort').value='asc';page=0;draw();
+ revealChart($('compare'));
 }
 $('mode-category').addEventListener('change',showLookupMode);
 $('mode-specific').addEventListener('change',showLookupMode);
@@ -249,7 +251,7 @@ function selectMarket(next){
  show();
 }
 for(const key of Object.keys(categories))$(key).onclick=()=>{location.hash=key;};
-window.addEventListener('hashchange',()=>selectMarket(marketFromHash()));
+window.addEventListener('hashchange',()=>{if(location.hash!=='#compare')selectMarket(marketFromHash());});
 
 
 function show(){
@@ -314,6 +316,16 @@ $('csv').onclick=()=>{
  const url=URL.createObjectURL(new Blob(['\ufeff',csv],{type:'text/csv;charset=utf-8'}));
  const a=document.createElement('a');a.href=url;a.download='EROSS-precios-'+market+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
+function revealChart(chart){
+ if(!chart)return;
+ chart.focus({preventScroll:true});
+ chart.scrollIntoView({block:'start',behavior:'instant'});
+}
+$('open-chart').onclick=event=>{
+ event.preventDefault();
+ tab('catalog');
+ revealChart($('compare'));
+};
 function liveChart(results,query){
  const eligible=results.filter(row=>row.match&&Number.isFinite(row.price)&&row.price>0&&row.available!==false);
  const cheapest=new Map();
@@ -323,9 +335,9 @@ function liveChart(results,query){
  }
  const rows=[...cheapest.values()].sort((a,b)=>a.price-b.price);
  const title='<h3>Comparativo de precios</h3><p class="scope">'+esc(query)+'</p>';
- if(!rows.length)return '<section class="result-chart">'+title+'<p class="scope">No hay coincidencias con precio para graficar.</p></section>';
+ if(!rows.length)return '<section class="result-chart" tabindex="-1" aria-label="Comparativo de precios">'+title+'<p class="scope">No hay coincidencias con precio para graficar.</p></section>';
  const maximum=rows.at(-1).price;
- return '<section class="result-chart">'+title+
+ return '<section class="result-chart" tabindex="-1" aria-label="Comparativo de precios">'+title+
   '<p class="scope">La oferta de menor precio por tienda entre las coincidencias. Verificá la referencia y la disponibilidad en la ficha.</p>'+
   '<div class="chart">'+rows.map(row=>priceBar(row,maximum,[row.store,row.detail].filter(Boolean).join(' · '))).join('')+'</div></section>';
 }
@@ -352,7 +364,10 @@ async function searchLive(q,scope,panel,button,isCurrent){
    const response=await fetch('/api/discover?'+new URLSearchParams({q,market:scope}));
    const result=await response.json();if(!response.ok)throw new Error(result.error);return result;
   })();
-  if(isCurrent())panel.innerHTML=liveRows(result,q);
+  if(isCurrent()){
+   panel.innerHTML=liveRows(result,q);
+   revealChart(panel.querySelector('.result-chart'));
+  }
  }catch(e){if(isCurrent())panel.textContent=e.message;}
  finally{button.disabled=false;}
 }
