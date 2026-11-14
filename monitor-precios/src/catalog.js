@@ -1,10 +1,12 @@
+import {retailStores,retailTypes,captureRetail} from './retail.mjs';
 export const sources={
  medical:{name:'Medical Óptica',market:'optica',url:'https://medicaloptica.cr/'},
  vision:{name:'Ópticas Visión',market:'optica',url:'https://www.opticasvision.co.cr/pages/promociones'},
  max:{name:'Ópticas Dr. Max',market:'optica',url:'https://drmaxcr.com/catalogo?category=1'},
  disfarma:{name:'Disfarma',market:'ortopedia',url:'https://disfarmacr.com/product-category/ortopedia-y-soporte/'},
  epa:{name:'EPA',market:'ortopedia',url:'https://cr.epaenlinea.com/es-cr/collections/equipo-medico-auxiliar'},
- isel:{name:'IS Electromédica',market:'ortopedia',url:'https://iselectromedica.com/costarica/'}
+ isel:{name:'IS Electromédica',market:'ortopedia',url:'https://iselectromedica.com/costarica/'},
+ ...Object.fromEntries(Object.keys(retailTypes).flatMap(market=>Object.entries(retailStores).map(([key,s])=>[market+'-'+key,{name:s.name,market,url:'https://'+s.host,retail:key}])) )
 };
 const clean=s=>s.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi,' ').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
 const price=s=>Number(s?.replace(/\D/g,''));
@@ -43,6 +45,7 @@ async function fetchPage(url,fetcher) {
  return await r.text();
 }
 export async function capture(key,fetcher=fetch) {
+ if(sources[key]?.retail)return captureRetail(sources[key].retail,sources[key].market);
  if(key==='epa')return await captureEpa(fetcher);
  if(key==='disfarma')return await captureDisfarma(fetcher);
  if(key==='isel')return await captureIsel(fetcher);

@@ -12,9 +12,16 @@ const samples={
  isel:[['Compresa térmica de 30 cm',21000,'termoterapia'],['Equipo TENS de dos canales',61000,'electroterapia']]
 };
 const exampleNames={medical:'Óptica Horizonte',vision:'Óptica Prisma',max:'Óptica Central',disfarma:'Ortopedia Norte',epa:'Tienda Movilidad',isel:'Rehab Central'};
+function sampleRows(key){
+ if(samples[key])return samples[key];
+ const extra=key.endsWith('monge')?0:key.endsWith('gollo')?16000:23000;
+ return key.startsWith('tecnologia')?[
+  ['iPhone 16 128 GB',389900+extra,'celulares'],['iPhone 16 Pro 256 GB',599900+extra,'celulares'],['Pantalla Smart TV 55 pulgadas',242900+extra,'pantallas'],['Laptop 16 GB RAM',279900+extra,'portatiles']
+ ]:[['Lavadora Samsung 17 kg DEMO-W17',245000+extra,'lavadoras'],['Refrigeradora de 300 litros',259900+extra,'refrigeradoras'],['Cocina eléctrica de 4 discos',179900+extra,'cocinas']];
+}
 export function demoCatalog(sources){
- return Object.entries(sources).map(([key,source])=>({key,market:source.market,name:exampleNames[key],date:'2026-11-14T15:00:00Z',
-  items:samples[key].map(([name,price,type],i)=>({name,price,type,id:key+i,detail:'Producto ficticio',change:i===0?-1000:null})),history:[{date:'2026-11-14T15:00:00Z',count:samples[key].length},{date:'2026-11-13T15:00:00Z',count:samples[key].length}]}));
+ return Object.entries(sources).map(([key,source])=>({key,market:source.market,name:exampleNames[key]??({monge:'Tienda Central',gollo:'Comercio Aurora',walmart:'Almacén Horizonte'}[source.retail]),date:'2026-11-14T15:00:00Z',
+  items:sampleRows(key).map(([name,price,type],i)=>({name,price,type,id:key+i,detail:'Producto ficticio',change:i===0?-1000:null})),history:[{date:'2026-11-14T15:00:00Z',count:sampleRows(key).length},{date:'2026-11-13T15:00:00Z',count:sampleRows(key).length}]}));
 }
 export const demoDirectory=[
  {name:'Ortopedia Norte',province:'Alajuela',zone:'San Ramón',source:'disfarma'},

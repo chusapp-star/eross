@@ -52,7 +52,7 @@ function demoPage(){
  .replace('<main>','<main><p class="scope">Demo pública · datos y precios ficticios</p><a href="/acceso">Ingresar al monitor</a>')
  .replace("fetch(update?'/api/refresh?market='+market:'/api/catalog'","fetch('/api/demo'")
  .replace("method:update?'POST':'GET'","method:'GET'")
- .replace("selectMarket(market);load(false);","selectMarket(market);load(false);\n$('refresh').hidden=true;$('more').hidden=true;");
+ .replace("selectMarket(market);load(false);","demoMode=true;selectMarket(market);load(false);\n$('refresh').hidden=true;$('more').hidden=true;");
 }
 async function bodyOf(req){
  if(!String(req.headers['content-type']).startsWith('application/json'))return null;
@@ -119,7 +119,7 @@ async function route(path,{get,post,sameOrigin,url,req}){
  if(post&&path==='/api/refresh')return refresh(sql,url.searchParams.get('market'));
  if(get&&path==='/api/discover'){
   const market=url.searchParams.get('market'),q=url.searchParams.get('q')?.trim();
-  if(!q||q.length<3||q.length>100||!['optica','ortopedia'].includes(market))return json({error:'Escribí entre 3 y 100 caracteres.'},400);
+  if(!q||q.length<3||q.length>100||!['optica','ortopedia','tecnologia','linea','todos'].includes(market))return json({error:'Escribí entre 3 y 100 caracteres.'},400);
   if(!await attempt(sql,'discover:'+account.email,45))return json({error:'Límite de búsquedas alcanzado. Probá en unos minutos.'},429);
   return json(await discover(q,market));
  }

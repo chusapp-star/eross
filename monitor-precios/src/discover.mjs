@@ -1,3 +1,4 @@
+import {retailDiscovery,retailTypes} from './retail.mjs';
 const words=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[a-z0-9]+/g)||[];
 const ignore=new Set(['de','del','la','el','para','con','en','un','una','por']);
 const significant=value=>words(value).filter(word=>!ignore.has(word));
@@ -59,12 +60,13 @@ async function queryStore(store,query){
  });
 }
 export async function discover(query,market){
- const selected=market==='optica'?discoverySources.filter(s=>s.name==='Ópticas Visión'):discoverySources.filter(s=>s.name!=='Ópticas Visión');
- const responses=await Promise.all(selected.map(async store=>{
+ const selected=Object.hasOwn(retailTypes,market)?[]:market==='todos'?discoverySources:market==='optica'?discoverySources.filter(s=>s.name==='Ópticas Visión'):discoverySources.filter(s=>s.name!=='Ópticas Visión');
+ const [legacy,retail]=await Promise.all([Promise.all(selected.map(async store=>{
   try{return {store:store.name,items:await queryStore(store,query),ok:true};}
   catch{return {store:store.name,items:[],ok:false};}
- }));
+ })),(market==='todos'||Object.hasOwn(retailTypes,market))?retailDiscovery(query,market==='todos'?null:market):[]]);
+ const responses=[...legacy,...retail];
  const relevant=item=>significant(query).some(term=>significant(item.name).some(token=>token===term||token===term+'s'));
- const results=responses.flatMap(r=>r.items).filter(relevant).sort((a,b)=>Number(b.match)-Number(a.match)||(a.price??Infinity)-(b.price??Infinity));
- return {results,sources:responses.map(({store,ok})=>({store,ok}))};
+ const results=responses.flatMap(r=>r.items).filter(item=>item.market||relevant(item)).sort((a,b)=>Number(b.match)-Number(a.match)||(a.price??Infinity)-(b.price??Infinity));
+ return {results,checkedAt:new Date().toISOString(),sources:responses.map(({store,ok})=>({store,ok}))};
 }
