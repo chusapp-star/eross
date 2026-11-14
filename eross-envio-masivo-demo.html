@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es-CR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Probá EROSS Envío Masivo con datos ficticios.">
+<title>Demo de EROSS Envío Masivo</title>
+<style>
+:root{color-scheme:dark;--bg:#101110;--panel:#191a17;--line:#39352a;--gold:#e9c47b;--text:#faf6ee;--muted:#bdb8ac;font:16px/1.5 system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}a{color:var(--gold)}[hidden]{display:none!important}
+header{border-bottom:1px solid var(--line)}.top,main{width:min(1120px,calc(100% - 40px));margin:auto}
+.top{padding:18px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.top a{text-decoration:none}
+main{padding:36px 0 60px}h1{font-size:clamp(2rem,5vw,3.3rem);line-height:1.1;margin:0 0 12px}h2{margin-top:0}p{color:var(--muted)}
+.notice{border-left:3px solid var(--gold);padding-left:12px}.nav{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}
+button,select,textarea{font:inherit;color:inherit;background:#131411;border:1px solid #6c6046;border-radius:8px;padding:10px 13px}
+button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:3px}button:disabled{opacity:.6;cursor:default}
+.primary,[aria-pressed="true"]{background:var(--gold);color:#17130d;font-weight:650}
+.layout,.metrics,.inbox{display:grid;gap:16px}.layout{grid-template-columns:1fr 1fr}.inbox{grid-template-columns:1fr 2fr}.metrics{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}.card h3{margin:0 0 10px}
+label{display:block;margin:12px 0 4px}select,textarea{width:100%}textarea{resize:vertical}output{display:block;margin-top:12px;color:var(--gold)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 4px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}#threads button{display:block;width:100%;text-align:left;margin-bottom:8px}
+ol{padding-left:22px}li{overflow-wrap:anywhere;margin:6px 0}.metric{color:var(--gold);font-size:2rem;font-weight:700}.metric-label{display:block}
+@media(max-width:690px){.layout,.inbox{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}.top,main{width:calc(100% - 28px)}}
+</style>
+</head>
+<body>
+<header><div class="top"><a href="/eross-envio-masivo">← EROSS Envío Masivo</a><button type="button" id="reset">Reiniciar demo</button></div></header>
+<main>
+<h1>Demo de EROSS Envío Masivo</h1>
+<p class="notice">Datos ficticios. Los envíos y las respuestas se simulan en esta pestaña.</p>
+<nav class="nav" aria-label="Secciones de la demo">
+<button type="button" data-section="campaigns" aria-pressed="true">Campañas</button>
+<button type="button" data-section="inbox" aria-pressed="false">Bandeja de WhatsApp</button>
+<button type="button" data-section="reports" aria-pressed="false">Reportes</button>
+</nav>
+<section id="campaigns" aria-labelledby="campaign-title">
+<h2 id="campaign-title">Preparar un lote de prueba</h2>
+<div class="layout">
+<div class="card">
+<h3>Contactos del lote</h3>
+<table><thead><tr><th>Incluir</th><th>Contacto</th><th>Sede</th></tr></thead><tbody id="contacts"></tbody></table>
+</div>
+<div class="card">
+<h3>Mensaje de campaña</h3>
+<label for="channel">Canal</label><select id="channel"><option>WhatsApp</option><option>Correo</option></select>
+<label for="template">Plantilla</label><select id="template"><option>Reagendar examen visual</option><option>Asesoría visual</option><option>Aros en tendencia</option></select>
+<div id="preview" hidden><p id="preview-text"></p></div>
+<div class="actions"><button id="show-preview" type="button">Vista previa</button><button id="send" type="button" class="primary">Simular envío</button></div>
+<output id="campaign-status" aria-live="polite"></output>
+</div>
+</div>
+</section>
+<section id="inbox" aria-labelledby="inbox-title" hidden>
+<h2 id="inbox-title">Bandeja de WhatsApp</h2>
+<div class="inbox">
+<div class="card"><h3>Conversaciones</h3><div id="threads"></div></div>
+<div class="card"><h3 id="thread-title"></h3><ol id="messages" aria-live="polite"></ol>
+<form id="reply"><label for="reply-text">Respuesta</label><textarea id="reply-text" rows="3" maxlength="500" required placeholder="Escribí una respuesta de prueba"></textarea><div class="actions"><button class="primary">Simular respuesta</button></div></form>
+</div>
+</div>
+</section>
+<section id="reports" aria-labelledby="report-title" hidden>
+<h2 id="report-title">Reportes de la demo</h2>
+<div class="metrics" id="metrics"></div>
+<div class="card" style="margin-top:16px"><h3>Historial de lotes</h3><table><thead><tr><th>Plantilla</th><th>Canal</th><th>Envíos simulados</th></tr></thead><tbody id="history"></tbody></table></div>
+</section>
+</main>
+<script src="/eross-envio-masivo-demo.js" defer></script>
+</body>
+</html>
