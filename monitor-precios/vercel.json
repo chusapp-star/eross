@@ -1,0 +1,1 @@
+{"rewrites":[{"source":"/","destination":"/api/app?route=/"},{"source":"/:path*","destination":"/api/app?route=/:path*"}],"functions":{"api/app.mjs":{"maxDuration":60,"includeFiles":"src/**"}}}

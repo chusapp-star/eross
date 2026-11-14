@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="es-CR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EROSS Monitor Scraping de Precios</title>
+<style>
+:root{color-scheme:dark;--bg:#131310;--panel:#1c1b17;--line:#3e392f;--ink:#faf1e1;--sub:#c4b9a7;--gold:#edc679;font-family:"Instrument Sans",system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 600px 310px at 22% 0%,#282015,transparent),var(--bg);color:var(--ink)}header{border-bottom:1px solid var(--line);padding:18px max(20px,calc((100% - 1120px)/2));display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-weight:750;letter-spacing:.13em}.brand b{display:inline-grid;place-items:center;border:1px solid #9b7746;border-radius:50%;width:33px;height:33px;margin-right:10px;color:var(--gold)}header a{color:var(--sub);font-size:.9rem}main{max-width:1160px;margin:auto;padding:38px 20px}.hero{display:flex;align-items:end;justify-content:space-between;gap:14px}.hero h1{font-size:clamp(2rem,5vw,3.65rem);letter-spacing:-.055em;margin:0}.hero p{color:var(--sub);margin:10px 0 0}.primary{background:var(--gold);color:#21180a;font-weight:700;white-space:nowrap}button,input,select{font:inherit;color:inherit;border:1px solid var(--line);border-radius:8px;background:#221f19;padding:9px 11px}button{cursor:pointer}button:hover:not(:disabled){border-color:var(--gold)}button:disabled{opacity:.5;cursor:default}:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.status{min-height:23px;color:var(--gold);font-size:.88rem}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.summary article,.history article{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}.summary b{display:block;font-size:1.45rem;margin:4px 0}.summary small,table small,.history small,footer{color:var(--sub)}nav{display:flex;gap:8px;margin:22px 0 12px}nav [aria-pressed=true]{color:var(--gold);border-color:#967846}.filters{display:flex;gap:10px;flex-wrap:wrap;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;align-items:end}.filters label{display:grid;gap:5px;font-size:.83rem;color:var(--sub)}.filters label:first-child{flex:1 1 210px}.filters .check{display:flex;align-items:center;min-height:37px}.tools,.pager{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:12px 0;font-size:.9rem}.tools div{display:flex;gap:8px}.pager{justify-content:end}.table{border:1px solid var(--line);border-radius:10px;overflow:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:10px 13px}th{font-size:.8rem;color:var(--sub);background:#25211a;white-space:nowrap}td{border-top:1px solid var(--line);font-size:.9rem}td:nth-child(n+3){white-space:nowrap}.product{display:flex;align-items:center;gap:10px;min-width:180px}table small{display:block;margin-top:4px}.product img{width:54px;height:38px;object-fit:contain;background:white;border-radius:5px}.raise{color:#ffb5a2}.drop{color:#97dfae}a{color:var(--gold)}.history{display:grid;gap:8px}.history h2{margin:0;font-size:1.1rem}.history ul{margin-bottom:0}footer{margin-top:20px;font-size:.84rem}[hidden]{display:none!important}@media(max-width:650px){main{padding-top:24px}.hero{align-items:start;flex-direction:column}.summary article{padding:10px}.tools{flex-wrap:wrap}}@media print{:root{color-scheme:light}body{background:white;color:#222}header,nav,.primary,.status,.summary,.filters,.tools,.pager,footer{display:none!important}main{padding:0}.hero{margin-bottom:14px}.hero h1{font-size:28px}.hero p,table small,th{color:#444}.table{border:0;overflow:visible}th{background:#eee}td{border-color:#ddd}tr{break-inside:avoid}a,.raise,.drop{color:#222}}
+
+.compare{margin:14px 0 20px;padding:20px;border:1px solid #56472e;border-radius:14px;background:linear-gradient(145deg,#272218,#1c1b17 70%)}.compare h2,.directory h2{margin:0;font-size:1.32rem}.compare p,.directory p{margin:6px 0 12px;color:var(--sub);font-size:.88rem}.compare-head{display:flex;align-items:start;gap:12px;justify-content:space-between;flex-wrap:wrap}.compare label{display:grid;gap:4px;font-size:.82rem;color:var(--sub)}.compare select{max-width:100%}.chart{display:grid;gap:11px;margin-top:15px}.chart-row{padding:9px 0;border-top:1px solid #3a3428}.chart-caption{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.chart-caption a{font-weight:650;text-decoration:none}.chart-caption strong{white-space:nowrap;font-variant-numeric:tabular-nums}.chart-meta{display:block;margin:3px 0 6px;color:var(--sub);font-size:.8rem}.track{height:7px;background:#3b3327;border-radius:10px;overflow:hidden}.track span{display:block;height:100%;background:#ddae61;border-radius:10px}.chart-row:first-child .track span{background:#f0cd85}.directory .filters{margin:13px 0}.directory-meta{margin-bottom:12px;color:var(--sub);font-size:.87rem}.directory-tag{display:inline-block;border-radius:5px;background:#30291d;padding:4px 7px;font-size:.77rem;color:#ebce96}.directory-tag.online{background:#22352a;color:#b3e4c1}.compare [role=status]{color:var(--sub);font-size:.82rem}@media print{.track span{-webkit-print-color-adjust:exact;print-color-adjust:exact}.compare{background:white;color:#222;border-color:#ddd}.compare p,.chart-meta,.compare [role=status]{color:#444}.compare label{display:none}}
+.search-panel{padding:16px;margin:12px 0;border:1px solid #56472e;border-radius:14px;background:#201d17}.search-panel h2{margin:0 0 9px;font-size:1.2rem}.search-panel fieldset{margin:0 0 12px;padding:0;border:0;display:flex;gap:14px;flex-wrap:wrap}.search-panel fieldset label{display:flex;gap:6px;align-items:center}.search-panel input[type=radio]{accent-color:var(--gold)}.national-form{display:flex;align-items:end;flex-wrap:wrap;gap:10px}.national-form>label{display:grid;gap:5px;flex:1;min-width:180px;font-size:.87rem}.scope{margin:10px 0 0;color:var(--sub);font-size:.87rem}.coverage-button{padding:5px 9px;font-size:.82rem;margin-top:8px}.search-hit{color:#f0cd85}.summary article{min-width:0}@media print{.search-panel{display:none}}
+.supplier-toggle{white-space:nowrap;color:var(--gold)}.supplier-toggle[aria-expanded=true]{border-color:#967846}.supplier-details>td{background:var(--panel);padding:15px 18px}.supplier-heading{display:block;font-size:1rem;margin:0}.supplier-details .supplier-products td{white-space:normal}.supplier-details .supplier-products td:nth-child(2){white-space:nowrap}.supplier-products td:last-child{min-width:90px}
+</style></head>
+<body><header><span class="brand"><b>E</b>EROSS</span><a href="https://erosscr.com/" target="_blank" rel="noopener">EROSS Consulting ↗</a></header>
+<main><section class="hero"><div><h1>Monitor Scraping de Precios</h1><p>Precios publicados por comercios de Costa Rica.</p></div><button class="primary" id="refresh">↻ Actualizar precios</button></section>
+<nav aria-label="Mercados" id="markets"><button id="optica" aria-pressed="false">Ópticas</button><button id="ortopedia" aria-pressed="true">Terapia física y ortopedia</button></nav>
+<p class="status" id="status" role="status">Cargando catálogo…</p><section class="summary" id="summary" aria-label="Fuentes consultadas"></section>
+<nav aria-label="Vistas"><button id="catalog-tab" aria-pressed="true">Catálogo</button><button id="history-tab" aria-pressed="false">Historial</button><button id="directory-tab" aria-pressed="false">Proveedores por provincia</button></nav>
+<section id="catalog">
+<section class="search-panel" aria-labelledby="national-title">
+<h2 id="national-title">Búsqueda nacional</h2>
+<fieldset aria-label="Forma de búsqueda"><label><input type="radio" name="lookup" id="mode-category" checked> Por tipo de producto</label><label><input type="radio" name="lookup" id="mode-specific"> Producto específico</label></fieldset>
+<form class="national-form" id="national-form">
+<label id="national-category-label">Tipo de producto<select id="national-category"></select></label>
+<label id="national-query-label" hidden>Nombre, marca o modelo<input id="national-query" type="search" placeholder="Ej. LMAP56 o andadera aluminio" maxlength="120"></label>
+<button type="submit" class="primary">Buscar</button>
+</form>
+<p class="scope" id="lookup-status" role="status"></p>
+<button type="button" id="more" class="coverage-button" hidden>Buscar en catálogos ampliados</button>
+<section id="more-results" aria-live="polite" hidden></section>
+<button type="button" class="coverage-button" id="lookup-directory">Ver proveedores para consultar</button>
+</section>
+<section class="compare" id="compare" aria-labelledby="compare-title">
+<div class="compare-head"><div><h2 id="compare-title">Comparativo de precios</h2><p>Compará precios publicados para un tipo de producto y revisá el modelo de cada opción.</p></div><label>Producto<select id="compare-product"></select></label><label id="region-filter">Provincia de la tienda<select id="region"><option value="">Todas</option></select></label></div>
+<div id="chart" class="chart"></div><p id="chart-note" role="status"></p>
+</section>
+<div class="filters">
+<label>Buscar<input id="search" type="search" placeholder="Marca, modelo o producto"></label>
+<label>Tienda<select id="shop"><option value="">Todas</option></select></label>
+<label>Categoría<select id="type"><option value="">Todas</option></select></label>
+<label>Orden<select id="sort"><option value="">Por catálogo</option><option value="asc">Menor precio</option><option value="desc">Mayor precio</option></select></label>
+<label class="check"><input type="checkbox" id="changes">Solo cambios de precio</label>
+</div><div class="tools"><span id="count"></span><div><button id="csv">Exportar CSV</button><button id="pdf">Imprimir / PDF</button></div></div>
+<div class="table"><table><thead><tr><th scope="col">Producto</th><th scope="col">Tienda</th><th scope="col">Precio anunciado</th><th scope="col">Último cambio</th><th scope="col">Fuente</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="pager"><button id="prev">Anterior</button><span id="page"></span><button id="next">Siguiente</button></div></section>
+<section class="history" id="history" hidden></section>
+<section class="directory" id="directory" hidden>
+<h2>Directorio de terapia física y ortopedia</h2><p>Abrí una fila para ver los productos y precios publicados por el proveedor.</p>
+<div class="filters"><label>Buscar proveedor o zona<input id="directory-search" type="search" placeholder="Ej. Guápiles, San Ramón, Bonilla"></label><label>Provincia<select id="directory-region"><option value="">Todas</option></select></label></div>
+<div class="directory-meta" id="directory-count" role="status"></div>
+<div class="table"><table><thead><tr><th scope="col">Proveedor o tienda</th><th scope="col">Provincia</th><th scope="col">Zona</th><th scope="col">Precios en el monitor</th><th scope="col">Fuente</th></tr></thead><tbody id="directory-rows"></tbody></table></div>
+</section>
+<footer>Confirmá el precio, las condiciones y la disponibilidad en la ficha de cada tienda.</footer></main>
+<script>
+/* REGIONAL_DIRECTORY */
+const $=id=>document.getElementById(id);
+const money=new Intl.NumberFormat('es-CR',{style:'currency',currency:'CRC',minimumFractionDigits:0,maximumFractionDigits:2});
+const dates=new Intl.DateTimeFormat('es-CR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Costa_Rica'});
+const dateLabel=value=>value?dates.format(new Date(value)):'Sin consulta';
+const fold=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
+const pageSize=20;
+let data=[],filtered=[],page=0,busy=false,printing=false;
+const categories={
+ optica:{aro:'Aros',sencillo:'Combos sencillos',bifocal:'Combos bifocales',progresivo:'Combos progresivos'},
+ ortopedia:{soportes:'Soportes y ortesis',movilidad:'Movilidad y ayudas para el baño',posicionamiento:'Cojines y posicionamiento',termoterapia:'Termoterapia y compresas',electroterapia:'Electroterapia',rehabilitacion:'Rehabilitación y ejercicio'}
+};
+let market=location.hash==='#optica'?'optica':'ortopedia';
+const marketSources=()=>data.filter(source=>source.market===market);
+const provinces=['San José','Alajuela','Cartago','Heredia','Guanacaste','Puntarenas','Limón','En línea'];
+const productGroups={
+ ortopedia:{andaderas:['Andaderas',/\bandadera|caminador/],sillas:['Sillas de ruedas',/silla de ruedas/],bastones:['Bastones',/\bbaston/],rodilleras:['Rodilleras',/rodiller/],compresas:['Compresas',/compresa/],electro:['Equipos TENS',/\btens\b|electroestimulador/],bandas:['Bandas elásticas',/banda.*elastica|thera.band/],pedaleras:['Pedaleras',/pedalera|pedal de ejercicio/]},
+ optica:{sencillo:['Combos sencillos','sencillo'],bifocal:['Combos bifocales','bifocal'],progresivo:['Combos progresivos','progresivo'],aro:['Aros','aro']}
+};
+for(const id of ['region','directory-region']){
+ $(id).innerHTML+=[...provinces].map(province=>'<option>'+esc(province)+'</option>').join('');
+}
+let lookup={mode:'category',type:'',query:''};
+const tokens=value=>fold(value).match(/[a-z0-9]+/g)||[];
+function specificMatch(row,value){
+ const words=tokens(value);
+ const normalized=tokens(row.name+' '+(row.detail??''));
+ const isModel=/^[a-z]+[ -]?\d+[a-z0-9-]*$/i.test(value);
+ if(isModel){
+  const model=words.join('');
+  return normalized.some((part,i)=>part===model||part+normalized[i+1]===model);
+ }
+ return words.length>0&&words.every(word=>/\d/.test(word)?normalized.includes(word):normalized.some(part=>part.startsWith(word)));
+}
+function showLookupMode(){
+ const specific=$('mode-specific').checked;
+ $('national-category-label').hidden=specific;
+ $('national-query-label').hidden=!specific;
+}
+function showCoverage(count){
+ const shops=marketSources().length;
+ const listed=regionalDirectory.filter(r=>!$('region').value||r.province===$('region').value).length;
+ const matching=new Set(filtered.map(row=>row.shop)).size;
+ const scope=$('region').value||'Costa Rica';
+ $('lookup-status').textContent=(lookup.query&&!count?'Sin coincidencias en los catálogos conectados. ':'')+
+  scope+' · '+count+' resultados con precio en '+matching+' de '+shops+' catálogos conectados'+(market==='ortopedia'?' · '+listed+' ubicaciones en el directorio.':'.');
+}
+function runLookup(event){
+ event.preventDefault();
+ const specific=$('mode-specific').checked;
+ const query=$('national-query').value.trim();
+ if(specific&&!tokens(query).length){
+  $('lookup-status').textContent='Escribí un producto, marca o modelo.';
+  return;
+ }
+ lookup={mode:specific?'specific':'category',query:specific?query:'',type:specific?'':$('national-category').value};
+ $('more').hidden=!specific;$('more-results').hidden=true;
+ $('search').value='';$('type').value='';$('shop').value='';$('changes').checked=false;
+ $('sort').value='asc';page=0;draw();
+}
+$('mode-category').addEventListener('change',showLookupMode);
+$('mode-specific').addEventListener('change',showLookupMode);
+$('national-form').addEventListener('submit',runLookup);
+$('lookup-directory').onclick=()=>{
+ $('directory-region').value=$('region').value;
+ $('directory-search').value='';
+ renderDirectory();
+ tab('directory');
+};
+const locations=(key,province='')=>regionalDirectory.filter(row=>row.source===key&&(!province||row.province===province));
+function activeSources(){
+ const province=market==='ortopedia'?$('region').value:'';
+ return marketSources().filter(s=>!province||locations(s.key,province).length);
+}
+const categoryOptions=(entries)=>Object.entries(entries).map(([key,[title]])=>'<option value="'+key+'">'+esc(title)+'</option>').join('');
+function chart(){
+ if(lookup.mode==='specific'){
+  renderChart(filtered.map(row=>({...row,key:row.source})).slice().sort((a,b)=>a.price-b.price),true);
+  return;
+ }
+ const group=productGroups[market][$('compare-product').value];
+ if(!group)return;
+ const [, rule]=group;
+ if(lookup.type){
+  renderChart(filtered.map(row=>({...row,key:row.source})).slice().sort((a,b)=>a.price-b.price),false);
+  return;
+ }
+ const items=activeSources().filter(s=>!$('shop').value||s.key===$('shop').value)
+  .flatMap(s=>s.items.filter(r=>typeof rule==='string'?r.type===rule:rule.test(fold(r.name))&&($("compare-product").value!=="electro"||!/electrodos?|cables?|parches?|accesorio/i.test(r.name)))
+   .map(r=>({...r,shop:s.name,key:s.key}))).sort((a,b)=>a.price-b.price);
+ renderChart(items,false);
+}
+function renderChart(items,specific){
+ const grouped=new Map();
+ for(const item of items){
+  const rows=grouped.get(item.key)||[];
+  if(rows.length<3)rows.push(item);
+  grouped.set(item.key,rows);
+ }
+ const rows=[...grouped.values()].flat().sort((a,b)=>a.price-b.price).slice(0,9);
+ const max=rows.at(-1)?.price||1;
+ $('chart').innerHTML=rows.map(row=>{
+  const local=market==='ortopedia'?locations(row.key,$('region').value):[];
+  const area=[...new Set(local.map(x=>x.province))].join(', ');
+  return '<div class="chart-row"><div class="chart-caption"><a href="'+esc(row.url)+'" target="_blank" rel="noopener">'+esc(row.name)+'</a><strong>'+(row.from?'Desde ':'')+esc(money.format(row.price))+'</strong></div><span class="chart-meta">'+esc(row.shop+(area?' · '+area:''))+'</span><div class="track" aria-hidden="true"><span style="width:'+Math.max(3,row.price/max*100).toFixed(1)+'%"></span></div></div>';
+ }).join('');
+ $('chart-note').textContent=rows.length?(grouped.size===1?'Un proveedor con precios para esta selección. ':'')+'Hasta 3 precios por proveedor. '+(specific?'Revisá el modelo o la referencia en la ficha.':'Los modelos pueden variar.')+($('region').value?' Precios en línea. Confirmá condiciones en la sucursal.':''):'Sin precios publicados para esta selección en los catálogos conectados.';
+}
+const directoryBody=$('directory-rows');
+let expandedSupplier=null;
+const providerKey=row=>regionalDirectory.indexOf(row);
+
+function supplierDetails(row,source){
+ if(!source?.items.length){
+  const message=row.source&&!data.length?'Cargando catálogo…':'Por ahora no hay productos con precio en el monitor. Podés consultar al proveedor desde su ficha.';
+  return '<p>'+esc(message)+'</p><a href="'+esc(row.url)+'" target="_blank" rel="noopener">Ver ficha del proveedor ↗</a>';
+ }
+ const items=[...source.items].sort((a,b)=>a.name.localeCompare(b.name,'es')||a.price-b.price);
+ return '<strong class="supplier-heading">Productos de '+esc(source.name)+'</strong>'+
+  '<p>'+items.length+' productos · Precios en línea consultados el '+esc(dateLabel(source.date))+'. Confirmá las condiciones con la tienda.</p>'+
+  '<div class="table"><table class="supplier-products" aria-label="Productos y precios de '+esc(source.name)+'">'+
+  '<thead><tr><th scope="col">Producto</th><th scope="col">Precio publicado</th><th scope="col">Ficha</th></tr></thead><tbody>'+
+  items.map(item=>'<tr><td><strong>'+esc(item.name)+'</strong><small>'+esc(item.detail)+'</small></td><td>'+
+   (item.from?'Desde ':'')+esc(money.format(item.price))+(item.regular?'<small>Regular '+esc(money.format(item.regular))+'</small>':'')+
+   '</td><td><a href="'+esc(item.url)+'" target="_blank" rel="noopener">Abrir ↗</a></td></tr>').join('')+'</tbody></table></div>';
+}
+
+function renderDirectory(){
+ const q=fold($('directory-search').value.trim()),region=$('directory-region').value;
+ const entries=regionalDirectory.filter(r=>(!region||r.province===region)&&fold(r.name+' '+r.zone+' '+r.province).includes(q));
+ $('directory-count').textContent=entries.length+' ubicaciones de '+regionalDirectory.length+' encontradas';
+ if(!entries.some(row=>providerKey(row)===expandedSupplier))expandedSupplier=null;
+ directoryBody.innerHTML=entries.map(row=>{
+  const key=providerKey(row);
+  const open=expandedSupplier===key;
+  const source=data.find(s=>s.key===row.source);
+  const count=source?.items.length;
+  const label=count?'Ver productos y precios ('+count+')':row.source&&!data.length?'Ver productos y precios':'Consultar proveedor';
+  const regionId='supplier-panel-'+key;
+  return '<tr><td>'+esc(row.name)+'</td><td>'+esc(row.province)+'</td><td>'+esc(row.zone)+
+   '</td><td><button type="button" id="supplier-button-'+key+'" class="supplier-toggle" data-supplier="'+key+'" aria-expanded="'+open+'" aria-controls="'+regionId+'">'+esc(label)+'</button></td>'+
+   '<td>'+(row.url?'<a target="_blank" rel="noopener" href="'+esc(row.url)+'">Ver fuente ↗</a>':'Demo')+'</td></tr>'+
+   '<tr class="supplier-details" id="'+regionId+'"'+(open?'':' hidden')+'><td colspan="5">'+(open?supplierDetails(row,source):'')+'</td></tr>';
+ }).join('')||'<tr><td colspan="5">Sin ubicaciones para estos filtros.</td></tr>';
+}
+directoryBody.addEventListener('click',event=>{
+ const button=event.target.closest('button[data-supplier]');
+ if(!button)return;
+ const key=Number(button.dataset.supplier);
+ expandedSupplier=expandedSupplier===key?null:key;
+ renderDirectory();
+ $('supplier-button-'+key).focus({preventScroll:true});
+});
+for(const id of ['directory-search','directory-region'])$(id).addEventListener(id==='directory-search'?'input':'change',renderDirectory);
+$('compare-product').addEventListener('change',chart);
+$('region').addEventListener('change',()=>{page=0;show();});
+renderDirectory();
+function selectMarket(next){
+ market=next;
+ lookup={mode:'category',type:'',query:''};
+ $('more').hidden=true;$('more-results').hidden=true;
+ $('mode-category').checked=true;$('mode-specific').checked=false;$('national-query').value='';showLookupMode();
+ $('lookup-directory').hidden=market!=='ortopedia';
+ $('national-category').innerHTML='<option value="">'+(market==='ortopedia'?'Todos los productos de terapia física y ortopedia':'Todos los productos de óptica')+'</option>'+Object.entries(categories[market]).map(([id,label])=>'<option value="'+id+'">'+esc(label)+'</option>').join('');
+ for(const key of Object.keys(categories))$(key).setAttribute('aria-pressed',String(key===market));
+ page=0;$('shop').value='';$('type').value='';$('search').value='';$('changes').checked=false;
+ $('region').value='';$('region-filter').hidden=market!=='ortopedia';
+ $('directory-tab').hidden=market!=='ortopedia';
+ $('compare-product').innerHTML=categoryOptions(productGroups[market]);
+ if(market!=='ortopedia'&&!$('directory').hidden)tab('catalog');
+ show();
+}
+for(const key of Object.keys(categories))$(key).onclick=()=>{location.hash=key;};
+window.addEventListener('hashchange',()=>selectMarket(location.hash==='#optica'?'optica':'ortopedia'));
+
+
+function show(){
+ const scoped=marketSources();
+ $('summary').innerHTML=scoped.map(s=>'<article>'+esc(s.name)+'<b>'+s.items.length+'</b><small>'+esc(dateLabel(s.date))+'</small></article>').join('');
+ const selected=$('shop').value;
+ $('shop').innerHTML='<option value="">Todas</option>'+activeSources().map(s=>'<option value="'+esc(s.key)+'">'+esc(s.name)+'</option>').join('');
+ $('shop').value=activeSources().some(s=>s.key===selected)?selected:'';
+ const selectedType=$('type').value;
+ $('type').innerHTML='<option value="">Todas</option>'+Object.entries(categories[market]).map(([key,name])=>'<option value="'+key+'">'+esc(name)+'</option>').join('');
+ if(categories[market][selectedType])$('type').value=selectedType;
+ $('history').innerHTML=scoped.map(s=>'<article><h2>'+esc(s.name)+'</h2><small>Últimas consultas</small><ul>'+s.history.map(h=>'<li>'+esc(dateLabel(h.date))+' · '+h.count+' registros</li>').join('')+'</ul></article>').join('');
+ draw();
+}
+function draw(){
+ const q=fold($('search').value.trim()),shop=$('shop').value,type=$('type').value,sort=$('sort').value;
+ filtered=activeSources().filter(s=>!shop||s.key===shop).flatMap(s=>s.items.map(item=>({...item,shop:s.name,date:s.date,source:s.key}))).filter(item=>
+ (!type||item.type===type)&&(!lookup.type||item.type===lookup.type)&&(!lookup.query||specificMatch(item,lookup.query))&&fold(item.name+' '+item.detail).includes(q)&&(!$('changes').checked||!!item.change));
+ if(sort)filtered.sort((a,b)=>(sort==='asc'?1:-1)*(a.price-b.price));
+ const pages=Math.max(1,Math.ceil(filtered.length/pageSize));
+ page=Math.min(page,pages-1);
+ const visible=printing?filtered:filtered.slice(page*pageSize,(page+1)*pageSize);
+ $('rows').innerHTML=visible.map(row=>{
+  const delta=row.change===null?'Sin comparación':row.change?((row.change>0?'+':'−')+money.format(Math.abs(row.change))):'Sin cambio';
+  return '<tr><td><div class="product">'+(row.photo?'<img loading="lazy" alt="" src="'+esc(row.photo)+'">':'')+'<div><strong>'+esc(row.name)+'</strong><small>'+esc(row.detail)+'</small></div></div></td><td>'+esc(row.shop)+'<small>'+esc(dateLabel(row.date))+'</small></td><td>'+(row.from?'Desde ':'')+esc(money.format(row.price))+(row.regular?'<small>Regular '+esc(money.format(row.regular))+'</small>':'')+'</td><td class="'+(row.change>0?'raise':row.change<0?'drop':'')+'">'+esc(delta)+'</td><td><a target="_blank" rel="noopener" href="'+esc(row.url)+'">Abrir ficha ↗</a></td></tr>';
+ }).join('')||'<tr><td colspan="5">Sin resultados para estos filtros.</td></tr>';
+ $('count').textContent=filtered.length+' productos';
+ showCoverage(filtered.length);
+ $('page').textContent=(page+1)+' de '+pages;
+ $('prev').disabled=page===0;$('next').disabled=page+1>=pages;
+ $('csv').disabled=$('pdf').disabled=!filtered.length;
+ chart();
+}
+async function load(update){
+ if(busy)return;
+ busy=true;$('refresh').disabled=true;
+ $('status').textContent=update?'Consultando los catálogos. Puede tardar unos segundos…':'Cargando catálogo…';
+ try{
+  const response=await fetch(update?'/api/refresh?market='+market:'/api/catalog',{method:update?'POST':'GET'});
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error);
+  data=update?result.data:result;show();renderDirectory();
+  $('status').textContent=update?result.results.map(r=>data.find(s=>s.key===r.key).name+' · '+(r.error?'Error de consulta ('+r.error+')':r.count+' registros')).join(' | '):'';
+ }catch(e){$('status').textContent=e.message||'No se pudo cargar el catálogo.';}
+ finally{busy=false;$('refresh').disabled=false;}
+}
+function tab(section){
+ for(const id of ['catalog','history','directory']){
+  $(id).hidden=id!==section;
+  $(id+'-tab').setAttribute('aria-pressed',String(id===section));
+ }
+}
+for(const id of ['search','shop','type','sort','changes'])$(id).addEventListener(id==='search'?'input':'change',()=>{page=0;draw();});
+$('prev').onclick=()=>{page--;draw();};$('next').onclick=()=>{page++;draw();};
+$('catalog-tab').onclick=()=>tab('catalog');$('history-tab').onclick=()=>tab('history');$('directory-tab').onclick=()=>tab('directory');$('refresh').onclick=()=>load(true);
+$('pdf').onclick=()=>window.print();
+window.addEventListener('beforeprint',()=>{printing=true;draw();document.querySelectorAll('.product img').forEach(img=>img.loading='eager');});
+window.addEventListener('afterprint',()=>{printing=false;draw();});
+$('csv').onclick=()=>{
+ const lines=[['Producto','Tienda','Categoría','Precio CRC','Desde','Precio regular','Cambio CRC','Fecha de captura','Detalle','Fuente','Foto'],...filtered.map(r=>[r.name,r.shop,categories[market][r.type]??r.type,r.price,r.from?'Sí':'',r.regular,r.change,r.date,r.detail,r.url,r.photo])];
+ const csv=lines.map(line=>line.map(v=>'"'+String(typeof v==='string'&&/^[=+\-@\t\r]/.test(v)?"'"+v:v??'').replaceAll('"','""')+'"').join(',')).join('\r\n');
+ const url=URL.createObjectURL(new Blob(['\ufeff',csv],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='EROSS-precios-'+market+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+$('more').onclick=async()=>{
+ const q=lookup.query,currentMarket=market;
+ const panel=$('more-results');
+ panel.hidden=false;panel.textContent='Consultando los catálogos ampliados…';$('more').disabled=true;
+ try{
+  const response=await fetch('/api/discover?'+new URLSearchParams({q,market:currentMarket}));
+  const result=await response.json();if(!response.ok)throw new Error(result.error);
+  if(q!==lookup.query||currentMarket!==market)return;
+  const coverage=result.sources.map(s=>esc(s.store)+(s.ok?'':' (sin respuesta)')).join(' · ');
+  panel.innerHTML='<p class="scope">Fuentes consultadas · '+coverage+'</p>'+
+   (result.results.length?'<ul>'+result.results.map(r=>'<li><a target="_blank" rel="noopener" href="'+esc(r.url)+'">'+esc(r.name)+'</a> · '+esc(r.store)+' · '+(r.price===null?'Consultar precio':(r.from?'Desde ':'')+esc(money.format(r.price)))+(r.match?'':' · Revisar como alternativa')+'</li>').join('')+'</ul>':'<p class="scope">Sin resultados en las fuentes consultadas.</p>');
+ }catch(e){if(q===lookup.query&&currentMarket===market)panel.textContent=e.message;}
+ finally{$('more').disabled=false;}
+};
+selectMarket(market);load(false);
+</script></body></html>

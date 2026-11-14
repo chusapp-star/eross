@@ -1,0 +1,21 @@
+<!doctype html><html lang="es-CR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acceso · EROSS Monitor Scraping de Precios</title><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#151411;color:#faf0df;font:16px system-ui}main{width:min(94vw,490px);background:#211e18;border:1px solid #55462c;border-radius:16px;padding:28px}h1{font-size:1.8rem;margin:12px 0}label{display:grid;gap:6px;margin:12px 0}a{color:#edc679}input,button,select{width:100%;font:inherit;padding:11px;border-radius:7px;border:1px solid #61543c;background:#171510;color:inherit}button{background:#edc679;color:#201508;font-weight:700;margin:10px 0;cursor:pointer}small,#status{color:#d4bd95}header{color:#edc679;font-weight:700;letter-spacing:.12em}
+</style><main><header>EROSS</header><h1 id="title">Ingresá al monitor</h1><form id="form"><label>Correo<input id="email" type="email" required autocomplete="username"></label><label>Contraseña<input id="pass" type="password" required autocomplete="current-password" maxlength="128"></label><button id="submit">Ingresar</button></form><p id="status" role="status"></p><a href="/demo">Probar la demo</a> · <a href="https://erosscr.com/">Volver a EROSS</a></main><script>
+const $=id=>document.getElementById(id);
+const setup=location.pathname==='/configurar';
+const admin=location.pathname==='/clientes';
+const token=setup?new URLSearchParams(location.hash.slice(1)).get('codigo'):null;
+if(setup||admin){
+ $('title').textContent=setup?'Creá tu acceso administrador':'Activar o restablecer un cliente';
+ $('submit').textContent=setup?'Crear acceso':'Guardar cliente';
+ $('pass').autocomplete='new-password';$('pass').minLength=12;
+}
+$('form').onsubmit=async event=>{
+ event.preventDefault();$('submit').disabled=true;$('status').textContent='Procesando…';
+ try{
+  const r=await fetch(setup?'/api/setup':admin?'/api/client':'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('email').value,password:$('pass').value,token})});
+  const data=await r.json();if(!r.ok)throw new Error(data.error);
+  if(admin){$('form').reset();$('status').textContent='Acceso de cliente guardado.';}else location.replace('/');
+ }catch(error){$('status').textContent=error.message;}finally{$('submit').disabled=false;}
+};
+</script></html>
